@@ -36,21 +36,25 @@ const Footer = () => {
     }
   }, [isSubmenuOpen]);
   return (
-    <footer className="w-[100vw] bg-[#1a3e92] text-white mt-10">
-      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-8">
+    <footer className="w-[100vw] mx-auto bg-[#1a3e92] text-white mt-10 max-[640px]:mt-8">
+      <div className="w-[90vw] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-8 max-[640px]:px-2 max-[640px]:py-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Logo and Social Media Section */}
-          <div className="col-span-1">
-            <div className="mb-4">
+          <div className="col-span-1 flex flex-col items-center sm:items-start">
+            <div className="mb-4 flex justify-center sm:justify-start w-full">
               {/* Logo placeholder - replace with actual logo image */}
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-52 h-34 rounded flex items-center justify-center">
-                  <img src="/uploads/VJP-FastTrack-Logo.png" alt="VJP Flight Booking Logo" />
+                <div className="w-64 max-[640px]:w-100 max-w-xs rounded flex items-center justify-center">
+                  <img
+                    src="/uploads/VJP-FastTrack-Logo.png"
+                    alt="VJP Flight Booking Logo"
+                    className="w-100 h-auto"
+                  />
                 </div>
               </div>
             </div>
             {/* Social Media Icons */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
               <a href="https://www.facebook.com/vietjapan.vip" target="_blank" className="w-12 h-12 bg-[#3c5998] rounded-[20%] flex items-center justify-center transition-colors">
                 <svg className="p-3 text-white fill-current" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M504 256C504 119 393 8 256 8S8 119 8 256c0 123.78 90.69 226.38 209.25 245V327.69h-63V256h63v-54.64c0-62.15 37-96.48 93.67-96.48 27.14 0 55.52 4.84 55.52 4.84v61h-31.28c-30.8 0-40.41 19.12-40.41 38.73V256h68.78l-11 71.69h-57.78V501C413.31 482.38 504 379.78 504 256z"></path></svg>
               </a>
@@ -71,8 +75,8 @@ const Footer = () => {
 
           {/* Menu Column */}
           <div className="col-span-1">
-            <h3 className="text-lg mb-4">メニュー</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg mb-4 max-[640px]:text-sm">メニュー</h3>
+            <ul className="px-2 space-y-2 text-sm max-[640px]:text-sm max-[640px]:space-y-1 max-[640px]:text-sm max-[640px]:space-y-1">
               <li>
                 <a href="https://vietjapan.vip/" className="hover:text-[#7FD67F]">ホーム</a>
               </li>
@@ -163,8 +167,8 @@ const Footer = () => {
 
           {/* Service Introduction Column */}
           <div className="col-span-1">
-            <h3 className="text-lg  mb-4">ベトナム国際空港ファストトラックのご紹介</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg mb-4 max-[640px]:text-sm">ベトナム国際空港ファストトラックのご紹介</h3>
+            <ul className="px-2 space-y-2 text-sm max-[640px]:text-sm max-[640px]:space-y-1">
               <li>
                 <a href="https://vietjapan.vip/tan-son-nhat-entry-vip-fasttrack/" className="hover:text-[#7FD67F]">[入国専用] ホーチミン・タンソンニャット空港VIPファストトラック | ベトナム入国を最速で | 日本語サポート</a>
               </li>
@@ -185,8 +189,8 @@ const Footer = () => {
 
           {/* Information Policy Column */}
           <div className="col-span-1">
-            <h3 className="text-lg  mb-4">情報取り扱い方針</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg mb-4 max-[640px]:text-sm">情報取り扱い方針</h3>
+            <ul className="px-2 space-y-2 text-sm">
               <li>
                 <a href="https://vietjapan.vip/privacy/" rel="privacy-policy" className="hover:text-[#7FD67F]">個人情報の取り扱い</a>
               </li>
@@ -201,7 +205,7 @@ const Footer = () => {
 
           {/* Contact Information Column */}
           <div className="col-span-1">
-            <h3 className="text-lg mb-4">連絡先情報</h3>
+            <h3 className="text-lg mb-4 max-[640px]:text-sm">連絡先情報</h3>
             <div className="space-y-2 text-sm">
               <div>VIET JAPAN PARTNER COOPERATION CO., LTD.</div>
               <div>税コード: 0317613936</div>

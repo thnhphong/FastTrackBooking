@@ -250,7 +250,7 @@ const PriceBar = ({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#f0f8ff] border-t-1 border-black-200 shadow-lg z-40 px-8">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#f0f8ff] border-t-1 border-black-200 shadow-lg z-40 px-8 max-[769px]:px-3">
       <div className="max-w-[1140px] mx-auto max-[769px]:mx-0 py-2 h-38 max-[769px]:h-40 max-[769px]:px-0">
         <div className="flex flex-col">
           <div className="flex flex-wrap justify-between items-start max-[1367px]:hidden max-[1367px]:justify-around">
@@ -326,7 +326,7 @@ const PriceBar = ({
             </div>
             {/* Just Payment Method Section  */}
             {primaryActionLabel && onPrimaryAction && (
-              <div className="flex flex-row items-between gap-9  w-full">
+              <div className="flex flex-row items-between gap-9 w-full">
                 {/* Payment Method Section */}
                 <div className="flex justify-start items-center gap-4 flex-1">
                   <label className="text-base font-bold text-black whitespace-nowrap">支払方法</label>
@@ -402,7 +402,7 @@ const PriceBar = ({
           max-[769px]:w-60%
            */}
 
-          <div className="hidden max-[1367px]:flex max-[1367px]:flex-col max-[1367px]:gap-2 max-[1367px]:mt-2 max-[769px]:w-[120%] max-[769px]:flex-col max-[769px]:py-1 max-[769px]:items-start max-[769px]:gap-5">
+          <div className="hidden max-[1367px]:flex max-[1367px]:flex-col max-[1367px]:gap-1 max-[1367px]:mt-2 max-[769px]:w-[120%] max-[769px]:flex-col max-[769px]:py-1 max-[769px]:items-start max-[769px]:gap-10">
             {/* Row 1 - summary + payment dropdown */}
             <div className="flex items-start justify-between max-[1367px]:justify-start">
               <div className="flex flex-row items-start gap-2">
@@ -425,7 +425,7 @@ const PriceBar = ({
                 <select
                   value={paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                  className="w-full px-4 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-base text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                  className="w-full px-4 py-2 max-[679px]:py-0 max-[679px]:px-0 bg-[#a3e7a3] border border-gray-300 rounded-md text-base text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
                   max-[769px]:w-[80%]"
                 >
                   {paymentMethods.map((method) => (
@@ -438,7 +438,28 @@ const PriceBar = ({
             </div>
 
             {/* Row 2 - coupon + primary button */}
-            <div className="flex flex-wrap gap-2 max-[769px]:mx-0">
+            <div className="relative flex flex-wrap gap-2 max-[769px]:mx-0">
+              {/* Applied coupon - positioned above the coupon section */}
+              {appliedCoupon && (
+                <button
+                  onClick={handleCouponRemove}
+                  className="absolute bottom-full mb-1 flex items-center gap-3 font-semibold text-[#015cc8] border-b border-dashed border-[#015cc8] w-fit z-10"
+                >
+                  <span className="flex items-center justify-center w-4 h-4 font-bold rounded-full border-[1.5px] border-[#a42021] text-[#a42021] text-base">
+                    ×
+                  </span>
+                  <span>{appliedCoupon.name}</span>
+                  <span className="ml-6 ">-{`$${appliedCoupon.discount.toFixed(2)}`}</span>
+                </button>
+              )}
+
+              {/* Coupon error - positioned above the coupon section */}
+              {couponError && (
+                <div className="absolute bottom-full mb-1 px-1 bg-[#fff9f9] border border-[1px] border-[#c02b0b] max-w-[220px] text-blue-600 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis inline-flex z-10">
+                  {couponError}
+                </div>
+              )}
+
               <div className="flex w-full items-center max-[769px]:py-0 max-[540px]:scale-90">
                 <span className="text-base text-black font-bold">クーポン</span>
                 <input
@@ -471,25 +492,6 @@ const PriceBar = ({
                   </button>
                 )}
               </div>
-
-              {appliedCoupon && (
-                <button
-                  onClick={handleCouponRemove}
-                  className="flex items-center gap-3 font-semibold text-[#015cc8] border-b border-dashed border-[#015cc8] w-fit"
-                >
-                  <span className="flex items-center justify-center w-4 h-4 font-bold rounded-full border-[1.5px] border-[#a42021] text-[#a42021] text-base">
-                    ×
-                  </span>
-                  <span>{appliedCoupon.name}</span>
-                  <span className="ml-6 ">-{`$${appliedCoupon.discount.toFixed(2)}`}</span>
-                </button>
-              )}
-
-              {couponError && (
-                <div className="max-[640px]:top-[50%] absolute top-[70%] px-1 bg-[#fff9f9] border border-[1px] border-[#c02b0b] max-w-[220px] text-blue-600 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis inline-flex z-10">
-                  {couponError}
-                </div>
-              )}
             </div>
           </div>
         </div>

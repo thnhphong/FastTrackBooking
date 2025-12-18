@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PriceBar from './PriceBar';
 import ProcessIndicator from './ProcessIndicator';
 import Error from './Error';
@@ -6,6 +6,13 @@ import FieldRequired from './FieldRequired';
 import JapaneseDatePicker from './JapaneseDatePicker';
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
+  // Scroll to top when this step is mounted
+  useEffect(() => {
+    window.scrollTo({ top: 250, left: 0, behavior: 'auto' });
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 100, left: 0, behavior: 'auto' });
+    }
+  }, []);
   const [formData, setFormData] = useState({
     // Immigration
     useImmigration: bookingData?.immigration ? true : false,
@@ -295,9 +302,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         <div className="mb-6 p-4 text-left flex-col justify-center">
           <div className="flex flex-col text-[15px] text-gray-700 text-center mb-6">
             <p>
-              ✔️アカウント登録不要　✔️パスポート写真送付不要　✔️丁寧に対応　✔️当日予約可
+              ✔️アカウント登録不要 ✔️パスポート写真送付不要 ✔️丁寧に対応 ✔️当日予約可
             </p>
-            <p>✔️日本語24時間対応　✔️夜間・早朝の追加料無　✔️予約簡単　✔️日本語領収書発行可</p>
+            <p>✔️日本語24時間対応 ✔️夜間・早朝の追加料無 ✔️予約簡単 ✔️日本語領収書発行可</p>
             <p className="text-red-600 underline text-center">
               <a href="https://vietnam-fasttrack.com/vjp-fasttrack-december-esim-campaign/?_gl=1*atd23l*_gcl_au*MTk5MDI3MTkzOS4xNzY0MDQ3NDEyLjE4OTg5OTIyNjAuMTc2NTgwMzE3Mi4xNzY1ODAzMTcy" target='_blank'>🎁高速データ通信 eSIM（30GB/5日・10USD相当）を今だけ無料プレゼント！詳細はこちら</a>
             </p>

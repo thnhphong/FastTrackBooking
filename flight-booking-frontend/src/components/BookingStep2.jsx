@@ -6,6 +6,13 @@ import FieldRequired from './FieldRequired';
 import JapaneseDatePicker from './JapaneseDatePicker';
 
 const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) => {
+  // Scroll to top when this step is mounted
+  useEffect(() => {
+    window.scrollTo({ top: 250, left: 0, behavior: 'auto' });
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 100, left: 0, behavior: 'auto' });
+    }
+  }, []);
   const [formData, setFormData] = useState({
     first_name: bookingData?.passport?.first_name || '',
     last_name: bookingData?.passport?.last_name || '',
@@ -271,7 +278,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       name="last_name"
                       value={formData.last_name}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.last_name ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.last_name ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
@@ -289,7 +296,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       name="first_name"
                       value={formData.first_name}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.first_name ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.first_name ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
@@ -340,7 +347,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           onChange={handleInputChange}
                           placeholder="年/月/日"
                           maxDate={new Date()}
-                          className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.birthday ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                          className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.birthday ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                           error={errors.birthday}
                         />
                       </FieldRequired>
@@ -362,7 +369,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           value={formData.phone_num}
                           onChange={handleInputChange}
                           placeholder=""
-                          className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.phone_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                          className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.phone_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                         />
                       </FieldRequired>
                     </div>
@@ -406,7 +413,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.email ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.email ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
@@ -422,7 +429,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       name="email_cc"
                       value={formData.email_cc}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
+                      className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                     />
                   </FieldRequired>
                 </div>
@@ -440,7 +447,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       name="passport_num"
                       value={formData.passport_num}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.passport_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.passport_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
@@ -461,12 +468,12 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           onChange={handleInputChange}
                           placeholder="年/月/日"
                           minDate={new Date()}
-                          className={`w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.expire_date ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                          className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.expire_date ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                           error={errors.expire_date}
                         />
                       </div>
                       {showPassportWarning && (
-                        <div className="flex-1 min-w-0 ml-14 max-[640px]:ml-0 font-bold">
+                        <div className="flex-1 min-w-0 ml-14 max-[640px]:ml-0 font-bold max-[640px]:px-8">
                           <div className="text-red-600 font-bold text-base">
                             ★ 要注意★
                           </div>
@@ -493,7 +500,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       value={formData.company_name}
                       onChange={handleInputChange}
                       placeholder=""
-                      className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
+                      className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                     />
                   </FieldRequired>
                 </div>
@@ -510,7 +517,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       value={formData.referer_name}
                       onChange={handleInputChange}
 
-                      className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
+                      className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                     />
                   </FieldRequired>
                 </div>
@@ -639,7 +646,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
             <button
               //hover with bg-white-500 with slow transition
               type="submit"
-              className="px-8 py-3 bg-[#01ae00] text-white rounded-full hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium transition-all duration-300 text-base max-[640px]:w-full"
+              className="px-8 py-3 bg-[#01ae00] text-white rounded-full hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium transition-all duration-300 text-base max-[391px]:text-sm max-[640px]:w-full"
             >
               予約情報の確認
             </button>

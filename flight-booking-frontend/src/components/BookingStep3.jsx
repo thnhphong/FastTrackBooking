@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../services/bookingService';
 import ProcessIndicator from './ProcessIndicator';
@@ -7,6 +7,14 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Scroll to top 250 when this step is mounted, top 100 when this step is mounted on mobile
+  useEffect(() => {
+    window.scrollTo({ top: 250, left: 0, behavior: 'auto' });
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 100, left: 0, behavior: 'auto' });
+    }
+  }, []);
 
   // Helper functions to get labels
   const getImmigrationPackageLabel = (value) => {
