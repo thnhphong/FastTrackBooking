@@ -13,6 +13,7 @@ import {
   getSurveyChannelLabel,
   getAddOnLabel,
   getPaymentMethodLabel,
+  getCountryLabel,
 } from '../utils/labelGetters';
 import { formatDate } from '../utils/formHelpers';
 
@@ -20,8 +21,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [showJsonPreview, setShowJsonPreview] = useState(false);
-  const [apiJson, setApiJson] = useState(null);
 
   useScrollToTop();
 
@@ -47,16 +46,16 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
         breakdown.push({ no: '1.1', content: '迎車利用', presence: 'なし', amount: '$0' });
       }
 
-      // 1.2 Guaranteed immigration clearance within 15 minutes
-      if (bookingData.immigration.use_immigration_fast_track) {
+      // 1.2 Guaranteed immigration clearance within 15 minutes (stored as string "true"/"false")
+      if (bookingData.immigration.use_immigration_fast_track === 'true') {
         breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'あり', amount: '$15' });
         subtotal += 15;
       } else {
         breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'なし', amount: '$0' });
       }
 
-      // 1.3 Pick-up at the plane's exit
-      if (bookingData.immigration.tarmac_pickup) {
+      // 1.3 Pick-up at the plane's exit (stored as string "true"/"false")
+      if (bookingData.immigration.tarmac_pickup === 'true') {
         breakdown.push({ no: '1.3', content: "飛行機の降り口でのお迎え", presence: 'あり', amount: '$60' });
         subtotal += 60;
       } else {
@@ -100,7 +99,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     apiData.date_of_birth = bookingData?.date_of_birth || bookingData?.passport?.birthday || '';
     apiData.passport_expiry_date = bookingData?.passport_expiry_date || bookingData?.passport?.expire_date || '';
     apiData.sex = bookingData?.sex !== undefined ? String(bookingData.sex) : (bookingData?.passport?.gender === 'male' ? '0' : bookingData?.passport?.gender === 'female' ? '1' : '');
-    apiData.user_phone_number = bookingData?.user_phone_number || bookingData?.passport?.phone_num || '';
+    apiData.user_phone_number = bookingData?.user_phone_number || bookingData?.passport?.user_phone_number || '';
     apiData.nationality = bookingData?.nationality || bookingData?.passport?.nationality || '';
     apiData.contact_email_to = bookingData?.contact_email_to || bookingData?.passport?.email || '';
     apiData.contact_email_cc = bookingData?.contact_email_cc || bookingData?.passport?.email_cc || '';
@@ -128,9 +127,13 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.arrival_phone_number = bookingData.immigration.arrival_phone_number || '';
       apiData.arrival_request = bookingData.immigration.arrival_request || '';
       apiData.entry_fast_track_option = bookingData.immigration.entry_fast_track_option !== undefined ? String(bookingData.immigration.entry_fast_track_option) : '';
-      apiData.tarmac_pickup = bookingData.immigration.tarmac_pickup === true || bookingData.immigration.tarmac_pickup === 'true' ? 'true' : 'false';
+      // Ensure string format "true"/"false" for API
+      const tarmacPickupValue = bookingData.immigration.tarmac_pickup;
+      apiData.tarmac_pickup = (tarmacPickupValue === 'true' || tarmacPickupValue === true || tarmacPickupValue === 1 || tarmacPickupValue === '1') ? 'true' : 'false';
       apiData.pickup_service = bookingData.immigration.pickup_service !== undefined ? String(bookingData.immigration.pickup_service) : '0';
-      apiData.use_immigration_fast_track = bookingData.immigration.use_immigration_fast_track === true || bookingData.immigration.use_immigration_fast_track === 'true' ? 'true' : 'false';
+      // Ensure string format "true"/"false" for API
+      const useImmigrationValue = bookingData.immigration.use_immigration_fast_track;
+      apiData.use_immigration_fast_track = (useImmigrationValue === 'true' || useImmigrationValue === true || useImmigrationValue === 1 || useImmigrationValue === '1') ? 'true' : 'false';
     }
 
     // Emigration fields
@@ -141,14 +144,23 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.departure_flight_reservation_code = bookingData.emigration.departure_flight_reservation_code || '';
       apiData.departure_phone_number = bookingData.emigration.departure_phone_number || '';
       apiData.departure_request = bookingData.emigration.departure_request || '';
-      apiData.departure_fast_track_option = bookingData.emigration.departure_fast_track_option !== undefined ? String(bookingData.emigration.departure_fast_track_option) : '';
+      apiData.departure_fast_track_option = bookingData.emigration.departure_fast_track_option !== undefined
+        ? String(bookingData.emigration.departure_fast_track_option)
+        : '';
       apiData.departure_seating_preferences = bookingData.emigration.departure_seating_preferences !== undefined ? String(bookingData.emigration.departure_seating_preferences) : '';
       apiData.departure_meeting_time = bookingData.emigration.departure_meeting_time || '';
-      apiData.use_departure_fast_track = bookingData.emigration.use_departure_fast_track === true || bookingData.emigration.use_departure_fast_track === 'true' ? '1' : '0';
+      // use_departure_fast_track uses string numeric based on selected package:
+      // 0: 出国Fasttrackフルサポートをご利用する(50$)
+      // 1: VVIP出国Fasttrackを利用する(300$)
+      if (bookingData.emigration.departure_fast_track_option === 1 || bookingData.emigration.departure_fast_track_option === '1') {
+        apiData.use_departure_fast_track = '1';
+      } else {
+        apiData.use_departure_fast_track = '0';
+      }
     }
 
-    // Payment and pricing
-    apiData.payment_method = bookingData?.payment_method !== undefined ? String(bookingData.payment_method) : '';
+    // Payment and pricing - default to "1" if not set
+    apiData.payment_method = bookingData?.payment_method !== undefined ? String(bookingData.payment_method) : '1';
     apiData.preliminary_calculation = bookingData?.preliminary_calculation !== undefined ? String(bookingData.preliminary_calculation) : (bookingData?.sub_price !== undefined ? String(bookingData.sub_price) : '0');
     apiData.tax = bookingData?.tax !== undefined ? String(bookingData.tax) : (bookingData?.vat_price !== undefined ? String(bookingData.vat_price) : '0');
     apiData.total = bookingData?.total !== undefined ? String(bookingData.total) : (bookingData?.total_price !== undefined ? String(bookingData.total_price) : '0');
@@ -175,41 +187,23 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     }
   };
 
-  const handlePreviewJson = () => {
-    const apiData = prepareApiData();
-    setApiJson(apiData);
-    setShowJsonPreview(true);
-    // Also log to console for easy access
-    console.log('=== API JSON for Postman ===');
-    console.log(JSON.stringify(apiData, null, 2));
-  };
-
-  const handleCopyJson = () => {
-    if (apiJson) {
-      navigator.clipboard.writeText(JSON.stringify(apiJson, null, 2));
-      alert('JSON copied to clipboard!');
-    }
-  };
-
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError('');
 
     try {
-      // Prepare data for API (using the same format as preview)
       const submitData = prepareApiData();
-
-      // Log to console before sending
-      console.log('=== Sending to API ===');
-      console.log(JSON.stringify(submitData, null, 2));
-
       const response = await createBooking(submitData);
 
-      // Clear step from localStorage when going to success
-      localStorage.removeItem('bookingStep');
+      // Log API response from /web-booking
+      console.log('=== API /web-booking response ===');
+      console.log(JSON.stringify(response, null, 2));
 
-      // Navigate to success page with booking ID
-      navigate(`/booking/success/${response.data.id}`);
+      // Set flag in sessionStorage to show success page
+      sessionStorage.setItem('bookingSuccess', 'true');
+
+      // Navigate to /book-now/ with a timestamp to force React Router to treat it as new navigation
+      navigate('/book-now/?success=' + Date.now(), { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || '予約の作成に失敗しました。もう一度お試しください。');
       setIsSubmitting(false);
@@ -269,14 +263,13 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                 <tr className="border-b border-gray-200">
                   <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
                     <span className="font-semibold">国コード 付電話番号:</span>{' '}
-                    {bookingData?.passport?.phone_num}
+                    {bookingData?.user_phone_number}
                   </td>
                   <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
                     <span className="font-semibold">国籍:</span>{' '}
-                    {bookingData?.passport?.nationality === 'japan' ? '日本' :
-                      bookingData?.passport?.nationality === 'vietnam' ? 'ベトナム' :
-                        bookingData?.passport?.nationality === 'others' ? 'その他' :
-                          bookingData?.passport?.nationality || ''}
+                    {getCountryLabel(
+                      bookingData?.nationality || bookingData?.passport?.nationality
+                    )}
                   </td>
                 </tr>
 
@@ -374,7 +367,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                         {bookingData.immigration.immigration_package !== '300$' && (
                           <tr className="border-b border-gray-200">
                             <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>オプション：15分以内に入国審査手続き完了ン:</strong> {bookingData.immigration.use_immigration_fast_track ? '利用する (15$)' : '利用しない'}
+                              <strong>オプション：15分以内に入国審査手続き完了ン:</strong> {bookingData.immigration.use_immigration_fast_track === 'true' ? '利用する (15$)' : '利用しない'}
                             </td>
                           </tr>
                         )}
@@ -396,7 +389,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                         </tr>
                         <tr className="border-b border-gray-200">
                           <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>飛行機の降り口でお迎え (60$):</strong> {bookingData.immigration.tarmac_pickup ? 'ご利用する (60$)' : '利用しない'}
+                            <strong>飛行機の降り口でお迎え (60$):</strong> {bookingData.immigration.tarmac_pickup === 'true' ? 'ご利用する (60$)' : '利用しない'}
                           </td>
                         </tr>
                         <tr className="border-b border-gray-200">
@@ -462,7 +455,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                         )}
                         <tr className="border-b border-gray-200">
                           <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.emigration.airport)}
+                            <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.emigration.departure_airport_code)}
                           </td>
                         </tr>
                         <tr className="border-b border-gray-200">
@@ -580,7 +573,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
         >
           前へ
         </button>
-        
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
@@ -589,41 +581,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
           {isSubmitting ? '予約中...' : '予約する'}
         </button>
       </div>
-
-      {/* JSON Preview Modal */}
-      {showJsonPreview && apiJson && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-xl font-bold text-black">API JSON (Postman用)</h3>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleCopyJson}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  コピー
-                </button>
-                <button
-                  onClick={() => setShowJsonPreview(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  閉じる
-                </button>
-              </div>
-            </div>
-            <div className="p-4 overflow-auto flex-1">
-              <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
-                {JSON.stringify(apiJson, null, 2)}
-              </pre>
-            </div>
-            <div className="p-4 border-t bg-gray-50">
-              <p className="text-sm text-gray-600">
-                💡 このJSONはコンソールにも出力されています。ブラウザの開発者ツール（F12）のコンソールタブを確認してください。
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

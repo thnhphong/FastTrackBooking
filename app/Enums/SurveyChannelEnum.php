@@ -19,13 +19,18 @@ final class SurveyChannelEnum extends Enum
     public static function getDescriptions(): array
     {
         return [
-            self::INTRODUCTION_BY_ACQUAINTANCE => 'Introduction from an acquaintance', // 知り合いのご紹介
-            self::SERVICE_INTRODUCTION_EMAIL   => 'Service introduction email', // サービス紹介メール
+            self::INTRODUCTION_BY_ACQUAINTANCE => '知り合いのご紹介',
+            self::SERVICE_INTRODUCTION_EMAIL   => 'サービス紹介メール',
             self::FACEBOOK                     => 'Facebook', // Facebook
-            self::ADVERTISEMENT                => 'Advertisement', // 広告
-            self::SEARCH_ENGINE                => 'Search site (Google, Yahoo, etc.)', // 検索サイト（Google、Yahoo等）
-            self::REUSE                        => 'Repeat use', // 再利用
+            self::ADVERTISEMENT                => '広告',
+            self::SEARCH_ENGINE                => '検索サイト（Google、Yahoo等）',
+            self::REUSE                        => '再利用',
         ];
+    }
+
+    public static function getApiValue(int $value): int
+    {
+        return $value;
     }
 }
 

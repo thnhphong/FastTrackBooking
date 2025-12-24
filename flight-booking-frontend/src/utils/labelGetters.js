@@ -49,9 +49,9 @@ export const getSeatingPreferenceLabel = (value) => {
 
 export const getAirportLabel = (value) => {
   const airports = {
-    'SGN': 'SGN - タンソンニャット空港 (Tan Son Nhat・Ho Chi Minh City)',
-    'DAD': 'DAD - ダナン空港(Da Nang)',
-    'HAN': 'HAN - ノイバイ(Noi Bai・Ha Noi)',
+    '0': 'SGN - タンソンニャット空港 (Tan Son Nhat・Ho Chi Minh City)',
+    '1': 'DAD - ダナン空港(Da Nang)',
+    '2': 'HAN - ノイバイ(Noi Bai・Ha Noi)',
   };
   return airports[value] || value;
 };
@@ -107,5 +107,23 @@ export const getPaymentMethodLabel = (value) => {
 
 export const getGenderLabel = (value) => {
   return value === 'male' ? '男性' : value === 'female' ? '女性' : value;
+};
+
+// Nationality / country code label
+export const getCountryLabel = (value) => {
+  if (!value) return '';
+
+  const map = {
+    JPN: '日本',
+    VNM: 'ベトナム',
+    others: 'その他',
+    japan: '日本',
+    vietnam: 'ベトナム',
+    // Fallback for lowercase country codes if ever used
+    jpn: '日本',
+    vnm: 'ベトナム',
+  };
+
+  return map[value] || value;
 };
 

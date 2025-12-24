@@ -18,9 +18,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     arrival_flight_number: bookingData?.immigration?.arrival_flight_number ?? '',
     arrival_airport: typeof bookingData?.immigration?.arrival_airport === 'number' ? bookingData.immigration.arrival_airport : (bookingData?.immigration?.arrival_airport !== undefined && bookingData?.immigration?.arrival_airport !== null ? Number(bookingData.immigration.arrival_airport) : ''),
     arrival_date: bookingData?.immigration?.arrival_date ?? '',
-    tarmac_pickup: bookingData?.immigration?.tarmac_pickup === true || bookingData?.immigration?.tarmac_pickup === 'true',
-    use_immigration_fast_track: bookingData?.immigration?.use_immigration_fast_track === true || bookingData?.immigration?.use_immigration_fast_track === 'true' ? true : false,
-    pickup_service: typeof bookingData?.immigration?.pickup_service === 'number' ? bookingData.immigration.pickup_service : 0,
+    // Store as strings like pickup_service, not booleans
+    tarmac_pickup: (bookingData?.immigration?.tarmac_pickup === 'true' || bookingData?.immigration?.tarmac_pickup === true || bookingData?.immigration?.tarmac_pickup === 1) ? 'true' : 'false',
+    use_immigration_fast_track: (bookingData?.immigration?.use_immigration_fast_track === 'true' || bookingData?.immigration?.use_immigration_fast_track === true || bookingData?.immigration?.use_immigration_fast_track === 1) ? 'true' : 'false',
+    pickup_service: typeof bookingData?.immigration?.pickup_service === 'number' ? String(bookingData.immigration.pickup_service) : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
     arrival_phone_number: bookingData?.immigration?.arrival_phone_number ?? '',
     arrival_request: bookingData?.immigration?.arrival_request ?? '',
     useOtherOptions: bookingData?.immigration?.useOtherOptions === true || bookingData?.immigration?.useOtherOptions === 'true' ? true : false,
@@ -95,7 +96,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       setFormData(prev => ({
         ...prev,
         [name]: Number(value),
-        use_immigration_fast_track: false, // Disable when 300$ is selected
+        use_immigration_fast_track: 'false', // Disable when 300$ is selected
       }));
       return;
     }
@@ -168,11 +169,14 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         arrival_flight_number: formData.arrival_flight_number,
         arrival_airport: formData.arrival_airport,
         arrival_date: formData.arrival_date,
-        tarmac_pickup: formData.tarmac_pickup,
-        use_immigration_fast_track: formData.use_immigration_fast_track,
+        // Already stored as strings "true"/"false"
+        tarmac_pickup: formData.tarmac_pickup || 'false',
+        use_immigration_fast_track: formData.use_immigration_fast_track || 'false',
         pickup_service: formData.pickup_service,
         arrival_phone_number: formData.arrival_phone_number,
         arrival_request: formData.arrival_request,
+        // Persist \"他のオプション\" checkbox state so it remains checked when returning to Step 1
+        useOtherOptions: formData.useOtherOptions,
       } : null,
       emigration: formData.useEmigration ? {
         departure_fast_track_option: formData.departure_fast_track_option,
@@ -223,7 +227,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         newErrors.arrival_airport = 'This field is required';
       }
       // Always validate use_immigration_fast_track for non-300$ packages (not part of "Other options")
-      if (formData.entry_fast_track_option !== 3 && formData.use_immigration_fast_track === undefined) {
+      if (formData.entry_fast_track_option !== 3 && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '')) {
         newErrors.use_immigration_fast_track = 'This field is required';
       }
       // Only validate pickup_service if "Other options" is checked
@@ -332,7 +336,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       label="オプション：15分以内に入国審査手続き完了"
                       required={true}
                       error={errors.use_immigration_fast_track}
-                      isEmpty={formData.use_immigration_fast_track === undefined}
+                      isEmpty={!formData.use_immigration_fast_track || formData.use_immigration_fast_track === ''}
                     >
                       <fieldset className="space-y-2 border-none p-0 m-0">
                         <label className="flex items-center cursor-pointer">
@@ -340,7 +344,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                             type="radio"
                             name="use_immigration_fast_track"
                             value="false"
-                            checked={formData.use_immigration_fast_track === false}
+                            checked={formData.use_immigration_fast_track === 'false'}
                             onChange={() => {
                               if (errors.use_immigration_fast_track) {
                                 setErrors(prev => {
@@ -349,9 +353,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, use_immigration_fast_track: false }));
+                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'false' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
                           <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
                         </label>
@@ -360,7 +364,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                             type="radio"
                             name="use_immigration_fast_track"
                             value="true"
-                            checked={formData.use_immigration_fast_track === true}
+                            checked={formData.use_immigration_fast_track === 'true'}
                             onChange={() => {
                               if (errors.use_immigration_fast_track) {
                                 setErrors(prev => {
@@ -369,9 +373,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, use_immigration_fast_track: true }));
+                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'true' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
                           <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用する (15$)</span>
                         </label>
@@ -492,7 +496,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       label="飛行機の降り口（または飛行機からバスで到着した場所）でお迎えのご利用を選択してください: (必須)"
                       required={true}
                       error={errors.tarmac_pickup}
-                      isEmpty={formData.tarmac_pickup === false}
+                      isEmpty={formData.tarmac_pickup === 'false'}
                     >
                       {/* with max-w-[640px] => make tarmac_pickup into 2 cols*/}
                       <fieldset className="space-y-2 border-none p-0 m-0 max-[640px]:grid grid-cols-2 gap-4">
@@ -501,7 +505,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                             type="radio"
                             name="tarmac_pickup"
                             value="false"
-                            checked={!formData.tarmac_pickup}
+                            checked={formData.tarmac_pickup === 'false'}
                             onChange={() => {
                               if (errors.tarmac_pickup) {
                                 setErrors(prev => {
@@ -510,9 +514,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, tarmac_pickup: false }));
+                              setFormData(prev => ({ ...prev, tarmac_pickup: 'false' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === 'false' ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
                           <span className={`ml-3 text-base ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
                         </label>
@@ -521,7 +525,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                             type="radio"
                             name="tarmac_pickup"
                             value="true"
-                            checked={formData.tarmac_pickup}
+                            checked={formData.tarmac_pickup === 'true'}
                             onChange={() => {
                               if (errors.tarmac_pickup) {
                                 setErrors(prev => {
@@ -530,9 +534,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, tarmac_pickup: true }));
+                              setFormData(prev => ({ ...prev, tarmac_pickup: 'true' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === 'false' ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
                           <span className={`ml-3 text-base ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'text-[#c02b0b]' : 'text-black'}`}>ご利用する (60$)</span>
                         </label>
@@ -869,11 +873,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
           immigration: formData.useImmigration ? {
             entry_fast_track_option: formData.entry_fast_track_option ?? 0,
             immigration_package: immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$',
-            tarmac_pickup: formData.useOtherOptions ? formData.tarmac_pickup : false,
+            tarmac_pickup: formData.useOtherOptions ? formData.tarmac_pickup : 'false',
             use_immigration_fast_track:
               (immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$') !== '300$'
                 ? formData.use_immigration_fast_track
-                : false,
+                : 'false',
             pickup_service: formData.useOtherOptions ? formData.pickup_service : 0,
           } : null,
           emigration: formData.useEmigration ? {

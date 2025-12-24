@@ -1,7 +1,6 @@
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-const BookingSuccess = () => {
-  const { id } = useParams();
+const BookingSuccess = ({ onNewBooking }) => {
 
   return (
     <div className="min-h-screen bg-white">
@@ -16,13 +15,6 @@ const BookingSuccess = () => {
             Please wait a moment as our staff will check your reservation details and process your request promptly.
           </p>
 
-          {id && (
-            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-base text-gray-700">
-                <strong>Booking ID:</strong> <span className="font-mono text-lg">{id}</span>
-              </p>
-            </div>
-          )}
 
           {/* Contact Information */}
           <div className="mb-8 p-6 bg-gray-50 border border-gray-200 rounded-lg">
@@ -182,12 +174,16 @@ const BookingSuccess = () => {
             Book Your Vietnam Fast Track International And Domestic Flights Now Here
           </h2>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
-            <Link
-              to="/booking/step1"
+            <button
+              onClick={() => {
+                if (onNewBooking) {
+                  onNewBooking();
+                }
+              }}
               className="px-8 py-4 bg-[#01ae00] text-white rounded-full font-medium hover:bg-[#018800] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors text-center"
             >
               Open Vietnam Entry/Exit Fast Track Booking Form
-            </Link>
+            </button>
             <a
               href="https://vietjapan.vip/book-domestic/"
               target="_blank"
@@ -201,12 +197,16 @@ const BookingSuccess = () => {
 
         {/* Navigation Links */}
         <div className="flex justify-center gap-4 mt-8">
-          <Link
-            to="/booking/step1"
+          <button
+            onClick={() => {
+              if (onNewBooking) {
+                onNewBooking();
+              }
+            }}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
           >
             Make Another Booking
-          </Link>
+          </button>
           <Link
             to="/"
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"

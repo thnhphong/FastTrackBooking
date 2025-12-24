@@ -362,8 +362,8 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base appearance-none pr-10"
                         >
-                          <option value="japan">日本</option> {/* Japan */}
-                          <option value="vietnam">ベトナム</option> {/* Vietnam */}
+                          <option value="JPN">日本</option> {/* Japan */}
+                          <option value="VNM">ベトナム</option> {/* Vietnam */}
                           <option value="others">その他</option> {/* Other */}
                         </select>
                         <div className="absolute right-3 bottom-1.5 transform -translate-y-1/2 pointer-events-none">

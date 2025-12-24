@@ -23,17 +23,26 @@ final class AddOnEnum extends Enum
     public static function getDescriptions(): array
     {
         return [
-            self::AIRPORT_LOUNGE => 'Airport Lounge', //Airport Lounge
-            self::HOTEL => 'Hotels for Japanese and foreign tourists', //Hotels for Japanese and foreign tourists
-            self::SHOPPING => 'Shopping spots', //Shopping spots
-            self::RENTAL_CAR => 'Rental Car', //Rental Car
-            self::AIRLINE_TICKET => 'Airline tickets (purchase, change, etc.)', //Airline tickets (purchase, change, etc.)
+            self::AIRPORT_LOUNGE => '空港ラウンジ',
+            self::HOTEL => '日本人や外国人観光客向けのホテル',
+            self::SHOPPING => 'ショッピングスポット',
+            self::RENTAL_CAR => 'レンタルカー',
+            self::AIRLINE_TICKET => '航空券（購入・変更等）',
 
-            self::RESTAURANT => 'Restaurants for Japanese and foreign tourists', //Restaurants for Japanese and foreign tourists
-            self::MASSAGE => 'Massage, health care, beauty care', //Massage, health care, beauty care
-            self::INTERPRETATION => 'Interpretation and tourist information', //Interpretation and tourist information
-            self::GOLF => 'golf', //golf
-            self::FIND_SUPPLIERS => 'Finding Vietnamese suppliers and connecting with Vietnamese companies',    //Finding Vietnamese suppliers and connecting with Vietnamese companies
+            self::RESTAURANT => '日本人や外国人観光客向けのレストラン',
+            self::MASSAGE => 'マッサージ・健康ケア・美容ケア',
+            self::INTERPRETATION => '通訳・観光案内',
+            self::GOLF => 'ゴルフ',
+            self::FIND_SUPPLIERS => 'ベトナムサプライヤー探し・ベトナム会社繋がり',
         ];
+    }
+
+    /**
+     * Value used when calling the external operator API.
+     * Currently API expects the same numeric code as our enum value.
+     */
+    public static function getApiValue(int $value): int
+    {
+        return $value;
     }
 }

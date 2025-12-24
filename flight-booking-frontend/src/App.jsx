@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BookingStep1 from './components/BookingStep1';
 import BookingStep2 from './components/BookingStep2';
@@ -7,8 +7,6 @@ import BookingSuccess from './components/BookingSuccess';
 import LineInquiry from './components/LineInquiry';
 import Footer from './components/Footer';
 import './App.css';
-
-const STEP_STORAGE_KEY = 'bookingStep';
 
 const getDefaultBookingData = () => ({
   booking_type: null,
@@ -89,10 +87,6 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/booking/success/:id"
-              element={<BookingSuccess />}
-            />
           </Routes>
         </div>
       </div>
@@ -103,16 +97,16 @@ function App() {
 
 // Router component to handle step routing with internal state
 function BookingStepRouter({ bookingData, setBookingData }) {
-  const [currentStep, setCurrentStep] = useState(() => {
-    // Load step from localStorage on mount
-    const saved = localStorage.getItem(STEP_STORAGE_KEY);
-    return saved ? parseInt(saved) : 1;
-  });
+  const [currentStep, setCurrentStep] = useState(1);
 
-  // Save step to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem(STEP_STORAGE_KEY, currentStep.toString());
-  }, [currentStep]);
+  // Check sessionStorage directly in render to show success page
+  const isSuccess = sessionStorage.getItem('bookingSuccess') === 'true';
+
+  // Clear flag and reset data when success is detected
+  if (isSuccess) {
+    sessionStorage.removeItem('bookingSuccess');
+    setBookingData(getDefaultBookingData());
+  }
 
   const handleNextStep = () => {
     setCurrentStep(prev => prev + 1);
@@ -121,6 +115,14 @@ function BookingStepRouter({ bookingData, setBookingData }) {
   const handlePrevStep = () => {
     setCurrentStep(prev => Math.max(1, prev - 1));
   };
+
+  // Show success page if booking was successful
+  if (isSuccess) {
+    return <BookingSuccess onNewBooking={() => {
+      setCurrentStep(1);
+      setBookingData(getDefaultBookingData());
+    }} />;
+  }
 
   switch (currentStep) {
     case 1:

@@ -103,13 +103,13 @@ const PriceBar = ({
       calculatedSubtotal += price;
     }
 
-    // Pickup at exit
-    if (bookingData?.immigration?.tarmac_pickup) {
+    // Pickup at exit (stored as string "true"/"false")
+    if (bookingData?.immigration?.tarmac_pickup === 'true') {
       calculatedSubtotal += packagePrices.pickupAtExit;
     }
 
-    // Complete within 15 min
-    if (bookingData?.immigration?.use_immigration_fast_track) {
+    // Complete within 15 min (stored as string "true"/"false")
+    if (bookingData?.immigration?.use_immigration_fast_track === 'true') {
       calculatedSubtotal += packagePrices.completeWithin15min;
     }
 
