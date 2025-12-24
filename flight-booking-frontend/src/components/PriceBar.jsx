@@ -16,7 +16,9 @@ const PriceBar = ({
   const [subtotal, setSubtotal] = useState(0);
   const [vat, setVat] = useState(0);
   const [total, setTotal] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState(bookingData?.payment_method || 'online_credit');
+  const [paymentMethod, setPaymentMethod] = useState(
+    bookingData?.payment_method ?? 1 // 0: cash, 1: online_credit, 2: vietnam_bank_transfer
+  );
   const isCalculatingRef = useRef(false);
 
   // Package prices
@@ -32,10 +34,10 @@ const PriceBar = ({
       '300$': 300,
     },
     pickupVehicle: {
-      no: 0,
-      '4_seat': 20,
-      '7_seat': 25,
-      'limousine_7_seat': 50,
+      0: 0,
+      1: 20,
+      2: 25,
+      3: 50,
     },
     pickupAtExit: 60,
     completeWithin15min: 15,
@@ -58,10 +60,10 @@ const PriceBar = ({
 
   // Initialize payment method on mount if not set
   useEffect(() => {
-    if (!bookingData?.payment_method && paymentMethod === 'online_credit') {
+    if (bookingData?.payment_method === undefined || bookingData?.payment_method === null) {
       // Save default payment method to bookingData on initial mount
       if (onCouponApply) {
-        onCouponApply({ payment_method: 'online_credit' });
+        onCouponApply({ payment_method: paymentMethod });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,18 +95,21 @@ const PriceBar = ({
     }
 
     // Pickup vehicle
-    if (bookingData?.immigration?.pickup_vehicle_using) {
-      const price = packagePrices.pickupVehicle[bookingData.immigration.pickup_vehicle_using] || 0;
+    if (
+      bookingData?.immigration?.pickup_service !== undefined &&
+      bookingData?.immigration?.pickup_service !== null
+    ) {
+      const price = packagePrices.pickupVehicle[bookingData.immigration.pickup_service] || 0;
       calculatedSubtotal += price;
     }
 
-    // Pickup at exit
-    if (bookingData?.immigration?.pickup_at_airplain_exit) {
+    // Pickup at exit (stored as string "true"/"false")
+    if (bookingData?.immigration?.tarmac_pickup === 'true') {
       calculatedSubtotal += packagePrices.pickupAtExit;
     }
 
-    // Complete within 15 min
-    if (bookingData?.immigration?.complete_within_15min) {
+    // Complete within 15 min (stored as string "true"/"false")
+    if (bookingData?.immigration?.use_immigration_fast_track === 'true') {
       calculatedSubtotal += packagePrices.completeWithin15min;
     }
 
@@ -130,8 +135,10 @@ const PriceBar = ({
     if (onCouponApply) {
       const priceData = {
         sub_price: calculatedSubtotal,
-        vat_price: calculatedVat,
+        preliminary_calculation: calculatedSubtotal,
+        tax: calculatedVat,
         total_price: calculatedTotal,
+        total: calculatedTotal,
         coupon_id: appliedCoupon?.id || null,
         // Preserve existing coupon data if present
         coupon: bookingData?.coupon || (appliedCoupon ? {
@@ -150,9 +157,9 @@ const PriceBar = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bookingData?.immigration?.immigration_package,
-    bookingData?.immigration?.pickup_vehicle_using,
-    bookingData?.immigration?.pickup_at_airplain_exit,
-    bookingData?.immigration?.complete_within_15min,
+    bookingData?.immigration?.pickup_service,
+    bookingData?.immigration?.tarmac_pickup,
+    bookingData?.immigration?.use_immigration_fast_track,
     bookingData?.emigration?.emigration_package,
     appliedCoupon?.id,
     appliedCoupon?.type,
@@ -235,23 +242,23 @@ const PriceBar = ({
     }
   };
 
-  // Payment method options
+  // Payment method options (numeric values for API)
   const paymentMethods = [
-    { value: 'cash', label: '現金払い' },
-    { value: 'online_credit', label: 'オンラインでクレジット決済' },
-    { value: 'vietnam_bank_transfer', label: 'ベトナム口座振込' },
+    { value: 0, label: '現金払い' },
+    { value: 1, label: 'オンラインでクレジット決済' },
+    { value: 2, label: 'ベトナム口座振込' },
   ];
 
   const handlePaymentMethodChange = (value) => {
     setPaymentMethod(value);
     if (onCouponApply) {
-      onCouponApply({ payment_method: value });
+      onCouponApply({ payment_method: Number(value) });
     }
   };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#f0f8ff] border-t-1 border-black-200 shadow-lg z-40 px-8 max-[769px]:px-3">
-      <div className="max-w-[1140px] mx-auto max-[769px]:mx-0 py-2 h-38 max-[769px]:h-40 max-[769px]:px-0">
+      <div className="max-w-[1140px] mx-38 max-[769px]:mx-0 py-2 h-38 max-[769px]:h-40 max-[1367px]:px-0">
         <div className="flex flex-col">
           <div className="flex flex-wrap justify-between items-start max-[1367px]:hidden max-[1367px]:justify-around">
             {/* 仮計算 */}
@@ -328,7 +335,7 @@ const PriceBar = ({
             {primaryActionLabel && onPrimaryAction && (
               <div className="flex flex-row items-between gap-9 w-full">
                 {/* Payment Method Section */}
-                <div className="flex justify-start items-center gap-4 flex-1">
+                <div className="flex justify-start items-end gap-4 flex-1">
                   <label className="text-base font-bold text-black whitespace-nowrap">支払方法</label>
 
                   {/* Radio buttons for larger screens */}
@@ -337,12 +344,13 @@ const PriceBar = ({
                       <input
                         type="radio"
                         name="payment_method"
-                        value="cash"
-                        checked={paymentMethod === 'cash'}
+                        value={0}
+                        checked={paymentMethod === 0 || paymentMethod === '0'}
                         onChange={(e) => {
-                          setPaymentMethod(e.target.value);
+                          const value = Number(e.target.value);
+                          setPaymentMethod(value);
                           if (onCouponApply) {
-                            onCouponApply({ payment_method: e.target.value });
+                            onCouponApply({ payment_method: value });
                           }
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
@@ -353,12 +361,13 @@ const PriceBar = ({
                       <input
                         type="radio"
                         name="payment_method"
-                        value="online_credit"
-                        checked={paymentMethod === 'online_credit'}
+                        value={1}
+                        checked={paymentMethod === 1 || paymentMethod === '1'}
                         onChange={(e) => {
-                          setPaymentMethod(e.target.value);
+                          const value = Number(e.target.value);
+                          setPaymentMethod(value);
                           if (onCouponApply) {
-                            onCouponApply({ payment_method: e.target.value });
+                            onCouponApply({ payment_method: value });
                           }
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
@@ -369,12 +378,13 @@ const PriceBar = ({
                       <input
                         type="radio"
                         name="payment_method"
-                        value="vietnam_bank_transfer"
-                        checked={paymentMethod === 'vietnam_bank_transfer'}
+                        value={2}
+                        checked={paymentMethod === 2 || paymentMethod === '2'}
                         onChange={(e) => {
-                          setPaymentMethod(e.target.value);
+                          const value = Number(e.target.value);
+                          setPaymentMethod(value);
                           if (onCouponApply) {
-                            onCouponApply({ payment_method: e.target.value });
+                            onCouponApply({ payment_method: value });
                           }
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
@@ -402,10 +412,10 @@ const PriceBar = ({
           max-[769px]:w-60%
            */}
 
-          <div className="hidden max-[1367px]:flex max-[1367px]:flex-col max-[1367px]:gap-1 max-[1367px]:mt-2 max-[769px]:w-[120%] max-[769px]:flex-col max-[769px]:py-1 max-[769px]:items-start max-[769px]:gap-10">
+          <div className="hidden max-[1367px]:flex max-[1367px]:flex-col max-[1367px]:gap-10 max-[1367px]:mb-2 max-[769px]:w-[120%] max-[769px]:flex-col max-[769px]:py-1 max-[769px]:items-start max-[769px]:gap-10 max-[769px]:px-0">
             {/* Row 1 - summary + payment dropdown */}
-            <div className="flex items-start justify-between max-[1367px]:justify-start">
-              <div className="flex flex-row items-start gap-2">
+            <div className="flex items-start justify-between max-[1367px]:px-10 max-[769px]:px-0 max-[769px]:justify-start">
+              <div className="flex flex-row items-start gap-20 max-[1367px]:gap-10 max-[769px]:gap-3">
                 <div className="flex flex-col items-start">
                   <span className="text-base text-black font-bold">仮計算</span>
                   <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
@@ -416,17 +426,17 @@ const PriceBar = ({
                 </div>
                 <div className="flex flex-col items-start">
                   <span className="text-base font-bold text-black">合計</span>
-                  <span className="w-24 text-start font-bold text-black">${total.toFixed(2)}</span>
+                  <span className="text-start font-bold text-black">${total.toFixed(2)}</span>
                 </div>
               </div>
               {/* make label + select into a col*/}
-              <div className="flex flex-col gap-1 min-[1367px]:hidden max-[1367px]:block max-[769px]:w-[40%] max-[769px]:py-0 max-[769px]:items-start max-[540px]:scale-90">
+              <div className="flex flex-col gap-1 min-[1367px]:hidden max-[1367px]:block max-[769px]:w-[40%] max-[769px]:py-0 max-[769px]:items-start">
                 <label className="text-base font-bold text-black">支払方法</label>
                 <select
                   value={paymentMethod}
-                  onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                  className="w-full px-4 py-2 max-[679px]:py-0 max-[679px]:px-0 bg-[#a3e7a3] border border-gray-300 rounded-md text-base text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                  max-[769px]:w-[80%]"
+                  onChange={(e) => handlePaymentMethodChange(Number(e.target.value))}
+                  className="w-full max-[1367px]:w-[92%] px-4 py-2 max-[1367px]:py-0  max-[1367px]:px-0 bg-[#a3e7a3] border border-gray-300 rounded-md text-base text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                  max-[769px]:w-[950]"
                 >
                   {paymentMethods.map((method) => (
                     <option key={method.value} value={method.value} className="text-black ">
@@ -438,19 +448,20 @@ const PriceBar = ({
             </div>
 
             {/* Row 2 - coupon + primary button */}
-            <div className="relative flex flex-wrap gap-2 max-[769px]:mx-0">
+            <div className="relative flex flex-wrap gap-2 max-[769px]:mx-0 max-[1367px]:px-10 max-[769px]:px-0">
               {/* Applied coupon - positioned above the coupon section */}
               {appliedCoupon && (
-                <button
-                  onClick={handleCouponRemove}
+                <div
+
                   className="absolute bottom-full mb-1 flex items-center gap-3 font-semibold text-[#015cc8] border-b border-dashed border-[#015cc8] w-fit z-10"
                 >
-                  <span className="flex items-center justify-center w-4 h-4 font-bold rounded-full border-[1.5px] border-[#a42021] text-[#a42021] text-base">
+                  <span onClick={handleCouponRemove} className="flex items-center justify-center w-4 h-4 font-bold rounded-full border-[1.5px] border-[#a42021] text-[#a42021] text-base">
                     ×
+
                   </span>
                   <span>{appliedCoupon.name}</span>
-                  <span className="ml-6 ">-{`$${appliedCoupon.discount.toFixed(2)}`}</span>
-                </button>
+                  <span className="ml-2">{`-$${appliedCoupon.discount.toFixed(2)}`}</span>
+                </div>
               )}
 
               {/* Coupon error - positioned above the coupon section */}
@@ -460,7 +471,7 @@ const PriceBar = ({
                 </div>
               )}
 
-              <div className="flex w-full items-center max-[769px]:py-0 max-[540px]:scale-90">
+              <div className="flex w-full items-center max-[769px]:py-0 gap-0">
                 <span className="text-base text-black font-bold">クーポン</span>
                 <input
                   type="text"

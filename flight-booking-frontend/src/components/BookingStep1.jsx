@@ -1,85 +1,45 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PriceBar from './PriceBar';
 import ProcessIndicator from './ProcessIndicator';
 import Error from './Error';
 import FieldRequired from './FieldRequired';
 import JapaneseDatePicker from './JapaneseDatePicker';
+import { useScrollToTop } from '../hooks/useScrollToTop';
+import { airports, immigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../constants/bookingOptions';
+import { isInputEmpty } from '../utils/formHelpers';
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
-  // Scroll to top when this step is mounted
-  useEffect(() => {
-    window.scrollTo({ top: 250, left: 0, behavior: 'auto' });
-    if (window.innerWidth < 768) {
-      window.scrollTo({ top: 100, left: 0, behavior: 'auto' });
-    }
-  }, []);
+  useScrollToTop();
   const [formData, setFormData] = useState({
     // Immigration
     useImmigration: bookingData?.immigration ? true : false,
-    immigration_package: bookingData?.immigration?.immigration_package || '35$', // Default to first option
-    flight_reservation_num: bookingData?.immigration?.flight_reservation_num || '',
-    flight_num: bookingData?.immigration?.flight_num || '',
-    airport: bookingData?.immigration?.airport,
-    arrival_date: bookingData?.immigration?.arrival_date || '',
-    pickup_at_airplain_exit: bookingData?.immigration?.pickup_at_airplain_exit || false,
-    complete_within_15min: bookingData?.immigration?.complete_within_15min || false,
-    pickup_vehicle_using: bookingData?.immigration?.pickup_vehicle_using || 'no',
-    phone_num_of_picker: bookingData?.immigration?.phone_num_of_picker || '',
-    requirement: bookingData?.immigration?.requirement || '',
-    useOtherOptions: bookingData?.immigration?.useOtherOptions || false,
+    entry_fast_track_option: typeof bookingData?.immigration?.entry_fast_track_option === 'number' ? bookingData.immigration.entry_fast_track_option : 0, // 0..3
+    arrival_flight_reservation_code: bookingData?.immigration?.arrival_flight_reservation_code ?? '',
+    arrival_flight_number: bookingData?.immigration?.arrival_flight_number ?? '',
+    arrival_airport: typeof bookingData?.immigration?.arrival_airport === 'number' ? bookingData.immigration.arrival_airport : (bookingData?.immigration?.arrival_airport !== undefined && bookingData?.immigration?.arrival_airport !== null ? Number(bookingData.immigration.arrival_airport) : ''),
+    arrival_date: bookingData?.immigration?.arrival_date ?? '',
+    // Store as strings like pickup_service, not booleans
+    tarmac_pickup: (bookingData?.immigration?.tarmac_pickup === 'true' || bookingData?.immigration?.tarmac_pickup === true || bookingData?.immigration?.tarmac_pickup === 1) ? 'true' : 'false',
+    use_immigration_fast_track: (bookingData?.immigration?.use_immigration_fast_track === 'true' || bookingData?.immigration?.use_immigration_fast_track === true || bookingData?.immigration?.use_immigration_fast_track === 1) ? 'true' : 'false',
+    pickup_service: typeof bookingData?.immigration?.pickup_service === 'number' ? String(bookingData.immigration.pickup_service) : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
+    arrival_phone_number: bookingData?.immigration?.arrival_phone_number ?? '',
+    arrival_request: bookingData?.immigration?.arrival_request ?? '',
+    useOtherOptions: bookingData?.immigration?.useOtherOptions === true || bookingData?.immigration?.useOtherOptions === 'true' ? true : false,
 
     // Emigration
     useEmigration: bookingData?.emigration ? true : false,
-    emigration_package: bookingData?.emigration?.emigration_package || '50$', // Default to first option
-    emigration_flight_reservation_num: bookingData?.emigration?.flight_reservation_num || '',
-    airline_membership_num: bookingData?.emigration?.airline_membership_num || '',
-    emigration_airport: bookingData?.emigration?.airport,
-    seating_pref: bookingData?.emigration?.seating_pref || '',
-    emigration_phone_num_of_picker: bookingData?.emigration?.phone_num_of_picker || '',
-    emigration_requirement: bookingData?.emigration?.requirement || '',
-    departure_date: bookingData?.emigration?.departure_date || '',
-    meeting_time: bookingData?.emigration?.meeting_time || '',
-    emigration_flight_num: bookingData?.emigration?.flight_num || '',
+    departure_fast_track_option: typeof bookingData?.emigration?.departure_fast_track_option === 'number' ? bookingData.emigration.departure_fast_track_option : 0, // 0..1
+    departure_flight_reservation_code: bookingData?.emigration?.departure_flight_reservation_code ?? '',
+    airline_membership_num: bookingData?.emigration?.airline_membership_num ?? '',
+    departure_airport_code: typeof bookingData?.emigration?.departure_airport_code === 'number' ? bookingData.emigration.departure_airport_code : (bookingData?.emigration?.departure_airport_code !== undefined && bookingData?.emigration?.departure_airport_code !== null ? Number(bookingData.emigration.departure_airport_code) : ''),
+    departure_seating_preferences: typeof bookingData?.emigration?.departure_seating_preferences === 'number' ? bookingData.emigration.departure_seating_preferences : (bookingData?.emigration?.departure_seating_preferences !== undefined && bookingData?.emigration?.departure_seating_preferences !== null ? Number(bookingData.emigration.departure_seating_preferences) : ''),
+    departure_phone_number: bookingData?.emigration?.departure_phone_number ?? '',
+    departure_request: bookingData?.emigration?.departure_request ?? '',
+    departure_date: bookingData?.emigration?.departure_date ?? '',
+    departure_meeting_time: bookingData?.emigration?.departure_meeting_time ?? '',
+    departure_flight_number: bookingData?.emigration?.departure_flight_number ?? '',
     sameAsEntry: false, // Track if "Same as entry" checkbox is checked
   });
-
-  const airports = [
-    { value: 'SGN', label: 'SGN - タンソンニャット空港 (Tan Son Nhat・Ho Chi Minh City)' },
-    { value: 'DAD', label: 'DAD - ダナン空港(Da Nang)' },
-    { value: 'HAN', label: 'HAN - ノイバイ(Noi Bai・Ha Noi)' },
-  ];
-
-  const immigrationPackages = [
-    { value: '35$', label: 'VIP_IN1_入国審査での優先レーンのみ利用(フィー：35$ )' },
-    { value: '40$', label: 'VIP_IN2_入国審査での優先レーン利用＋空港の外の迎え場所への案内 (フィー：40$ )' },
-    { value: '50$', label: 'VIP_IN3_ 入国審査での優先レーン利用＋荷物受取サポート＋空港の外の迎え場所への案内 (フィー：50$ )' },
-    { value: '300$', label: 'VIP_IN6_VVIP最優先レーン利用・Non-stopパッケージ(フィー：300$)' },
-  ];
-
-  const emigrationPackages = [
-    { value: '50$', label: '出国Fasttrackフルサポートをご利用する(50$)' },
-    { value: '300$', label: 'VVIP出国Fasttrackを利用する(300$)' },
-  ];
-
-  const pickupVehicles = [
-    { value: 'no', label: '利用しない' },
-    { value: '4_seat', label: '迎車 4席 (20$)' },
-    { value: '7_seat', label: '迎車 7席 (25$)' },
-    { value: 'limousine_7_seat', label: '迎車 9席 Limousine (50$)' },
-  ];
-
-  const seatingPreferences = [
-    { value: 'dont_want', label: "希望しない" },
-    { value: 'front_window', label: '前方 窓側' },
-    { value: 'front_aisle', label: '前方 通路側' },
-    { value: 'front_middle_window', label: '前方 真ん中席又は窓側' },
-    { value: 'middle_window', label: '中列 窓側' },
-    { value: 'middle_aisle', label: '中列 通路側' },
-    { value: 'middle_middle_window', label: '中列 真ん中席又は窓側' },
-    { value: 'rear_aisle', label: '後方 通路側' },
-    { value: 'rear_window', label: '後方 窓側' },
-    { value: 'rear_middle_window', label: '後方 真ん中席又は窓側' },
-  ];
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -94,20 +54,20 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     }
 
     // Auto-select first package when checkbox is checked
-    if (type === 'checkbox' && name === 'useImmigration' && checked && !formData.immigration_package) {
+    if (type === 'checkbox' && name === 'useImmigration' && checked && formData.entry_fast_track_option === '') {
       setFormData(prev => ({
         ...prev,
-        [name]: checked,
-        immigration_package: '35$', // Auto-select first option
+        [name]: Boolean(checked), // Ensure boolean
+        entry_fast_track_option: 0, // Auto-select first option
       }));
       return;
     }
 
-    if (type === 'checkbox' && name === 'useEmigration' && checked && !formData.emigration_package) {
+    if (type === 'checkbox' && name === 'useEmigration' && checked && formData.departure_fast_track_option === '') {
       setFormData(prev => ({
         ...prev,
-        [name]: checked,
-        emigration_package: '50$', // Auto-select first option
+        [name]: Boolean(checked), // Ensure boolean
+        departure_fast_track_option: 0, // Auto-select first option
       }));
       return;
     }
@@ -116,8 +76,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     if (type === 'checkbox' && name === 'useImmigration' && !checked) {
       setFormData(prev => ({
         ...prev,
-        [name]: checked,
-        immigration_package: '35$', // Reset to first option
+        [name]: Boolean(checked), // Ensure boolean
+        entry_fast_track_option: 0, // Reset to first option
       }));
       return;
     }
@@ -125,18 +85,18 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     if (type === 'checkbox' && name === 'useEmigration' && !checked) {
       setFormData(prev => ({
         ...prev,
-        [name]: checked,
-        emigration_package: '50$', // Reset to first option
+        [name]: Boolean(checked), // Ensure boolean
+        departure_fast_track_option: 0, // Reset to first option
       }));
       return;
     }
 
-    // If selecting 300$ package, disable complete_within_15min
-    if (name === 'immigration_package' && value === '300$') {
+    // If selecting 300$ package (index 3), disable use_immigration_fast_track and hide the option
+    if (name === 'use_immigration_fast_track' && Number(value) === 3) {
       setFormData(prev => ({
         ...prev,
-        [name]: value,
-        complete_within_15min: false, // Disable when 300$ is selected
+        [name]: Number(value),
+        use_immigration_fast_track: 'false', // Disable when 300$ is selected
       }));
       return;
     }
@@ -144,16 +104,23 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     setFormData(prev => {
       const updated = {
         ...prev,
-        [name]: type === 'checkbox' ? checked : value,
+        [name]:
+          type === 'checkbox'
+            ? Boolean(checked) // Ensure checkbox values are always boolean
+            : ['pickup_service', 'entry_fast_track_option', 'departure_fast_track_option', 'arrival_airport', 'departure_airport_code', 'seating_pref', 'departure_seating_preferences'].includes(
+              name
+            )
+              ? Number(value)
+              : value,
       };
 
       // If "Same as entry" is checked and immigration flight_reservation_num changes, update emigration
-      if (name === 'flight_reservation_num' && prev.sameAsEntry && prev.useImmigration) {
-        updated.emigration_flight_reservation_num = updated.flight_reservation_num;
+      if (name === 'arrival_flight_reservation_code' && prev.sameAsEntry && prev.useImmigration) {
+        updated.departure_flight_reservation_code = updated.arrival_flight_reservation_code;
       }
 
       // If user manually edits emigration flight reservation, uncheck "Same as entry"
-      if (name === 'emigration_flight_reservation_num' && prev.sameAsEntry) {
+      if (name === 'departure_flight_reservation_code' && prev.sameAsEntry) {
         updated.sameAsEntry = false;
       }
 
@@ -163,17 +130,17 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
 
   // Handle "Same as entry" checkbox for emigration flight reservation
   const handleSameAsEntry = (checked) => {
-    if (checked && formData.useImmigration && formData.flight_reservation_num) {
+    if (checked && formData.useImmigration && formData.arrival_flight_reservation_code) {
       // When checked: copy immigration flight reservation to emigration
       setFormData(prev => ({
         ...prev,
-        emigration_flight_reservation_num: prev.flight_reservation_num,
+        departure_flight_reservation_code: prev.arrival_flight_reservation_code,
         sameAsEntry: true,
       }));
     } else {
       setFormData(prev => ({
         ...prev,
-        emigration_flight_reservation_num: '',
+        departure_flight_reservation_code: '',
         sameAsEntry: false,
       }));
     }
@@ -197,26 +164,29 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     const updatedData = {
       ...bookingData,
       immigration: formData.useImmigration ? {
-        immigration_package: formData.immigration_package,
-        flight_reservation_num: formData.flight_reservation_num,
-        flight_num: formData.flight_num,
-        airport: formData.airport,
+        entry_fast_track_option: formData.entry_fast_track_option,
+        arrival_flight_reservation_code: formData.arrival_flight_reservation_code,
+        arrival_flight_number: formData.arrival_flight_number,
+        arrival_airport: formData.arrival_airport,
         arrival_date: formData.arrival_date,
-        pickup_at_airplain_exit: formData.pickup_at_airplain_exit,
-        complete_within_15min: formData.complete_within_15min,
-        pickup_vehicle_using: formData.pickup_vehicle_using,
-        phone_num_of_picker: formData.phone_num_of_picker,
-        requirement: formData.requirement,
+        // Already stored as strings "true"/"false"
+        tarmac_pickup: formData.tarmac_pickup || 'false',
+        use_immigration_fast_track: formData.use_immigration_fast_track || 'false',
+        pickup_service: formData.pickup_service,
+        arrival_phone_number: formData.arrival_phone_number,
+        arrival_request: formData.arrival_request,
+        // Persist \"他のオプション\" checkbox state so it remains checked when returning to Step 1
+        useOtherOptions: formData.useOtherOptions,
       } : null,
       emigration: formData.useEmigration ? {
-        emigration_package: formData.emigration_package,
-        flight_reservation_num: formData.emigration_flight_reservation_num,
-        flight_num: formData.emigration_flight_num,
+        departure_fast_track_option: formData.departure_fast_track_option,
+        departure_flight_reservation_code: formData.departure_flight_reservation_code,
+        departure_flight_number: formData.departure_flight_number,
         airline_membership_num: formData.airline_membership_num,
-        airport: formData.emigration_airport,
-        seating_pref: formData.seating_pref,
-        phone_num_of_picker: formData.emigration_phone_num_of_picker,
-        requirement: formData.emigration_requirement,
+        departure_airport_code: formData.departure_airport_code,
+        departure_seating_preferences: formData.departure_seating_preferences,
+        departure_phone_number: formData.departure_phone_number,
+        departure_request: formData.departure_request,
         departure_date: formData.departure_date,
         meeting_time: formData.meeting_time,
       } : null,
@@ -234,54 +204,53 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const [showError, setShowError] = useState(false);
 
   // Helper function to check if input is empty and should show red label
-  const isInputEmpty = (value) => !value || value.trim() === '';
 
   // Validation function
   const validateForm = () => {
     const newErrors = {};
 
     if (formData.useImmigration) {
-      if (!formData.immigration_package) {
-        newErrors.immigration_package = 'Please select an immigration package';
+      if (formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined) {
+        newErrors.entry_fast_track_option = 'Please select an immigration package';
       }
 
-      if (!formData.flight_reservation_num || !formData.flight_reservation_num.trim()) {
-        newErrors.flight_reservation_num = 'This field is required';
+      if (!formData.arrival_flight_reservation_code || !formData.arrival_flight_reservation_code.trim()) {
+        newErrors.arrival_flight_reservation_code = 'This field is required';
       }
-      if (!formData.flight_num || !formData.flight_num.trim()) {
-        newErrors.flight_num = 'This field is required';
+      if (!formData.arrival_flight_number || !formData.arrival_flight_number.trim()) {
+        newErrors.arrival_flight_number = 'This field is required';
       }
       if (!formData.arrival_date) {
         newErrors.arrival_date = 'This field is required';
       }
-      if (!formData.airport) {
-        newErrors.airport = 'This field is required';
+      if (formData.arrival_airport === '' || formData.arrival_airport === null || formData.arrival_airport === undefined) {
+        newErrors.arrival_airport = 'This field is required';
       }
-      // Always validate complete_within_15min for non-300$ packages (not part of "Other options")
-      if (formData.immigration_package !== '300$' && formData.complete_within_15min === undefined) {
-        newErrors.complete_within_15min = 'This field is required';
+      // Always validate use_immigration_fast_track for non-300$ packages (not part of "Other options")
+      if (formData.entry_fast_track_option !== 3 && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '')) {
+        newErrors.use_immigration_fast_track = 'This field is required';
       }
-      // Only validate pickup_vehicle_using if "Other options" is checked
-      if (formData.useOtherOptions && !formData.pickup_vehicle_using) {
-        newErrors.pickup_vehicle_using = 'This field is required';
+      // Only validate pickup_service if "Other options" is checked
+      if (formData.useOtherOptions && (formData.pickup_service === null || formData.pickup_service === undefined)) {
+        newErrors.pickup_service = 'This field is required';
       }
     }
 
     if (formData.useEmigration) {
-      if (!formData.emigration_package) {
-        newErrors.emigration_package = 'Please select an emigration package';
+      if (formData.departure_fast_track_option === '' || formData.departure_fast_track_option === null || formData.departure_fast_track_option === undefined) {
+        newErrors.departure_fast_track_option = 'Please select an emigration package';
       }
-      if (!formData.emigration_flight_reservation_num || !formData.emigration_flight_reservation_num.trim()) {
-        newErrors.emigration_flight_reservation_num = 'This field is required';
+      if (!formData.departure_flight_reservation_code || !formData.departure_flight_reservation_code.trim()) {
+        newErrors.departure_flight_reservation_code = 'This field is required';
       }
-      if (!formData.emigration_flight_num || !formData.emigration_flight_num.trim()) {
-        newErrors.emigration_flight_num = 'This field is required';
+      if (!formData.departure_flight_number || !formData.departure_flight_number.trim()) {
+        newErrors.departure_flight_number = 'This field is required';
       }
       if (!formData.departure_date) {
         newErrors.departure_date = 'This field is required';
       }
-      if (!formData.emigration_airport) {
-        newErrors.emigration_airport = 'This field is required';
+      if (formData.departure_airport_code === '' || formData.departure_airport_code === null || formData.departure_airport_code === undefined) {
+        newErrors.departure_airport_code = 'This field is required';
       }
     }
 
@@ -325,7 +294,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               <input
                 type="checkbox"
                 name="useImmigration"
-                checked={formData.useImmigration}
+                checked={Boolean(formData.useImmigration)}
                 onChange={handleInputChange}
                 className="w-5 h-5 mr-3 text-blue-600 border-gray-300 rounded focus:outline-none"
               />
@@ -341,15 +310,15 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               {/* Immigration Package and Complete within 15 minutes group using cols-2*/}
               <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-4">
                 <div className="mb-6">
-                  <FieldRequired label="入国ファストトラックパッケージ" required={true} error={errors.immigration_package} isEmpty={!formData.immigration_package}>
+                  <FieldRequired label="入国ファストトラックパッケージ" required={true} error={errors.entry_fast_track_option} isEmpty={formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined}>
                     <fieldset className="space-y-2 w-[98%] border-none p-0 m-0">
                       {immigrationPackages.map(pkg => (
                         <label key={pkg.value} className="flex items-start cursor-pointer text-start">
                           <input
                             type="radio"
-                            name="immigration_package"
+                            name="entry_fast_track_option"
                             value={pkg.value}
-                            checked={formData.immigration_package === pkg.value}
+                            checked={formData.entry_fast_track_option === pkg.value || formData.entry_fast_track_option === String(pkg.value)}
                             onChange={handleInputChange}
                             required={formData.useImmigration}
                             className="mt-1 w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
@@ -361,54 +330,54 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   </FieldRequired>
                 </div>
                 {/* Only show "Complete within 15 min" option for first 3 packages (not 300$) - always visible, not part of "Other options" */}
-                {formData.immigration_package !== '300$' && (
+                {formData.entry_fast_track_option !== 3 && (
                   <div className="mt-6">
                     <FieldRequired
                       label="オプション：15分以内に入国審査手続き完了"
                       required={true}
-                      error={errors.complete_within_15min}
-                      isEmpty={formData.complete_within_15min === undefined}
+                      error={errors.use_immigration_fast_track}
+                      isEmpty={!formData.use_immigration_fast_track || formData.use_immigration_fast_track === ''}
                     >
                       <fieldset className="space-y-2 border-none p-0 m-0">
                         <label className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="complete_within_15min"
+                            name="use_immigration_fast_track"
                             value="false"
-                            checked={!formData.complete_within_15min}
+                            checked={formData.use_immigration_fast_track === 'false'}
                             onChange={() => {
-                              if (errors.complete_within_15min) {
+                              if (errors.use_immigration_fast_track) {
                                 setErrors(prev => {
                                   const newErrors = { ...prev };
-                                  delete newErrors.complete_within_15min;
+                                  delete newErrors.use_immigration_fast_track;
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, complete_within_15min: false }));
+                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'false' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.complete_within_15min && formData.complete_within_15min === undefined ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
-                          <span className={`ml-3 text-base ${errors.complete_within_15min && formData.complete_within_15min === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
+                          <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
                         </label>
                         <label className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="complete_within_15min"
+                            name="use_immigration_fast_track"
                             value="true"
-                            checked={formData.complete_within_15min}
+                            checked={formData.use_immigration_fast_track === 'true'}
                             onChange={() => {
-                              if (errors.complete_within_15min) {
+                              if (errors.use_immigration_fast_track) {
                                 setErrors(prev => {
                                   const newErrors = { ...prev };
-                                  delete newErrors.complete_within_15min;
+                                  delete newErrors.use_immigration_fast_track;
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, complete_within_15min: true }));
+                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'true' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.complete_within_15min && formData.complete_within_15min === undefined ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
-                          <span className={`ml-3 text-base ${errors.complete_within_15min && formData.complete_within_15min === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用する (15$)</span>
+                          <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>利用する (15$)</span>
                         </label>
                         <p className="text-md text-[#1362cb] mt-2 text-left">
                           ※「外交官専用レーン」をご利用することで最短に入国手続きが終わります。15分以上かかる場合、15$が返金されます。お預かり荷物のない方にはおすすめです。
@@ -424,17 +393,17 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label="フライトの予約番号や予約コード"
                     required={true}
-                    error={errors.flight_reservation_num}
-                    isEmpty={isInputEmpty(formData.flight_reservation_num)}
+                    error={errors.arrival_flight_reservation_code}
+                    isEmpty={isInputEmpty(formData.arrival_flight_reservation_code)}
                   >
                     <input
                       type="text"
-                      name="flight_reservation_num"
-                      value={formData.flight_reservation_num}
+                      name="arrival_flight_reservation_code"
+                      value={formData.arrival_flight_reservation_code ?? ''}
                       onChange={handleInputChange}
                       required={formData.useImmigration}
                       placeholder="予約番号や予約コード"
-                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base border-[#f2f2f2] rounded-lg focus:outline-none ${errors.flight_reservation_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base border-[#f2f2f2] rounded-lg focus:outline-none ${errors.arrival_flight_reservation_code ? 'border-[#c02b0b]' : 'border-[#b98d5d]'
                         }`}
                     />
                   </FieldRequired>
@@ -444,32 +413,32 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label="便・フライトNo."
                     required={true}
-                    error={errors.flight_num}
-                    isEmpty={isInputEmpty(formData.flight_num)}
+                    error={errors.arrival_flight_number}
+                    isEmpty={isInputEmpty(formData.arrival_flight_number)}
                   >
                     <input
                       type="text"
-                      name="flight_num"
-                      value={formData.flight_num}
+                      name="arrival_flight_number"
+                      value={formData.arrival_flight_number ?? ''}
                       onChange={handleInputChange}
                       required={formData.useImmigration}
                       placeholder="VN000"
-                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base border-[#f2f2f2] rounded-lg focus:outline-none ${errors.flight_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base border-[#f2f2f2] rounded-lg focus:outline-none ${errors.arrival_flight_number ? 'border-[#c02b0b]' : 'border-[#b98d5d]'
                         }`}
                     />
                   </FieldRequired>
                 </div>
 
                 <div>
-                  <FieldRequired label="ご利用の対象空港" required={true} error={errors.airport} isEmpty={!formData.airport}>
+                  <FieldRequired label="ご利用の対象空港" required={true} error={errors.arrival_airport} isEmpty={formData.arrival_airport === '' || formData.arrival_airport === null || formData.arrival_airport === undefined}>
                     <fieldset className="space-y-2 border-none p-0 m-0">
                       {airports.map(airport => (
                         <label key={airport.value} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="airport"
+                            name="arrival_airport"
                             value={airport.value}
-                            checked={formData.airport === airport.value}
+                            checked={formData.arrival_airport === airport.value || formData.arrival_airport === String(airport.value)}
                             onChange={handleInputChange}
                             required={formData.useImmigration}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
@@ -490,7 +459,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   >
                     <JapaneseDatePicker
                       name="arrival_date"
-                      value={formData.arrival_date}
+                      value={formData.arrival_date ?? ''}
                       onChange={handleInputChange}
                       required={formData.useImmigration}
                       placeholder="年 / 月 / 日"
@@ -510,7 +479,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <input
                     type="checkbox"
                     name="useOtherOptions"
-                    checked={formData.useOtherOptions}
+                    checked={Boolean(formData.useOtherOptions)}
                     onChange={handleInputChange}
                     className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:outline-none"
                   />
@@ -526,50 +495,50 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     <FieldRequired
                       label="飛行機の降り口（または飛行機からバスで到着した場所）でお迎えのご利用を選択してください: (必須)"
                       required={true}
-                      error={errors.pickup_at_airplain_exit}
-                      isEmpty={formData.pickup_at_airplain_exit === false}
+                      error={errors.tarmac_pickup}
+                      isEmpty={formData.tarmac_pickup === 'false'}
                     >
-                      {/* with max-w-[640px] => make pickup_at_airplain_exit into 2 cols*/}
+                      {/* with max-w-[640px] => make tarmac_pickup into 2 cols*/}
                       <fieldset className="space-y-2 border-none p-0 m-0 max-[640px]:grid grid-cols-2 gap-4">
                         <label className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="pickup_at_airplain_exit"
+                            name="tarmac_pickup"
                             value="false"
-                            checked={!formData.pickup_at_airplain_exit}
+                            checked={formData.tarmac_pickup === 'false'}
                             onChange={() => {
-                              if (errors.pickup_at_airplain_exit) {
+                              if (errors.tarmac_pickup) {
                                 setErrors(prev => {
                                   const newErrors = { ...prev };
-                                  delete newErrors.pickup_at_airplain_exit;
+                                  delete newErrors.tarmac_pickup;
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, pickup_at_airplain_exit: false }));
+                              setFormData(prev => ({ ...prev, tarmac_pickup: 'false' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.pickup_at_airplain_exit && formData.pickup_at_airplain_exit === false ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === 'false' ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
-                          <span className={`ml-3 text-base ${errors.pickup_at_airplain_exit && formData.pickup_at_airplain_exit === false ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
+                          <span className={`ml-3 text-base ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'text-[#c02b0b]' : 'text-black'}`}>利用しない</span>
                         </label>
                         <label className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="pickup_at_airplain_exit"
+                            name="tarmac_pickup"
                             value="true"
-                            checked={formData.pickup_at_airplain_exit}
+                            checked={formData.tarmac_pickup === 'true'}
                             onChange={() => {
-                              if (errors.pickup_at_airplain_exit) {
+                              if (errors.tarmac_pickup) {
                                 setErrors(prev => {
                                   const newErrors = { ...prev };
-                                  delete newErrors.pickup_at_airplain_exit;
+                                  delete newErrors.tarmac_pickup;
                                   return newErrors;
                                 });
                               }
-                              setFormData(prev => ({ ...prev, pickup_at_airplain_exit: true }));
+                              setFormData(prev => ({ ...prev, tarmac_pickup: 'true' }));
                             }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.pickup_at_airplain_exit && formData.pickup_at_airplain_exit === false ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.tarmac_pickup && formData.tarmac_pickup === 'false' ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                           />
-                          <span className={`ml-3 text-base ${errors.pickup_at_airplain_exit && formData.pickup_at_airplain_exit === false ? 'text-[#c02b0b]' : 'text-black'}`}>ご利用する (60$)</span>
+                          <span className={`ml-3 text-base ${errors.tarmac_pickup && formData.tarmac_pickup === false ? 'text-[#c02b0b]' : 'text-black'}`}>ご利用する (60$)</span>
                         </label>
                       </fieldset>
                     </FieldRequired>
@@ -580,22 +549,22 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     <FieldRequired
                       label="迎車利用 (必須)"
                       required={true}
-                      error={errors.pickup_vehicle_using}
-                      isEmpty={!formData.pickup_vehicle_using}
+                      error={errors.pickup_service}
+                      isEmpty={formData.pickup_service === null || formData.pickup_service === undefined}
                     >
                       <fieldset className="space-y-2 grid grid-cols-2 max-[640px]:grid-cols-1 gap-4 max-[640px]:gap-0 border-none p-0 m-0">
                         {pickupVehicles.map(vehicle => (
                           <label key={vehicle.value} className="flex items-center cursor-pointer">
                             <input
                               type="radio"
-                              name="pickup_vehicle_using"
+                              name="pickup_service"
                               value={vehicle.value}
-                              checked={formData.pickup_vehicle_using === vehicle.value}
+                              checked={formData.pickup_service === vehicle.value}
                               onChange={handleInputChange}
                               required={formData.useOtherOptions}
-                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.pickup_vehicle_using && !formData.pickup_vehicle_using ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.pickup_service && !formData.pickup_service ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                             />
-                            <span className={`ml-3 text-base text-left ${errors.pickup_vehicle_using && !formData.pickup_vehicle_using ? 'text-[#c02b0b]' : 'text-black'}`}>
+                            <span className={`ml-3 text-base text-left ${errors.pickup_service && !formData.pickup_service ? 'text-[#c02b0b]' : 'text-black'}`}>
                               {vehicle.label}
                             </span>
                           </label>
@@ -613,8 +582,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   </label>
                   <input
                     type="text"
-                    name="phone_num_of_picker"
-                    value={formData.phone_num_of_picker}
+                    name="arrival_phone_number"
+                    value={formData.arrival_phone_number ?? ''}
                     onChange={handleInputChange}
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base 
                     border-[#f2f2f2] rounded-lg focus:outline-none"
@@ -626,8 +595,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     他のご希望があればご記入くださいませ。
                   </label>
                   <textarea
-                    name="requirement"
-                    value={formData.requirement}
+                    name="arrival_request"
+                    value={formData.arrival_request ?? ''}
                     onChange={handleInputChange}
                     rows={1}
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
@@ -645,7 +614,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               <input
                 type="checkbox"
                 name="useEmigration"
-                checked={formData.useEmigration}
+                checked={Boolean(formData.useEmigration)}
                 onChange={handleInputChange}
                 className="w-5 h-5 mr-3 text-blue-600 border-gray-300 rounded focus:outline-none"
               />
@@ -659,15 +628,15 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
           {formData.useEmigration && (
             <div className="mb-6 w-full">
               <div className="mb-6">
-                <FieldRequired label="出国Fasttrack" required={true} error={errors.emigration_package} isEmpty={!formData.emigration_package}>
+                <FieldRequired label="出国Fasttrack" required={true} error={errors.departure_fast_track_option} isEmpty={formData.departure_fast_track_option === '' || formData.departure_fast_track_option === null || formData.departure_fast_track_option === undefined}>
                   <fieldset className="space-y-2 border-none p-0 m-0">
                     {emigrationPackages.map(pkg => (
                       <label key={pkg.value} className="flex items-start cursor-pointer">
                         <input
                           type="radio"
-                          name="emigration_package"
+                          name="departure_fast_track_option"
                           value={pkg.value}
-                          checked={formData.emigration_package === pkg.value}
+                          checked={formData.departure_fast_track_option === pkg.value || formData.departure_fast_track_option === String(pkg.value)}
                           onChange={handleInputChange}
                           required={formData.useEmigration}
                           className="mt-1 w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
@@ -683,9 +652,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                 <label className="flex items-center text-base text-black whitespace-nowrap cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={formData.sameAsEntry}
-                    onChange={(e) => handleSameAsEntry(e.target.checked)}
-                    disabled={!formData.useImmigration || !formData.flight_reservation_num}
+                    checked={Boolean(formData.sameAsEntry)}
+                    onChange={(e) => handleSameAsEntry(Boolean(e.target.checked))}
+                    disabled={!formData.useImmigration || !formData.arrival_flight_reservation_code}
                     className="w-4 h-4 mr-1 text-blue-600 border-gray-300 rounded focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   入国と同じ
@@ -699,17 +668,17 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label="フライトの予約番号や予約コード"
                     required={true}
-                    error={errors.emigration_flight_reservation_num}
-                    isEmpty={isInputEmpty(formData.emigration_flight_reservation_num)}
+                    error={errors.departure_flight_reservation_code}
+                    isEmpty={isInputEmpty(formData.departure_flight_reservation_code)}
                   >
                     <input
                       type="text"
-                      name="emigration_flight_reservation_num"
-                      value={formData.emigration_flight_reservation_num}
+                      name="departure_flight_reservation_code"
+                      value={formData.departure_flight_reservation_code ?? ''}
                       onChange={handleInputChange}
                       required={formData.useEmigration}
                       placeholder="予約番号や予約コード"
-                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.emigration_flight_reservation_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.departure_flight_reservation_code ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
@@ -718,31 +687,31 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label="便・フライトNo."
                     required={true}
-                    error={errors.emigration_flight_num}
-                    isEmpty={isInputEmpty(formData.emigration_flight_num)}
+                    error={errors.departure_flight_number}
+                    isEmpty={isInputEmpty(formData.departure_flight_number)}
                   >
                     <input
                       type="text"
-                      name="emigration_flight_num"
-                      value={formData.emigration_flight_num}
+                      name="departure_flight_number"
+                      value={formData.departure_flight_number ?? ''}
                       onChange={handleInputChange}
                       required={formData.useEmigration}
                       placeholder="VN999"
-                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.emigration_flight_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
+                      className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.departure_flight_number ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                     />
                   </FieldRequired>
                 </div>
 
                 <div>
-                  <FieldRequired label="ご利用の対象空港" required={true} error={errors.emigration_airport} isEmpty={!formData.emigration_airport}>
+                  <FieldRequired label="ご利用の対象空港" required={true} error={errors.departure_airport_code} isEmpty={formData.departure_airport_code === '' || formData.departure_airport_code === null || formData.departure_airport_code === undefined}>
                     <fieldset className="space-y-2 max-[640px]:space-y-0 border-none p-0 m-0">
                       {airports.map(airport => (
                         <label key={airport.value} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="emigration_airport"
+                            name="departure_airport_code"
                             value={airport.value}
-                            checked={formData.emigration_airport === airport.value}
+                            checked={formData.departure_airport_code === airport.value || formData.departure_airport_code === String(airport.value)}
                             onChange={handleInputChange}
                             required={formData.useEmigration}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
@@ -762,7 +731,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <input
                     type="text"
                     name="airline_membership_num"
-                    value={formData.airline_membership_num}
+                    value={formData.airline_membership_num ?? ''}
                     onChange={handleInputChange}
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                   />
@@ -781,9 +750,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     <label key={seat.value} className="flex items-center cursor-pointer">
                       <input
                         type="radio"
-                        name="seating_pref"
+                        name="departure_seating_preferences"
                         value={seat.value}
-                        checked={formData.seating_pref === seat.value}
+                        checked={formData.departure_seating_preferences === seat.value || formData.departure_seating_preferences === String(seat.value)}
                         onChange={handleInputChange}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
@@ -803,7 +772,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   >
                     <JapaneseDatePicker
                       name="departure_date"
-                      value={formData.departure_date}
+                      value={formData.departure_date ?? ''}
                       onChange={handleInputChange}
                       required={formData.useEmigration}
                       placeholder="年 / 月 / 日"
@@ -871,8 +840,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   </label>
                   <input
                     type="text"
-                    name="emigration_phone_num_of_picker"
-                    value={formData.emigration_phone_num_of_picker}
+                    name="departure_phone_number"
+                    value={formData.departure_phone_number ?? ''}
                     onChange={handleInputChange}
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                   />
@@ -883,8 +852,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     他のご希望があればご記入くださいませ。
                   </label>
                   <textarea
-                    name="emigration_requirement"
-                    value={formData.emigration_requirement}
+                    name="departure_request"
+                    value={formData.departure_request ?? ''}
                     onChange={handleInputChange}
                     rows={1}
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
@@ -902,13 +871,18 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         bookingData={{
           ...bookingData,
           immigration: formData.useImmigration ? {
-            immigration_package: formData.immigration_package || '35$',
-            pickup_at_airplain_exit: formData.useOtherOptions ? formData.pickup_at_airplain_exit : false,
-            complete_within_15min: (formData.immigration_package || '35$') !== '300$' ? formData.complete_within_15min : false,
-            pickup_vehicle_using: formData.useOtherOptions ? formData.pickup_vehicle_using : 'no',
+            entry_fast_track_option: formData.entry_fast_track_option ?? 0,
+            immigration_package: immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$',
+            tarmac_pickup: formData.useOtherOptions ? formData.tarmac_pickup : 'false',
+            use_immigration_fast_track:
+              (immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$') !== '300$'
+                ? formData.use_immigration_fast_track
+                : 'false',
+            pickup_service: formData.useOtherOptions ? formData.pickup_service : 0,
           } : null,
           emigration: formData.useEmigration ? {
-            emigration_package: formData.emigration_package || '50$',
+            departure_fast_track_option: formData.departure_fast_track_option ?? 0,
+            emigration_package: emigrationPackages[formData.departure_fast_track_option]?.priceKey || '50$',
           } : null,
         }}
         onCouponApply={handlePriceUpdate}
@@ -916,8 +890,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         primaryActionLabel="利用者情報のご記入"
         primaryActionDisabled={
           (!formData.useImmigration && !formData.useEmigration) ||
-          (formData.useImmigration && !formData.immigration_package) ||
-          (formData.useEmigration && !formData.emigration_package)
+          (formData.useImmigration && (formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined)) ||
+          (formData.useEmigration && (formData.departure_fast_track_option === '' || formData.departure_fast_track_option === null || formData.departure_fast_track_option === undefined))
         }
       />
     </div>

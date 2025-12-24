@@ -1,7 +1,19 @@
+import axios from 'axios';
 import api from './api';
 
 export const createBooking = async (bookingData) => {
-  const response = await api.post('/bookings', bookingData);
+  // Send directly to operator web-booking API (production endpoint)
+  // Use axios directly to avoid baseURL interference
+  const response = await axios.post(
+    'https://operator-dev.vietjapan.vip/api/fast-track-bookings/web-booking',
+    bookingData,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    }
+  );
   return response.data;
 };
 

@@ -19,13 +19,18 @@ final class ContactOptionEnum extends Enum
     public static function getDescriptions(): array
     {
         return [
-            self::LINE_ADDED_AND_MESSAGE_SENT   => 'Added LINE OA and sent message',
-            self::ADD_LINE_LATER                => 'Will add LINE later',
-            self::EMAIL_ONLY_AT_AIRPORT         => 'Email only (handled at airport)',
-            self::PHONE_ONLY                    => 'Phone only (call contact)',
-            self::ZALO_AT_ABOVE_NUMBER          => 'Contact via Zalo at the above number',
-            self::NO_CONTACT_AT_AIRPORT_CONSULT => 'No contact method at airport, consult on site',
+            self::LINE_ADDED_AND_MESSAGE_SENT   => '加してメッセージ送った',
+            self::ADD_LINE_LATER                => '後でLINE追加する',
+            self::EMAIL_ONLY_AT_AIRPORT         => 'メールだけ希望（空港で対応遅れる可能性ある）',
+            self::PHONE_ONLY                    => '電話だけ希望（課金やローミングの問題発生可能性ある）',
+            self::ZALO_AT_ABOVE_NUMBER          => '上の番号のZALOで連絡希望',
+            self::NO_CONTACT_AT_AIRPORT_CONSULT => '空港で連絡手段なし、相談したい',
         ];
+    }
+
+    public static function getApiValue(int $value): int
+    {
+        return $value;
     }
 }
 
