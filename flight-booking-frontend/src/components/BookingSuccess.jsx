@@ -34,31 +34,31 @@ const BookingSuccess = ({ onNewBooking }) => {
             何かご不明な点やご要望がございましたら、<br />
             以下のいずれかの連絡方法にてお気軽にお問い合わせください。<br />
             <strong>・Line OA：</strong>
-            <a
-              href="https://page.line.me/vjp.fasttrack"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://page.line.me/vjp.fasttrack
+                <a
+                  href="https://page.line.me/vjp.fasttrack"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  https://page.line.me/vjp.fasttrack
             </a><br />
             <strong>・お問い合わせフォーム：</strong>
-            <a
-              href="https://vietjapan.vip/contact/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://vietjapan.vip/contact/
+                <a
+                  href="https://vietjapan.vip/contact/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  https://vietjapan.vip/contact/
             </a><br />
             <strong>・メール：</strong>
-            <a
-              href="mailto:fasttrack@vietjapan.vip"
-              className="text-blue-600 hover:underline"
-            >
-              fasttrack@vietjapan.vip
-            </a>
-          </p>
+                <a
+                  href="mailto:fasttrack@vietjapan.vip"
+                  className="text-blue-600 hover:underline"
+                >
+                  fasttrack@vietjapan.vip
+                </a>
+              </p>
         </div>
 
         {/* VJP-AiTrans Gift Section */}
@@ -68,7 +68,7 @@ const BookingSuccess = ({ onNewBooking }) => {
             LINEで使える日本語・ベトナム語・英語のAI通訳ツールのプレゼントをご案内致します。
           </p>
 
-          <p className="text-base text-gray-700 mb-4">
+            <p className="text-base text-gray-700 mb-4">
             <strong>★VJP-AiTrans VN-JP-ENとは★</strong><br />
             「<strong>VJP-AiTrans VN-JP-EN</strong>」は、<strong>日本語・ベトナム語・英語</strong>に<br />
             対応した自動翻訳LINEチャットボットです。<br />
@@ -83,32 +83,32 @@ const BookingSuccess = ({ onNewBooking }) => {
               src="https://qr-official.line.me/gs/M_vnjpen_GW.png?from=page&searchId=vnjpen"
               alt="LINE QR Code"
               className="my-4 max-w-xs"
-            />
+                    />
           </p>
 
           <p className="text-base text-gray-700 mb-4">
             方法②：LINEチャットの下記のURLにアクセスする<br />
-            <a
-              href="https://page.line.me/vnjpen"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://page.line.me/vnjpen
+                    <a
+                      href="https://page.line.me/vnjpen"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      https://page.line.me/vnjpen
             </a><br />
             2. 日本語でメッセージを送るだけで、翻訳結果が自動的に表示されます。<br />
             3. グループチャットに追加すれば、関係者とのやり取りもスムーズにできます。<br />
             ※英語訳も同時に表示されるため、翻訳内容の確認も安心です。<br />
             自動翻訳チャットボットの使い方の紹介はこちらです。<br />
-            <a
-              href="https://www.youtube.com/shorts/S2muz2f684c"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://www.youtube.com/shorts/S2muz2f684c
-            </a>
-          </p>
+                <a
+                  href="https://www.youtube.com/shorts/S2muz2f684c"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  https://www.youtube.com/shorts/S2muz2f684c
+                </a>
+              </p>
 
           <p className="text-base text-gray-700 mb-4">
             <strong>★こんな場面で活躍！★</strong><br />
@@ -128,13 +128,13 @@ const BookingSuccess = ({ onNewBooking }) => {
             ご不明な点がございましたら、<br />
             LINE公式アカウントまでお気軽にお問い合わせください。<br />
             <strong>・Line OAお問い合わせ：</strong>
-            <a
-              href="https://page.line.me/vjp.fasttrack"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://page.line.me/vjp.fasttrack
+              <a
+                href="https://page.line.me/vjp.fasttrack"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                https://page.line.me/vjp.fasttrack
             </a><br />
             宜しくお願い致します。
           </p>

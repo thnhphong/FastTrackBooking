@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import BookingStep1 from './components/BookingStep1';
 import BookingStep2 from './components/BookingStep2';
 import BookingStep3 from './components/BookingStep3';
@@ -28,14 +28,12 @@ const getDefaultBookingData = () => ({
   total: 0,
   coupon_id: null,
   payment_method: null,
-  // Additional fields from ApiJson.txt
   date_of_birth: '',
   passport_expiry_date: '',
   passport_number: '',
   sex: null,
   nationality: '',
   add_ons: [],
-  // Immigration fields
   arrival_airport: null,
   arrival_date: '',
   arrival_flight_number: '',
@@ -46,7 +44,6 @@ const getDefaultBookingData = () => ({
   tarmac_pickup: false,
   use_immigration_fast_track: false,
   pickup_service: 0,
-  // Emigration fields
   departure_airport_code: null,
   departure_date: '',
   departure_flight_number: '',
@@ -60,7 +57,6 @@ const getDefaultBookingData = () => ({
 });
 
 function App() {
-  // bookingData is kept purely in React state; we do NOT persist it to localStorage.
   const [bookingData, setBookingData] = useState(getDefaultBookingData);
 
   return (
@@ -90,7 +86,7 @@ function App() {
             <Route
               path="/booking_success/"
               element={
-                <BookingStepRouter
+                <BookingSuccessRouter
                   bookingData={bookingData}
                   setBookingData={setBookingData}
                 />
@@ -104,23 +100,38 @@ function App() {
   );
 }
 
+// Separate router for booking success page
+function BookingSuccessRouter({ bookingData, setBookingData }) {
+  const navigate = useNavigate();
+
+
+  useEffect(() => {
+    // Check if we've ever shown the success page in this session
+    const hasSuccessFlag = sessionStorage.getItem('bookingSuccess') === 'true';
+    // If arriving with the success flag, mark that we've viewed the success page
+    if (hasSuccessFlag) {
+      sessionStorage.setItem('hasViewedSuccess', 'true');
+      sessionStorage.removeItem('bookingSuccess'); // Clear the initial flag
+      setBookingData(getDefaultBookingData()); // Reset booking data
+    }
+  }, [setBookingData]);
+
+
+  return (
+    <BookingSuccess
+      onNewBooking={() => {
+        // Clear the viewed flag when starting new booking
+        sessionStorage.removeItem('hasViewedSuccess');
+        setBookingData(getDefaultBookingData());
+        navigate('/book-now/', { replace: true });
+      }}
+    />
+  );
+}
+
 // Router component to handle step routing with internal state
 function BookingStepRouter({ bookingData, setBookingData }) {
-  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
-
-  // Check if we're on the success route and have the success flag
-  const isSuccessRoute = location.pathname === '/booking_success/';
-  const hasSuccessFlag = sessionStorage.getItem('bookingSuccess') === 'true';
-  const showSuccess = isSuccessRoute && hasSuccessFlag;
-
-  // Clear flag and reset data when success page is shown
-  useEffect(() => {
-    if (isSuccessRoute && hasSuccessFlag) {
-      sessionStorage.removeItem('bookingSuccess');
-      setBookingData(getDefaultBookingData());
-    }
-  }, [isSuccessRoute, hasSuccessFlag, setBookingData]);
 
   const handleNextStep = () => {
     setCurrentStep(prev => prev + 1);
@@ -129,14 +140,6 @@ function BookingStepRouter({ bookingData, setBookingData }) {
   const handlePrevStep = () => {
     setCurrentStep(prev => Math.max(1, prev - 1));
   };
-
-  // Show success page if booking was successful
-  if (showSuccess) {
-    return <BookingSuccess onNewBooking={() => {
-      setCurrentStep(1);
-      setBookingData(getDefaultBookingData());
-    }} />;
-  }
 
   switch (currentStep) {
     case 1:

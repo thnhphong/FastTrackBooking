@@ -200,7 +200,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     setError('');
 
     try {
-      
+      const submitData = prepareApiData();
+      await createBooking(submitData);
+
+
       sessionStorage.setItem('bookingSuccess', 'true');
 
       // Navigate to /booking_success/ after successful submission
