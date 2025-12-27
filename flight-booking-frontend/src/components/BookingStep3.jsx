@@ -120,7 +120,11 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     // Immigration fields
     if (bookingData?.immigration) {
-      apiData.arrival_airport = bookingData.immigration.arrival_airport !== undefined ? String(bookingData.immigration.arrival_airport) : '';
+      // Convert arrival_airport from numeric to airport code string (0 -> SGN, 1 -> DAD, 2 -> HAN)
+      const arrivalAirportMap = { 0: 'SGN', 1: 'DAD', 2: 'HAN' };
+      apiData.arrival_airport = bookingData.immigration.arrival_airport !== undefined
+        ? (arrivalAirportMap[bookingData.immigration.arrival_airport] || String(bookingData.immigration.arrival_airport))
+        : '';
       apiData.arrival_date = bookingData.immigration.arrival_date || '';
       apiData.arrival_flight_number = bookingData.immigration.arrival_flight_number || '';
       apiData.arrival_flight_reservation_code = bookingData.immigration.arrival_flight_reservation_code || '';
@@ -138,7 +142,11 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     // Emigration fields
     if (bookingData?.emigration) {
-      apiData.departure_airport_code = bookingData.emigration.departure_airport_code !== undefined ? String(bookingData.emigration.departure_airport_code) : '';
+      // Convert departure_airport_code from numeric to airport code string (0 -> SGN, 1 -> DAD, 2 -> HAN)
+      const departureAirportMap = { 0: 'SGN', 1: 'DAD', 2: 'HAN' };
+      apiData.departure_airport_code = bookingData.emigration.departure_airport_code !== undefined
+        ? (departureAirportMap[bookingData.emigration.departure_airport_code] || String(bookingData.emigration.departure_airport_code))
+        : '';
       apiData.departure_date = bookingData.emigration.departure_date || '';
       apiData.departure_flight_number = bookingData.emigration.departure_flight_number || '';
       apiData.departure_flight_reservation_code = bookingData.emigration.departure_flight_reservation_code || '';
@@ -192,18 +200,11 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     setError('');
 
     try {
-      const submitData = prepareApiData();
-      const response = await createBooking(submitData);
-
-      // Log API response from /web-booking
-      console.log('=== API /web-booking response ===');
-      console.log(JSON.stringify(response, null, 2));
-
-      // Set flag in sessionStorage to show success page
+      
       sessionStorage.setItem('bookingSuccess', 'true');
 
-      // Navigate to /book-now/ with a timestamp to force React Router to treat it as new navigation
-      navigate('/book-now/?success=' + Date.now(), { replace: true });
+      // Navigate to /booking_success/ after successful submission
+      navigate('/booking_success/');
     } catch (err) {
       setError(err.response?.data?.message || '予約の作成に失敗しました。もう一度お試しください。');
       setIsSubmitting(false);

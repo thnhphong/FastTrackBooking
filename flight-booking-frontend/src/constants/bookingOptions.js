@@ -63,14 +63,14 @@ export const contactOptions = [
 
 export const addOnsOptions = [
   { value: 0, label: '空港ラウンジ' },
-  { value: 1, label: '日本人や外国人観光客向けのホテル' },
-  { value: 2, label: 'ショッピングスポット' },
-  { value: 3, label: 'レンタルカー' },
-  { value: 4, label: '航空券（購入・変更等）' },
-  { value: 5, label: '日本人や外国人観光客向けのレストラン' },
-  { value: 6, label: 'マッサージ・健康ケア・美容ケア' },
-  { value: 7, label: '通訳・観光案内' },
-  { value: 8, label: 'ゴルフ' },
+  { value: 1, label: '日本人や外国人観光客向けのレストラン' },
+  { value: 2, label: '日本人や外国人観光客向けのホテル' },
+  { value: 3, label: 'マッサージ・健康ケア・美容ケア' },
+  { value: 4, label: 'ショッピングスポット' },
+  { value: 5, label: '通訳・観光案内' },
+  { value: 6, label: 'レンタルカー' },
+  { value: 7, label: 'ゴルフ' },
+  { value: 8, label: '航空券（購入・変更等）' },
   { value: 9, label: 'ベトナムサプライヤー探し・ベトナム会社繋がり' },
 ];
 

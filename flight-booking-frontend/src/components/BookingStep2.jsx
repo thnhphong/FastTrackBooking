@@ -575,9 +575,9 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 以下のサービスについての無料相談をご希望しませんか。
               </label>
               <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-3 max-[640px]:gap-2">
-                {/* Left Column: value0, value1, value2, value3, value4 */}
+                {/* Left Column: value 0, 2, 4, 6, 8 */}
                 <div className="space-y-1">
-                  {addOnsOptions.filter(addOn => addOn.value <= 4).map(addOn => (
+                  {addOnsOptions.filter(addOn => addOn.value % 2 === 0).map(addOn => (
                     <label key={addOn.value} className="flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -589,9 +589,9 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                     </label>
                   ))}
                 </div>
-                {/* Right Column: value5, value6, value7, value8, value9 */}
+                {/* Right Column: value 1, 3, 5, 7, 9 */}
                 <div className="space-y-1">
-                  {addOnsOptions.filter(addOn => addOn.value >= 5).map(addOn => (
+                  {addOnsOptions.filter(addOn => addOn.value % 2 === 1).map(addOn => (
                     <label key={addOn.value} className="flex items-center cursor-pointer">
                       <input
                         type="checkbox"

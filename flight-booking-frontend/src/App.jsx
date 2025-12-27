@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BookingStep1 from './components/BookingStep1';
 import BookingStep2 from './components/BookingStep2';
 import BookingStep3 from './components/BookingStep3';
@@ -87,6 +87,15 @@ function App() {
                 />
               }
             />
+            <Route
+              path="/booking_success/"
+              element={
+                <BookingStepRouter
+                  bookingData={bookingData}
+                  setBookingData={setBookingData}
+                />
+              }
+            />
           </Routes>
         </div>
       </div>
@@ -97,16 +106,21 @@ function App() {
 
 // Router component to handle step routing with internal state
 function BookingStepRouter({ bookingData, setBookingData }) {
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Check sessionStorage directly in render to show success page
-  const isSuccess = sessionStorage.getItem('bookingSuccess') === 'true';
+  // Check if we're on the success route and have the success flag
+  const isSuccessRoute = location.pathname === '/booking_success/';
+  const hasSuccessFlag = sessionStorage.getItem('bookingSuccess') === 'true';
+  const showSuccess = isSuccessRoute && hasSuccessFlag;
 
-  // Clear flag and reset data when success is detected
-  if (isSuccess) {
-    sessionStorage.removeItem('bookingSuccess');
-    setBookingData(getDefaultBookingData());
-  }
+  // Clear flag and reset data when success page is shown
+  useEffect(() => {
+    if (isSuccessRoute && hasSuccessFlag) {
+      sessionStorage.removeItem('bookingSuccess');
+      setBookingData(getDefaultBookingData());
+    }
+  }, [isSuccessRoute, hasSuccessFlag, setBookingData]);
 
   const handleNextStep = () => {
     setCurrentStep(prev => prev + 1);
@@ -117,7 +131,7 @@ function BookingStepRouter({ bookingData, setBookingData }) {
   };
 
   // Show success page if booking was successful
-  if (isSuccess) {
+  if (showSuccess) {
     return <BookingSuccess onNewBooking={() => {
       setCurrentStep(1);
       setBookingData(getDefaultBookingData());
