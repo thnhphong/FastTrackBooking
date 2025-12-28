@@ -46,7 +46,7 @@ const Footer = () => {
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-64 max-[640px]:w-100 max-w-xs rounded flex items-center justify-center">
                   <img
-                    src="/uploads/VJP-FastTrack-Logo.png"
+                    src="/public/uploads/VJP-FastTrack-Logo.png"
                     alt="VJP Flight Booking Logo"
                     className="w-100 h-auto"
                   />
