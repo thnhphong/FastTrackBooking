@@ -15,21 +15,23 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => env('APP_ENV') === 'local' 
-        ? ['*'] 
-        : [
-            'http://localhost:5173',
-            'http://localhost:5174',
-            'https://localhost:5173',
-            'https://localhost:5174',
-            'http://127.0.0.1:5173',
-            'http://127.0.0.1:5174',
-            env('FRONTEND_URL', 'http://localhost:5173'),
-        ],
+    ? ['*'] // Allows everything in local, but sometimes explicit is better for ngrok
+    : [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://localhost:5173',
+        'https://localhost:5174',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+        'https://mighty-buffalo-remarkably.ngrok-free.app',
+        'https://operator-dev.vietjapan.vip',
+        env('FRONTEND_URL'),
+    ],
 
     'allowed_origins_patterns' => [],
 

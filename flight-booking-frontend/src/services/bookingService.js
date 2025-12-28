@@ -2,6 +2,7 @@ import axios from 'axios';
 import api from './api';
 
 export const createBooking = async (bookingData) => {
+  try{
   // Send directly to operator web-booking API (production endpoint)
   // Use axios directly to avoid baseURL interference
   const response = await axios.post(
@@ -11,10 +12,15 @@ export const createBooking = async (bookingData) => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
       },
     }
   );
   return response.data;
+  } catch (error) {
+    console.error('Booking Error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 export const validateCoupon = async (couponCode) => {
