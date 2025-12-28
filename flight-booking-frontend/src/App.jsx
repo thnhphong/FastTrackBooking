@@ -64,7 +64,7 @@ function App() {
       <LineInquiry />
       <div className="w-[90vw] mx-20 max-[1150px]:w-[100vw] max-[1150px]:mx-0">
         <div className="flex flex-wrap justify-center w-[100%] mb-8 overflow-hidden max-[1150px]:w-[96vw]">
-          <img src="/uploads/vjp-flight-booking-banner.jpg" alt="" />
+          <img src="/public/vjp-flight-booking-banner.jpg" alt="" />
         </div>
         <div className="text-blue-800 flex flex-start w-[90vw] mx-auto mb-8 font-bold hover:underline max-[1150px]:w-[96vw]">
           <a href="https://vietjapan.vip/book-domestic/" target="_blank" rel="noopener noreferrer">

@@ -507,7 +507,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* QR Code Section */}
                 <div className="flex-shrink-0 max-[640px]:flex max-[640px]:justify-center">
                   <div className="w-80 h-80 max-[640px]:w-48 max-[640px]:h-48 flex max-[640px]:w-65 max-[640px]:h-65">
-                    <img src="/public/uploads/Line-QR.png" alt="" className="max-[640px]:w-full max-[640px]:h-full object-contain " />
+                    <img src="/public/Line-QR.png" alt="" className="max-[640px]:w-full max-[640px]:h-full object-contain " />
                   </div>
                 </div>
 
