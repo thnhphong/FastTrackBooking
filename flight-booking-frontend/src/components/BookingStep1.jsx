@@ -567,7 +567,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                               type="radio"
                               name="pickup_service"
                               value={vehicle.value}
-                              checked={formData.pickup_service === vehicle.value}
+                              checked={formData.pickup_service === String(vehicle.value) || Number(formData.pickup_service) === vehicle.value}
                               onChange={handleInputChange}
                               required={formData.useOtherOptions}
                               className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.pickup_service && !formData.pickup_service ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}

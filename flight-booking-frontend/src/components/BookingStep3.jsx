@@ -156,7 +156,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
         ? String(bookingData.emigration.departure_fast_track_option)
         : '';
       apiData.departure_seating_preferences = bookingData.emigration.departure_seating_preferences !== undefined ? String(bookingData.emigration.departure_seating_preferences) : '';
-      apiData.departure_meeting_time = bookingData.emigration.departure_meeting_time || '';
+      apiData.departure_time = bookingData.emigration.departure_time || '';
       // use_departure_fast_track uses string numeric based on selected package:
       // 0: 出国Fasttrackフルサポートをご利用する(50$)
       // 1: VVIP出国Fasttrackを利用する(300$)
@@ -467,10 +467,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                             <strong>出発日:</strong> {formatDate(bookingData.emigration.departure_date)}
                           </td>
                         </tr>
-                        {bookingData.emigration.departure_meeting_time && (
+                        {bookingData.emigration.departure_time && (
                           <tr className="border-b border-gray-200">
                             <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>出発空港での待ち合わせご希望時間（出発の３時間前からご指定可）:</strong> {bookingData.emigration.departure_meeting_time}
+                              <strong>出発空港での待ち合わせご希望時間（出発の３時間前からご指定可）:</strong> {bookingData.emigration.departure_time}
                             </td>
                           </tr>
                         )}
