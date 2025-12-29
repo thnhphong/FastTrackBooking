@@ -21,10 +21,18 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     // Store as strings like pickup_service, not booleans
     tarmac_pickup: (bookingData?.immigration?.tarmac_pickup === 'true' || bookingData?.immigration?.tarmac_pickup === true || bookingData?.immigration?.tarmac_pickup === 1) ? 'true' : 'false',
     use_immigration_fast_track: (bookingData?.immigration?.use_immigration_fast_track === 'true' || bookingData?.immigration?.use_immigration_fast_track === true || bookingData?.immigration?.use_immigration_fast_track === 1) ? 'true' : 'false',
-    pickup_service: typeof bookingData?.immigration?.pickup_service === 'number' ? String(bookingData.immigration.pickup_service) : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
+    pickup_service: typeof bookingData?.immigration?.pickup_service === 'number'
+      ? String(bookingData.immigration.pickup_service)
+      : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
     arrival_phone_number: bookingData?.immigration?.arrival_phone_number ?? '',
     arrival_request: bookingData?.immigration?.arrival_request ?? '',
-    useOtherOptions: bookingData?.immigration?.useOtherOptions === true || bookingData?.immigration?.useOtherOptions === 'true' ? true : false,
+    useOtherOptions: bookingData?.immigration?.useOtherOptions === true ||
+      bookingData?.immigration?.useOtherOptions === 'true' ||
+      // Auto-check if pickup_service is not 0 or tarmac_pickup is true
+      (bookingData?.immigration?.pickup_service && bookingData.immigration.pickup_service !== 0) ||
+      bookingData?.immigration?.tarmac_pickup === 'true' ||
+      bookingData?.immigration?.tarmac_pickup === true
+      ? true : false,
 
     // Emigration
     useEmigration: bookingData?.emigration ? true : false,
@@ -36,7 +44,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     departure_phone_number: bookingData?.emigration?.departure_phone_number ?? '',
     departure_request: bookingData?.emigration?.departure_request ?? '',
     departure_date: bookingData?.emigration?.departure_date ?? '',
-    departure_meeting_time: bookingData?.emigration?.departure_meeting_time ?? '',
+    departure_time: bookingData?.emigration?.departure_time ?? '',
     departure_flight_number: bookingData?.emigration?.departure_flight_number ?? '',
     sameAsEntry: false, // Track if "Same as entry" checkbox is checked
   });
@@ -188,7 +196,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         departure_phone_number: formData.departure_phone_number,
         departure_request: formData.departure_request,
         departure_date: formData.departure_date,
-        meeting_time: formData.meeting_time,
+        departure_time: formData.departure_time,
       } : null,
       type: formData.useImmigration && formData.useEmigration ? 'both' :
         formData.useImmigration ? 'immigration' : 'emigration',
@@ -792,18 +800,18 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     {/* Hours input box */}
                     <input
                       type="number"
-                      name="meeting_time_hours"
+                      name="departure_time_hours"
                       min="0"
                       max="23"
                       placeholder="時"
-                      value={formData.meeting_time ? parseInt(formData.meeting_time.split(':')[0] || '0') : ''}
+                      value={formData.departure_time ? parseInt(formData.departure_time.split(':')[0] || '0') : ''}
                       onChange={(e) => {
                         const hours = e.target.value;
-                        const minutes = formData.meeting_time ? formData.meeting_time.split(':')[1] : '00';
+                        const minutes = formData.departure_time ? formData.departure_time.split(':')[1] : '00';
                         const timeValue = hours !== '' ? `${hours.padStart(2, '0')}:${minutes}` : '';
                         setFormData(prev => ({
                           ...prev,
-                          meeting_time: timeValue,
+                          departure_time: timeValue,
                         }));
                       }}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
@@ -817,14 +825,14 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       min="0"
                       max="59"
                       placeholder='分'
-                      value={formData.meeting_time ? parseInt(formData.meeting_time.split(':')[1] || '0') : ''}
+                      value={formData.departure_time ? parseInt(formData.departure_time.split(':')[1] || '0') : ''}
                       onChange={(e) => {
                         const minutes = e.target.value;
-                        const hours = formData.meeting_time ? formData.meeting_time.split(':')[0] : '00';
+                        const hours = formData.departure_time ? formData.departure_time.split(':')[0] : '00';
                         const timeValue = minutes !== '' ? `${hours}:${minutes.padStart(2, '0')}` : '';
                         setFormData(prev => ({
                           ...prev,
-                          meeting_time: timeValue,
+                          departure_time: timeValue,
                         }));
                       }}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
