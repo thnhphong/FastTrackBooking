@@ -19,7 +19,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
     // sex (0: male, 1: female) - must be number or empty string for controlled input
     sex: typeof bookingData?.sex === 'number' ? bookingData.sex : (bookingData?.sex !== undefined && bookingData?.sex !== null ? Number(bookingData.sex) : ''),
     user_phone_number: bookingData?.user_phone_number || '',
-    nationality: bookingData?.nationality || '',
+    nationality: bookingData?.nationality || 'JPN',
     contact_email_to: bookingData?.contact_email_to || '',
     contact_email_cc: bookingData?.contact_email_cc || '',
     passport_number: bookingData?.passport_number || '',

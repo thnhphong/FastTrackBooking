@@ -513,53 +513,100 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
               </tr>
             </thead>
             <tbody>
-              {bookingData?.immigration && (
+              {/* Immigration Section */}
+              {bookingData?.immigration && costData.breakdown.filter(item => item.no.startsWith('1.')).length > 0 && (
                 <>
                   <tr>
-                    <td colSpan="4" className="py-2 px-4 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm bg-gray-100">入国ファストトラック:</td>
+                    <td colSpan="4" className="py-2 px-4 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm bg-gray-100">
+                      入国ファストトラック:
+                    </td>
                   </tr>
-                  {costData.breakdown.filter(item => item.no.startsWith('1.')).map((item, index) => (
-                    <tr key={index} className="border-b border-gray-200">
+                  {costData.breakdown
+                    .filter(item => item.no.startsWith('1.'))
+                    .map((item, index) => (
+                      <tr key={`immigration-${index}`} className="border-b border-gray-200">
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.no}</td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.content}</td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.presence}</td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">{item.amount}</td>
+                      </tr>
+                    ))}
+                </>
+              )}
+
+              {/* Emigration Section */}
+              {bookingData?.emigration && costData.breakdown.some(item => item.no === '2') && (
+                costData.breakdown
+                  .filter(item => item.no === '2')
+                  .map((item, index) => (
+                    <tr key={`emigration-${index}`} className="border-b border-gray-200">
                       <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.no}</td>
                       <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.content}</td>
                       <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.presence}</td>
                       <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">{item.amount}</td>
                     </tr>
-                  ))}
-                </>
+                  ))
               )}
-              {bookingData?.emigration && costData.breakdown.filter(item => item.no === '2').map((item, index) => (
-                <tr key={`emigration-${index}`} className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.no}</td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.content}</td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.presence}</td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">{item.amount}</td>
-                </tr>
-              ))}
+
+              {/* Subtotal Row */}
               <tr className="border-t-2 border-gray-300">
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">仮計算</td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">${subtotal.toFixed(1)}</td>
+                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  仮計算
+                </td>
+                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                  ${Number(subtotal || 0).toFixed(1)}
+                </td>
               </tr>
+
+              {/* Coupon Discount */}
               <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">クーポン</td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">- ${couponDiscount.toFixed(1)}</td>
+                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  クーポン
+                </td>
+                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
+                  - ${Number(couponDiscount || 0).toFixed(1)}
+                </td>
               </tr>
+
+              {/* Total Excluding Tax */}
               <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">合計（税抜）</td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">${totalExcludingTax.toFixed(1)}</td>
+                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  合計（税抜）
+                </td>
+                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                  ${Number(totalExcludingTax || 0).toFixed(1)}
+                </td>
               </tr>
+
+              {/* VAT */}
               <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">消費税 VAT(8%)</td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">${vat.toFixed(1)}</td>
+                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  消費税 VAT(8%)
+                </td>
+                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                  ${Number(vat || 0).toFixed(1)}
+                </td>
               </tr>
+
+              {/* Final Total */}
               <tr className="border-t-2 border-gray-300">
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">請求金額</td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">${billedAmount.toFixed(1)}</td>
+                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  請求金額
+                </td>
+                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">
+                  ${Number(billedAmount || 0).toFixed(1)}
+                </td>
               </tr>
+
+              {/* Payment Method */}
               {bookingData?.payment_method && (
                 <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">お支払い方法</td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">{getPaymentMethodLabel(bookingData.payment_method)}</td>
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    お支払い方法
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                    {getPaymentMethodLabel(bookingData.payment_method)}
+                  </td>
                 </tr>
               )}
             </tbody>
