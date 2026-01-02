@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import BookingStep1 from './components/BookingStep1';
-import BookingStep2 from './components/BookingStep2';
-import BookingStep3 from './components/BookingStep3';
-import BookingSuccess from './components/BookingSuccess';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import banner from './assets/images/vjp-flight-booking-banner.jpg';
+
+//japanese pages
+import BookingStep1 from './pages/ja/BookingStep1';
+import BookingStep2 from './pages/ja/BookingStep2';
+import BookingStep3 from './pages/ja/BookingStep3';
+import BookingSuccess from './pages/ja/BookingSuccess';
+import Navbar from './components/NavBar';
+//english pages 
+//vietnamese pages
 import LineInquiry from './components/LineInquiry';
 import Footer from './components/Footer';
 import './App.css';
@@ -61,10 +67,11 @@ function App() {
 
   return (
     <Router>
+      <Navbar />
       <LineInquiry />
       <div className="w-[90vw] mx-20 max-[1150px]:w-[100vw] max-[1150px]:mx-0">
         <div className="flex flex-wrap justify-center w-[100%] mb-8 overflow-hidden max-[1150px]:w-[96vw]">
-          <img src="/vjp-flight-booking-banner.jpg" alt="" />
+          <img src={banner} alt="" />
         </div>
         <div className="text-blue-800 flex flex-start w-[90vw] mx-auto mb-8 font-bold hover:underline max-[1150px]:w-[96vw]">
           <a href="https://vietjapan.vip/book-domestic/" target="_blank" rel="noopener noreferrer">

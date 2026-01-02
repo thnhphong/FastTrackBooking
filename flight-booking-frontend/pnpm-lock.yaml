@@ -57,6 +57,9 @@ importers:
       globals:
         specifier: ^16.5.0
         version: 16.5.0
+      laravel-vite-plugin:
+        specifier: ^2.0.1
+        version: 2.0.1(vite@7.2.2(jiti@2.6.1)(lightningcss@1.30.2))
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -1011,6 +1014,13 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
+  laravel-vite-plugin@2.0.1:
+    resolution: {integrity: sha512-zQuvzWfUKQu9oNVi1o0RZAJCwhGsdhx4NEOyrVQwJHaWDseGP9tl7XUPLY2T8Cj6+IrZ6lmyxlR1KC8unf3RLA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      vite: ^7.0.0
+
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -1158,6 +1168,10 @@ packages:
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
+  picomatch@2.3.1:
+    resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
+    engines: {node: '>=8.6'}
+
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
@@ -1281,6 +1295,9 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  vite-plugin-full-reload@1.2.0:
+    resolution: {integrity: sha512-kz18NW79x0IHbxRSHm0jttP4zoO9P9gXh+n6UTwlNKnviTTEpOlum6oS9SmecrTtSr+muHEn5TUuC75UovQzcA==}
 
   vite@7.2.2:
     resolution: {integrity: sha512-BxAKBWmIbrDgrokdGZH1IgkIk/5mMHDreLDmCJ0qpyJaAteP8NvMhkwr/ZCQNqNH97bw/dANTE9PDzqwJghfMQ==}
@@ -2205,6 +2222,12 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
+  laravel-vite-plugin@2.0.1(vite@7.2.2(jiti@2.6.1)(lightningcss@1.30.2)):
+    dependencies:
+      picocolors: 1.1.1
+      vite: 7.2.2(jiti@2.6.1)(lightningcss@1.30.2)
+      vite-plugin-full-reload: 1.2.0
+
   levn@0.4.1:
     dependencies:
       prelude-ls: 1.2.1
@@ -2321,6 +2344,8 @@ snapshots:
   path-key@3.1.1: {}
 
   picocolors@1.1.1: {}
+
+  picomatch@2.3.1: {}
 
   picomatch@4.0.3: {}
 
@@ -2443,6 +2468,11 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  vite-plugin-full-reload@1.2.0:
+    dependencies:
+      picocolors: 1.1.1
+      picomatch: 2.3.1
 
   vite@7.2.2(jiti@2.6.1)(lightningcss@1.30.2):
     dependencies:

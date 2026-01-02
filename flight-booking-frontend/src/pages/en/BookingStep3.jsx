@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBooking } from '../services/bookingService';
-import ProcessIndicator from './ProcessIndicator';
-import { useScrollToTop } from '../hooks/useScrollToTop';
+import { createBooking } from '../../services/bookingService';
+import ProcessIndicator from '../../components/ProcessIndicator';
+import { useScrollToTop } from '../../hooks/useScrollToTop';
 import {
   getImmigrationPackageLabel,
   getEmigrationPackageLabel,
@@ -14,8 +14,8 @@ import {
   getAddOnLabel,
   getPaymentMethodLabel,
   getCountryLabel,
-} from '../utils/labelGetters';
-import { formatDate } from '../utils/formHelpers';
+} from '../../utils/labelGetters';
+import { formatDate } from '../../utils/formHelpers';
 
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
