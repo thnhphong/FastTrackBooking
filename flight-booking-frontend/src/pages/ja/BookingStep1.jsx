@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import PriceBar from './PriceBar';
-import ProcessIndicator from './ProcessIndicator';
-import Error from './Error';
-import FieldRequired from './FieldRequired';
-import JapaneseDatePicker from './JapaneseDatePicker';
-import { useScrollToTop } from '../hooks/useScrollToTop';
-import { airports, immigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../constants/bookingOptions';
-import { isInputEmpty } from '../utils/formHelpers';
+import PriceBar from '../../components/PriceBar';
+import ProcessIndicator from '../../components/ProcessIndicator';
+import Error from '../../components/Error';
+import FieldRequired from '../../components/FieldRequired';
+import JapaneseDatePicker from '../../components/JapaneseDatePicker';
+import { useScrollToTop } from '../../hooks/useScrollToTop';
+import { airports, immigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../../constants/bookingOptions';
+import { isInputEmpty } from '../../utils/formHelpers';
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   useScrollToTop();

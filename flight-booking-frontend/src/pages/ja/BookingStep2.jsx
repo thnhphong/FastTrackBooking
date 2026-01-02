@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parse, differenceInMonths } from 'date-fns';
-import ProcessIndicator from './ProcessIndicator';
-import Error from './Error';
-import FieldRequired from './FieldRequired';
-import JapaneseDatePicker from './JapaneseDatePicker';
-import { useScrollToTop } from '../hooks/useScrollToTop';
-import { surveyChannels, contactOptions, addOnsOptions } from '../constants/bookingOptions';
-import { isInputEmpty, isValidEmail } from '../utils/formHelpers';
+import ProcessIndicator from '../../components/ProcessIndicator';
+import Error from '../../components/Error';
+import FieldRequired from '../../components/FieldRequired';
+import JapaneseDatePicker from '../../components/JapaneseDatePicker';
+import { useScrollToTop } from '../../hooks/useScrollToTop';
+import { surveyChannels, contactOptions, addOnsOptions } from '../../constants/bookingOptions';
+import { isInputEmpty, isValidEmail } from '../../utils/formHelpers';
+import line_qr from '../../assets/images/Line-QR.png';
 
 const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) => {
   useScrollToTop();
@@ -507,7 +508,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* QR Code Section */}
                 <div className="flex-shrink-0 max-[640px]:flex max-[640px]:justify-center">
                   <div className="w-80 h-80 max-[640px]:w-48 max-[640px]:h-48 flex max-[640px]:w-65 max-[640px]:h-65">
-                    <img src="/Line-QR.png" alt="" className="max-[640px]:w-full max-[640px]:h-full object-contain " />
+                    <img src={line_qr} alt="Line QR Code" className="max-[640px]:w-full max-[640px]:h-full object-contain " />
                   </div>
                 </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import logo from '..//assets/images/VJP-FastTrack-logo.png';
 
 const Footer = () => {
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
@@ -46,7 +47,7 @@ const Footer = () => {
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-64 max-[640px]:w-100 max-w-xs rounded flex items-center justify-center">
                   <img
-                    src="/VJP-FastTrack-logo.png"
+                    src={logo}
                     alt="VJP Flight Booking Logo"
                     className="w-100 h-auto"
                   />
@@ -102,7 +103,7 @@ const Footer = () => {
                 {isSubmenuOpen && (
                   <ul
                     ref={submenuRef}
-                    className="absolute left-full ml-2 bg-white text-black min-w-[260px] max-w-[400px] py-2 z-50 shadow-lg"
+                    className="absolute left-1/2 bg-white text-black min-w-[260px] max-w-[400px] py-1 z-50 shadow-lg"
                     style={submenuStyle}
                     onMouseEnter={() => setIsSubmenuOpen(true)}
                     onMouseLeave={() => setIsSubmenuOpen(false)}
