@@ -22,7 +22,7 @@ const Navbar = () => {
             />
           </a>
 
-          <div className="flex flex-row justify-between items-center gap-20 max-[768px]:gap-10">
+          <div className="flex flex-row justify-between items-center gap-20 max-[768px]:gap-10 max-[450px]:gap-5 max-[390px]:gap-0">
             {/* Desktop Menu */}
             <div className="flex flex-row justify-center md:space-x-8 items-center">
               {/* 2. すぐ予約 Button */}

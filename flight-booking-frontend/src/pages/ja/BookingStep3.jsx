@@ -194,7 +194,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     try {
       const submitData = prepareApiData();
-      console.log(submitData);
 
       await createBooking(submitData);
       sessionStorage.setItem('bookingSuccess', 'true');
