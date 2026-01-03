@@ -625,10 +625,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               />
               <span className="text-black text-base">出国ファストトラックのご利用(50$～)</span>
             </label>
-            <div className="text-red-600 text-lg">
+            <div className="text-red-600 text-base px-4 mt-2">
               <span>
                 【お知らせ】2026年1月1日以降、Vietjet Airをご利用のお客様につきましては、航空会社および空港の規定変更に伴い、VJP Fasttrackサービスに15USD（税別）の追加料金が発生いたします。 誠に恐縮ではございますが、何卒ご理解賜りますようお願い申し上げます。
-              </span>
+              </span> 
             </div>
           </div>
           <hr className="border-b-4 border-[#CBCBCB] my-8" />
