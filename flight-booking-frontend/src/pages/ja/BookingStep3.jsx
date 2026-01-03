@@ -17,10 +17,13 @@ import {
 } from '../../utils/labelGetters';
 import { formatDate } from '../../utils/formHelpers';
 
+
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+
 
   useScrollToTop();
 
@@ -71,7 +74,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     // 2 Full support for departures with Fasttrack
     if (bookingData?.emigration) {
-      const emigrationPrices = { '50$': 50, '300$': 300 };
+      const emigrationPrices = { '50$': 50, '65$': 65, '300$': 300 };
       const emigrationPrice = emigrationPrices[bookingData.emigration.emigration_package] || 0;
       breakdown.push({ no: '2', content: '出国Fasttrackフルサポート', presence: 'あり', amount: `$${emigrationPrice}` });
       subtotal += emigrationPrice;
@@ -84,7 +87,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const prepareApiData = () => {
     const apiData = {};
 
-    // Determine booking_type
     if (bookingData?.immigration && bookingData?.emigration) {
       apiData.booking_type = 'both';
     } else if (bookingData?.immigration) {
@@ -93,7 +95,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.booking_type = 'departure';
     }
 
-    // Personal information (from root level or passport object)
     apiData.first_name = bookingData?.first_name || bookingData?.passport?.first_name || '';
     apiData.last_name = bookingData?.last_name || bookingData?.passport?.last_name || '';
     apiData.date_of_birth = bookingData?.date_of_birth || bookingData?.passport?.birthday || '';
@@ -107,20 +108,16 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     apiData.optional_company_name = bookingData?.optional_company_name || bookingData?.passport?.company_name || '';
     apiData.referred_by_name = bookingData?.referred_by_name || bookingData?.passport?.referer_name || '';
 
-    // Contact and survey
     apiData.contact_method = bookingData?.contact_method !== undefined ? String(bookingData.contact_method) : '';
     apiData.survey_channel = bookingData?.survey_channel !== undefined ? String(bookingData.survey_channel) : '';
 
-    // Add-ons (convert array to comma-separated string)
     if (Array.isArray(bookingData?.add_ons) && bookingData.add_ons.length > 0) {
       apiData.add_ons = bookingData.add_ons.map(String).join(',');
     } else {
       apiData.add_ons = '';
     }
 
-    // Immigration fields
     if (bookingData?.immigration) {
-      // Convert arrival_airport from numeric to airport code string (0 -> SGN, 1 -> DAD, 2 -> HAN)
       const arrivalAirportMap = { 0: 'SGN', 1: 'DAD', 2: 'HAN' };
       apiData.arrival_airport = bookingData.immigration.arrival_airport !== undefined
         ? (arrivalAirportMap[bookingData.immigration.arrival_airport] || String(bookingData.immigration.arrival_airport))
@@ -131,18 +128,16 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.arrival_phone_number = bookingData.immigration.arrival_phone_number || '';
       apiData.arrival_request = bookingData.immigration.arrival_request || '';
       apiData.entry_fast_track_option = bookingData.immigration.entry_fast_track_option !== undefined ? String(bookingData.immigration.entry_fast_track_option) : '';
-      // Ensure string format "true"/"false" for API
+
       const tarmacPickupValue = bookingData.immigration.tarmac_pickup;
       apiData.tarmac_pickup = (tarmacPickupValue === 'true' || tarmacPickupValue === true || tarmacPickupValue === 1 || tarmacPickupValue === '1') ? 'true' : 'false';
       apiData.pickup_service = bookingData.immigration.pickup_service !== undefined ? String(bookingData.immigration.pickup_service) : '0';
-      // Ensure string format "true"/"false" for API
+
       const useImmigrationValue = bookingData.immigration.use_immigration_fast_track;
       apiData.use_immigration_fast_track = (useImmigrationValue === 'true' || useImmigrationValue === true || useImmigrationValue === 1 || useImmigrationValue === '1') ? 'true' : 'false';
     }
 
-    // Emigration fields
     if (bookingData?.emigration) {
-      // Convert departure_airport_code from numeric to airport code string (0 -> SGN, 1 -> DAD, 2 -> HAN)
       const departureAirportMap = { 0: 'SGN', 1: 'DAD', 2: 'HAN' };
       apiData.departure_airport_code = bookingData.emigration.departure_airport_code !== undefined
         ? (departureAirportMap[bookingData.emigration.departure_airport_code] || String(bookingData.emigration.departure_airport_code))
@@ -157,9 +152,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
         : '';
       apiData.departure_seating_preferences = bookingData.emigration.departure_seating_preferences !== undefined ? String(bookingData.emigration.departure_seating_preferences) : '';
       apiData.departure_time = bookingData.emigration.departure_time || '';
-      // use_departure_fast_track uses string numeric based on selected package:
-      // 0: 出国Fasttrackフルサポートをご利用する(50$)
-      // 1: VVIP出国Fasttrackを利用する(300$)
+
       if (bookingData.emigration.departure_fast_track_option === 1 || bookingData.emigration.departure_fast_track_option === '1') {
         apiData.use_departure_fast_track = '1';
       } else {
@@ -167,20 +160,20 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       }
     }
 
-    // Payment and pricing - default to "1" if not set
+    // Payment and pricing - calculated with extra fee
     apiData.payment_method = bookingData?.payment_method !== undefined ? String(bookingData.payment_method) : '1';
-    apiData.preliminary_calculation = bookingData?.preliminary_calculation !== undefined ? String(bookingData.preliminary_calculation) : (bookingData?.sub_price !== undefined ? String(bookingData.sub_price) : '0');
-    apiData.tax = bookingData?.tax !== undefined ? String(bookingData.tax) : (bookingData?.vat_price !== undefined ? String(bookingData.vat_price) : '0');
-    apiData.total = bookingData?.total !== undefined ? String(bookingData.total) : (bookingData?.total_price !== undefined ? String(bookingData.total_price) : '0');
+    apiData.preliminary_calculation = totalExcludingTax.toFixed(2);
+    apiData.tax = vat.toFixed(2);
+    apiData.total = billedAmount.toFixed(2);
 
-    // Remove empty strings and null values for cleaner JSON
+    // Clean up empty fields
     Object.keys(apiData).forEach(key => {
       if (apiData[key] === '' || apiData[key] === null || apiData[key] === undefined) {
         delete apiData[key];
       }
     });
 
-    // Sort keys alphabetically
+    // Sort keys
     const sortedApiData = {};
     Object.keys(apiData).sort().forEach(key => {
       sortedApiData[key] = apiData[key];
@@ -202,8 +195,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     try {
       const submitData = prepareApiData();
       await createBooking(submitData);
-
-
       sessionStorage.setItem('bookingSuccess', 'true');
 
       // Navigate to /booking_success/ after successful submission
@@ -215,17 +206,24 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   };
 
   const costData = getCostBreakdown();
+  //check if flight is VietJet Air
+  const isVietJet = (bookingData?.immigration.arrival_flight_number?.toUpperCase().includes('VJ')) || (bookingData?.emigration.departure_flight_number?.toUpperCase().includes('VJ'));
+  const extraFee = isVietJet ? 15 : 0;
 
-  // Use calculated values from bookingData (set by PriceBar)
+
+  // Final calculations including extra fee
   const subtotal = bookingData?.sub_price || costData.subtotal;
+  const adjustedSubtotal = subtotal + extraFee;
+
   const couponDiscount = bookingData?.coupon?.appliedCoupon
-    ? (bookingData.coupon.appliedCoupon.type === 'value_discount'
+    ? bookingData.coupon.appliedCoupon.type === 'value_discount'
       ? bookingData.coupon.appliedCoupon.discount
-      : (subtotal * bookingData.coupon.appliedCoupon.discount) / 100)
+      : (adjustedSubtotal * bookingData.coupon.appliedCoupon.discount) / 100
     : 0;
-  const totalExcludingTax = subtotal - couponDiscount;
-  const vat = bookingData?.vat_price || (totalExcludingTax * 0.08);
-  const billedAmount = bookingData?.total_price || (totalExcludingTax + vat);
+
+  const totalExcludingTax = adjustedSubtotal - couponDiscount;
+  const vat = totalExcludingTax * 0.08;
+  const billedAmount = totalExcludingTax + vat;
 
   return (
     <div className="min-h-screen bg-white border border-gray-200  shadow-sm rounded-lg">
@@ -513,7 +511,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Immigration Section */}
+              {/* Existing breakdown rows */}
               {bookingData?.immigration && costData.breakdown.filter(item => item.no.startsWith('1.')).length > 0 && (
                 <>
                   <tr>
@@ -534,7 +532,6 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                 </>
               )}
 
-              {/* Emigration Section */}
               {bookingData?.emigration && costData.breakdown.some(item => item.no === '2') && (
                 costData.breakdown
                   .filter(item => item.no === '2')
@@ -548,33 +545,45 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   ))
               )}
 
-              {/* Subtotal Row */}
+              {/* Subtotal */}
               <tr className="border-t-2 border-gray-300">
                 <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  仮計算
+                  小計
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${Number(subtotal || 0).toFixed(1)}
+                  ${subtotal.toFixed(2)}
                 </td>
               </tr>
 
-              {/* Coupon Discount */}
+              {/* Vietjet Extra Fee */}
+              {extraFee > 0 && (
+                <tr>
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    Vietjet Airの追加料金
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                    ${extraFee.toFixed(2)}
+                  </td>
+                </tr>
+              )}
+
+              {/* Coupon */}
               <tr>
                 <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
                   クーポン
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
-                  - ${Number(couponDiscount || 0).toFixed(1)}
+                  - ${couponDiscount.toFixed(2)}
                 </td>
               </tr>
 
-              {/* Total Excluding Tax */}
+              {/* Total excluding tax */}
               <tr>
                 <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  合計（税抜）
+                  合計（税抜き）
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${Number(totalExcludingTax || 0).toFixed(1)}
+                  ${totalExcludingTax.toFixed(2)}
                 </td>
               </tr>
 
@@ -584,17 +593,17 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   消費税 VAT(8%)
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${Number(vat || 0).toFixed(1)}
+                  ${vat.toFixed(2)}
                 </td>
               </tr>
 
               {/* Final Total */}
               <tr className="border-t-2 border-gray-300">
                 <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  請求金額
+                  請求額
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">
-                  ${Number(billedAmount || 0).toFixed(1)}
+                  ${billedAmount.toFixed(2)}
                 </td>
               </tr>
 

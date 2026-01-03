@@ -67,8 +67,8 @@ function App() {
 
   return (
     <Router>
-      <Navbar />
-      <LineInquiry />
+     <LineInquiry />
+     <Navbar />
       <div className="w-[90vw] mx-20 max-[1150px]:w-[100vw] max-[1150px]:mx-0">
         <div className="flex flex-wrap justify-center w-[100%] mb-8 overflow-hidden max-[1150px]:w-[96vw]">
           <img src={banner} alt="" />

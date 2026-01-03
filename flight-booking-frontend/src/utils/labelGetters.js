@@ -16,7 +16,8 @@ export const getImmigrationPackageLabel = (value) => {
 export const getEmigrationPackageLabel = (value) => {
   const packages = {
     0: '出国Fasttrackフルサポートをご利用する(50$)',
-    1: 'VVIP出国Fasttrackを利用する(300$)',
+    1: '出国Fasttrackフルサポート（プレミアム優先レーン）をご利用する（65$)',
+    2: ' 出国Fasttrackフルサポート（最優先レーン・ノンストップ）をご利用する（300$)',
   };
   return packages[value] || value;
 };

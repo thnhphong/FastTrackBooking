@@ -20,7 +20,8 @@ export const immigrationPackages = [
 // departure_fast_track_option: 0=50$,1=300$
 export const emigrationPackages = [
   { value: 0, priceKey: '50$', label: '出国Fasttrackフルサポートをご利用する(50$)' },
-  { value: 1, priceKey: '300$', label: 'VVIP出国Fasttrackを利用する(300$)' },
+  { value: 1, priceKey: '65$', label: '出国Fasttrackフルサポート（プレミアム優先レーン）をご利用する（65$)' },
+  { value: 2, priceKey: '300$', label: ' 出国Fasttrackフルサポート（最優先レーン・ノンストップ）をご利用する（300$)' },
 ];
 
 export const pickupVehicles = [
