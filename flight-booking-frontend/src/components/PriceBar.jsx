@@ -31,6 +31,7 @@ const PriceBar = ({
     },
     emigration: {
       '50$': 50,
+      '65$': 65,
       '300$': 300,
     },
     pickupVehicle: {

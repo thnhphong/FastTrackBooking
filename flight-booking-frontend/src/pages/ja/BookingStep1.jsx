@@ -282,9 +282,6 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               ✔️アカウント登録不要 ✔️パスポート写真送付不要 ✔️丁寧に対応 ✔️当日予約可
             </p>
             <p>✔️日本語24時間対応 ✔️夜間・早朝の追加料無 ✔️予約簡単 ✔️日本語領収書発行可</p>
-            <p className="text-red-600 underline text-center">
-              <a href="https://vietnam-fasttrack.com/vjp-fasttrack-december-esim-campaign/?_gl=1*atd23l*_gcl_au*MTk5MDI3MTkzOS4xNzY0MDQ3NDEyLjE4OTg5OTIyNjAuMTc2NTgwMzE3Mi4xNzY1ODAzMTcy" target='_blank'>🎁高速データ通信 eSIM（30GB/5日・10USD相当）を今だけ無料プレゼント！詳細はこちら</a>
-            </p>
           </div>
 
           {/* line esim */}
@@ -628,8 +625,12 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               />
               <span className="text-black text-base">出国ファストトラックのご利用(50$～)</span>
             </label>
+            <div className="text-red-600 text-lg">
+              <span>
+                【お知らせ】2026年1月1日以降、Vietjet Airをご利用のお客様につきましては、航空会社および空港の規定変更に伴い、VJP Fasttrackサービスに15USD（税別）の追加料金が発生いたします。 誠に恐縮ではございますが、何卒ご理解賜りますようお願い申し上げます。
+              </span>
+            </div>
           </div>
-
           <hr className="border-b-4 border-[#CBCBCB] my-8" />
 
           {/* Emigration Form - Show when checked */}

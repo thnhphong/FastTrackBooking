@@ -10,7 +10,7 @@ const Navbar = () => {
 
 
   return (
-    <nav className="bg-white w-[100vw] flex justify-evenly align-center">
+    <nav className="bg-white w-[100vw] flex justify-evenly align-center mx-auto">
       <div className="w-[100vw] flex justify-evenly align-center px-4 py-3">
         <div className="flex items-center gap-10 h-20">
           {/* 1. Logo */}
@@ -118,17 +118,17 @@ const Navbar = () => {
                 </a>
               </li>
               <li>
-                <a href="https://vietjapan.vip/faq/" className="text-black hover:text-blue-800 font-light transition-colors">
+                <a href="https://vietjapan.vip/faq/" className="text-black hover:text-[#0d1f49] font-light transition-colors">
                   よくあるご質問
                 </a>
               </li>
               <li>
-                <a href="https://vietjapan.vip/news/" className="text-black hover:text-blue-800 font-light transition-colors cursor-pointer">
+                <a href="https://vietjapan.vip/news/" className="text-black hover:text-[#0d1f49] font-light transition-colors cursor-pointer">
                   お知らせ
                 </a>
               </li>
               <li>
-                <a href="https://vietjapan.vip/blog/" className="text-black hover:text-blue-800 font-light transition-colors cursor-pointer">
+                <a href="https://vietjapan.vip/blog/" className="text-black hover:text-[#0d1f49] font-light transition-colors cursor-pointer">
                   ブログ
                 </a>
               </li>
