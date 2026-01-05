@@ -214,7 +214,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const subtotal = parseFloat(bookingData?.sub_price || costData.subtotal || 0);
   const isVietjetDeparture = bookingData?.emigration?.departure_flight_number?.toUpperCase().startsWith('VJ');
   const extraFee = isVietjetDeparture ? 15 : 0;
-  const adjustedSubtotal = subtotal + extraFee; 
+  const adjustedSubtotal = subtotal + extraFee;
 
   const appliedDiscount = bookingData?.coupon_discount_amount
     ? parseFloat(bookingData.coupon_discount_amount)
