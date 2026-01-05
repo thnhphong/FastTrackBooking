@@ -199,6 +199,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     try {
       const submitData = prepareApiData();
       console.log(submitData);
+
       await createBooking(submitData);
       sessionStorage.setItem('bookingSuccess', 'true');
 
@@ -211,9 +212,13 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   };
 
   const costData = getCostBreakdown();
-  const subtotal = parseFloat(bookingData?.sub_price || costData.subtotal || 0);
-  const isVietjetDeparture = bookingData?.emigration?.departure_flight_number?.toUpperCase().startsWith('VJ');
-  const extraFee = isVietjetDeparture ? 15 : 0;
+  //check if flight is VietJet Air
+  const isVietJet = (bookingData?.immigration.arrival_flight_number?.toUpperCase().includes('VJ')) || (bookingData?.emigration.departure_flight_number?.toUpperCase().includes('VJ'));
+  const extraFee = isVietJet ? 15 : 0;
+
+
+  // Final calculations including extra fee
+  const subtotal = bookingData?.sub_price || costData.subtotal;
   const adjustedSubtotal = subtotal + extraFee;
 
   const appliedDiscount = bookingData?.coupon_discount_amount
