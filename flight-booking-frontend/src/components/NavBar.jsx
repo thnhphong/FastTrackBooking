@@ -22,7 +22,7 @@ const Navbar = () => {
             />
           </a>
 
-          <div className="flex flex-row justify-between items-center gap-20 max-[768px]:gap-10">
+          <div className="flex flex-row justify-between items-center gap-20 max-[768px]:gap-10 max-[450px]:gap-5 max-[390px]:gap-0">
             {/* Desktop Menu */}
             <div className="flex flex-row justify-center md:space-x-8 items-center">
               {/* 2. すぐ予約 Button */}
@@ -46,7 +46,8 @@ const Navbar = () => {
 
                 {/* VJPファストトラックとは Dropdown */}
                 <div className="relative">
-                  <button
+                  <a
+                    href="https://vietjapan.vip/about-vjp-fasttrack/"
                     className="flex items-center text-gray-800 hover:text-blue-800 font-light transition-colors focus:outline-none cursor-pointer text-lg"
                     onMouseEnter={() => setIsOpen(true)}
                     onMouseLeave={() => setIsOpen(false)}
@@ -59,7 +60,7 @@ const Navbar = () => {
                     >
                       <path d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z" />
                     </svg>
-                  </button>
+                  </a>
 
                   {/* Dropdown Menu */}
                   <div
@@ -213,85 +214,85 @@ const Navbar = () => {
                 </svg>
               </button>
               {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="absolute max-[1025px]:block max-[768px]:top-70 top-24 left-0 w-full bg-white z-50 flex justify-center items-center transition-all duration-300">
-          <div className="text-center w-full">
-            <a href="https://vietjapan.vip/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">ホーム</a>
+              {mobileMenuOpen && (
+                <div className="absolute max-[1025px]:block max-[768px]:top-70 top-24 left-0 w-full bg-white z-50 flex justify-center items-center transition-all duration-300">
+                  <div className="text-center w-full">
+                    <a href="https://vietjapan.vip/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">ホーム</a>
 
-            {/* VJPファストトラックとは Dropdown in Mobile */}
-            <button
-              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-              className="w-full text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2 flex justify-center items-center bg-[#00ae00] text-white"
-            >
-              <strong className="font-medium">VJP</strong>ファストトラックとは
-              {/* no rotate */}
-              <svg
-                className={`ml-2 w-4 h-4 transition-transform`}
-                fill="currentColor"
-                viewBox="0 0 320 512"
-              >
-                <path d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z" />
-              </svg>
-            </button>
+                    {/* VJPファストトラックとは Dropdown in Mobile */}
+                    <button
+                      onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                      className="w-full text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2 flex justify-center items-center bg-[#00ae00] text-white"
+                    >
+                      <strong className="font-medium">VJP</strong>ファストトラックとは
+                      {/* no rotate */}
+                      <svg
+                        className={`ml-2 w-4 h-4 transition-transform`}
+                        fill="currentColor"
+                        viewBox="0 0 320 512"
+                      >
+                        <path d="M31.3 192h257.3c17.8 0 26.7 21.5 14.1 34.1L174.1 354.8c-7.8 7.8-20.5 7.8-28.3 0L17.2 226.1C4.6 213.5 13.5 192 31.3 192z" />
+                      </svg>
+                    </button>
 
-            {mobileDropdownOpen && (
-              <ul className="text-sm text-gray-700">
-                <li className="border-b border-[#01ae00]">
-                  <a
-                    href="https://vietjapan.vip/tan-son-nhat-entry-vip-fasttrack/"
-                    className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
-                  >
-                    【入国専用】ホーチミン・タンソンニャット空港VIPファストトラック｜ベトナム入国を最速で｜日本語サポート
-                  </a>
-                </li>
-                <li className="border-b border-[#01ae00]">
-                  <a
-                    href="https://vietjapan.vip/%e3%80%90%e5%87%ba%e5%9b%bd%e5%b0%82%e7%94%a8%e3%80%91%e3%83%9b%e3%83%bc%e3%83%81%e3%83%9f%e3%83%b3%e3%83%bb%e3%82%bf%e3%83%b3%e3%82%bd%e3%83%b3%e3%83%8b%e3%83%a3%e3%83%83%e3%83%88%e7%a9%ba%e6%b8%afvi/"
-                    className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
-                  >
-                    【出国専用】ホーチミン・タンソンニャット空港VIPファストトラック｜チェックインをスムーズに｜日本語サポート
-                  </a>
-                </li>
-                <li className="border-b border-[#01ae00]">
-                  <a
-                    href="https://vietjapan.vip/tan-son-nhat-airport-fasttrack/"
-                    className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
-                  >
-                    タンソンニャットファストトラックとは
-                  </a>
-                </li>
-                <li className="border-b border-[#01ae00]">
-                  <a
-                    href="https://vietjapan.vip/hanoi-noibai-fasttrack/"
-                    className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
-                  >
-                    ハノイ・ノイバイファストトラックとは
-                  </a>
-                </li>
-                <li className="border-b border-[#01ae00]">
-                  <a
-                    href="https://vietjapan.vip/danang-fasttrack/"
-                    className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
-                  >
-                    ダナンファストトラックとは
-                  </a>
-                </li>
-              </ul>
-            )}
+                    {mobileDropdownOpen && (
+                      <ul className="text-sm text-gray-700">
+                        <li className="border-b border-[#01ae00]">
+                          <a
+                            href="https://vietjapan.vip/tan-son-nhat-entry-vip-fasttrack/"
+                            className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
+                          >
+                            【入国専用】ホーチミン・タンソンニャット空港VIPファストトラック｜ベトナム入国を最速で｜日本語サポート
+                          </a>
+                        </li>
+                        <li className="border-b border-[#01ae00]">
+                          <a
+                            href="https://vietjapan.vip/%e3%80%90%e5%87%ba%e5%9b%bd%e5%b0%82%e7%94%a8%e3%80%91%e3%83%9b%e3%83%bc%e3%83%81%e3%83%9f%e3%83%b3%e3%83%bb%e3%82%bf%e3%83%b3%e3%82%bd%e3%83%b3%e3%83%8b%e3%83%a3%e3%83%83%e3%83%88%e7%a9%ba%e6%b8%afvi/"
+                            className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
+                          >
+                            【出国専用】ホーチミン・タンソンニャット空港VIPファストトラック｜チェックインをスムーズに｜日本語サポート
+                          </a>
+                        </li>
+                        <li className="border-b border-[#01ae00]">
+                          <a
+                            href="https://vietjapan.vip/tan-son-nhat-airport-fasttrack/"
+                            className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
+                          >
+                            タンソンニャットファストトラックとは
+                          </a>
+                        </li>
+                        <li className="border-b border-[#01ae00]">
+                          <a
+                            href="https://vietjapan.vip/hanoi-noibai-fasttrack/"
+                            className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
+                          >
+                            ハノイ・ノイバイファストトラックとは
+                          </a>
+                        </li>
+                        <li className="border-b border-[#01ae00]">
+                          <a
+                            href="https://vietjapan.vip/danang-fasttrack/"
+                            className="block px-6 py-3 hover:bg-[#2dae00] hover:text-white transition-colors"
+                          >
+                            ダナンファストトラックとは
+                          </a>
+                        </li>
+                      </ul>
+                    )}
 
-            <a href="https://vietjapan.vip/contact/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">お問い合わせ</a>
-            <a href="https://vietjapan.vip/faq/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">よくあるご質問</a>
-            <a href="https://vietjapan.vip/news/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">お知らせ</a>
-            <a href="https://vietjapan.vip/blog/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">ブログ</a>
-          </div>
-        </div>
-      )}
+                    <a href="https://vietjapan.vip/contact/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">お問い合わせ</a>
+                    <a href="https://vietjapan.vip/faq/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">よくあるご質問</a>
+                    <a href="https://vietjapan.vip/news/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">お知らせ</a>
+                    <a href="https://vietjapan.vip/blog/" className="block text-gray-800 hover:text-[#0d1f49] text-sm font-light border-b border-[#01ae00] hover:bg-[#01ae00] hover:text-white py-2">ブログ</a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      
+
     </nav>
   );
 };
