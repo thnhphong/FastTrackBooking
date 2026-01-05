@@ -59,6 +59,7 @@ const PriceBar = ({
     }
   }, [bookingData?.coupon]);
 
+
   // Initialize payment method on mount if not set
   useEffect(() => {
     if (bookingData?.payment_method === undefined || bookingData?.payment_method === null) {
@@ -116,17 +117,21 @@ const PriceBar = ({
 
     // Apply coupon discount
     let discount = 0;
+    let couponDiscountAmount = 0;
+    let amountAfterCoupon = calculatedSubtotal;
     if (appliedCoupon) {
       if (appliedCoupon.type === 'value_discount') {
-        discount = appliedCoupon.discount;
+        couponDiscountAmount = appliedCoupon.discount;
+        discount = couponDiscountAmount;
       } else if (appliedCoupon.type === 'percent_discount') {
-        discount = (calculatedSubtotal * appliedCoupon.discount) / 100;
+        couponDiscountAmount = (calculatedSubtotal * appliedCoupon.discount) / 100;
+        discount = couponDiscountAmount;
       }
+      amountAfterCoupon = Math.max(0, calculatedSubtotal - discount);
     }
 
-    const afterDiscount = Math.max(0, calculatedSubtotal - discount);
-    const calculatedVat = afterDiscount * 0.08; // 8% VAT
-    const calculatedTotal = afterDiscount + calculatedVat;
+    const calculatedVat = amountAfterCoupon * 0.08; // 8% VAT
+    const calculatedTotal = amountAfterCoupon + calculatedVat;
 
     setSubtotal(calculatedSubtotal);
     setVat(calculatedVat);
@@ -136,16 +141,21 @@ const PriceBar = ({
     if (onCouponApply) {
       const priceData = {
         sub_price: calculatedSubtotal,
-        preliminary_calculation: calculatedSubtotal,
+        preliminary_calculation: calculatedSubtotal.toFixed(2),
         tax: calculatedVat,
         total_price: calculatedTotal,
         total: calculatedTotal,
+        coupon: appliedCoupon ? couponCode : null,
+        coupon_discount_amount: appliedCoupon ? couponDiscountAmount.toFixed(2) : null,
+        coupon_discount_formatted: appliedCoupon ? `-$${couponDiscountAmount.toFixed(2)}` : '$0.00',
+        has_coupon_discount: !!appliedCoupon,
+        amount_after_coupon: amountAfterCoupon.toFixed(2),
+
         coupon_id: appliedCoupon?.id || null,
-        // Preserve existing coupon data if present
-        coupon: bookingData?.coupon || (appliedCoupon ? {
+        coupon_obj: appliedCoupon ? {
           code: couponCode,
           appliedCoupon: appliedCoupon,
-        } : null),
+        } : null,
       };
       // Use requestAnimationFrame to avoid infinite loop
       requestAnimationFrame(() => {
@@ -165,6 +175,7 @@ const PriceBar = ({
     appliedCoupon?.id,
     appliedCoupon?.type,
     appliedCoupon?.discount,
+    couponCode,
   ]);
 
   const handleCouponApply = async () => {
@@ -239,6 +250,11 @@ const PriceBar = ({
       onCouponApply({
         coupon: null,
         coupon_id: null,
+        coupon_obj: null,
+        coupon_discount_amount: null,
+        coupon_discount_formatted: null,
+        has_coupon_discount: false,
+        amount_after_coupon: null,
       });
     }
   };

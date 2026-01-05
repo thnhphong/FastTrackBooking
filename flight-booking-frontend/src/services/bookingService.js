@@ -12,7 +12,6 @@ export const createBooking = async (bookingData) => {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
     }
   );
@@ -24,10 +23,22 @@ export const createBooking = async (bookingData) => {
 };
 
 export const validateCoupon = async (couponCode) => {
-  // Trim and encode the coupon code for URL
-  const encodedCode = encodeURIComponent(couponCode.trim().toUpperCase());
-  const response = await api.get(`/coupons/validate/${encodedCode}`);
-  return response.data;
+  try {
+    const encodedCode = encodeURIComponent(couponCode.trim().toUpperCase());
+    const response = await axios.get(
+      `https://operator-dev.vietjapan.vip/api/fast-track-bookings/web-booking/coupons/validate-coupon/${encodedCode}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Coupon Validation Error:', error.response?.data || error.message);
+    throw error;
+  }
 };
 
 export const getBooking = async (bookingId) => {

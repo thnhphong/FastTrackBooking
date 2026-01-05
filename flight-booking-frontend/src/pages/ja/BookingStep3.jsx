@@ -162,9 +162,13 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     // Payment and pricing - calculated with extra fee
     apiData.payment_method = bookingData?.payment_method !== undefined ? String(bookingData.payment_method) : '1';
-    apiData.preliminary_calculation = totalExcludingTax.toFixed(2);
-    apiData.tax = vat.toFixed(2);
-    apiData.total = billedAmount.toFixed(2);
+    apiData.coupon = bookingData?.coupon || null;
+    apiData.coupon_discount_amount = bookingData?.coupon_discount_amount || null;
+    apiData.has_coupon_discount = bookingData?.has_coupon_discount || false;
+    apiData.amount_after_coupon = bookingData?.amount_after_coupon || null;
+    apiData.preliminary_calculation = bookingData?.preliminary_calculation || subtotal.toFixed(2);
+    apiData.tax = bookingData?.tax || vat.toFixed(2);
+    apiData.total = bookingData?.total || billedAmount.toFixed(2);
 
     // Clean up empty fields
     Object.keys(apiData).forEach(key => {
@@ -194,7 +198,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
     try {
       const submitData = prepareApiData();
-
+      console.log(submitData);
       await createBooking(submitData);
       sessionStorage.setItem('bookingSuccess', 'true');
 
@@ -207,26 +211,21 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   };
 
   const costData = getCostBreakdown();
-  //check if flight is VietJet Air
-  const isVietjetArrival = bookingData?.immigration ? (bookingData.immigration.arrival_flight_number?.toUpperCase().includes('VJ') || false) : false;
-  const isVietjetDeparture = bookingData?.emigration ? (bookingData.emigration.departure_flight_number?.toUpperCase().includes('VJ') || false) : false;
-  const vietjetFeeCount = (isVietjetArrival ? 1 : 0) + (isVietjetDeparture ? 1 : 0);
-  const extraFee = vietjetFeeCount * 15;
+  const subtotal = parseFloat(bookingData?.sub_price || costData.subtotal || 0);
+  const isVietjetDeparture = bookingData?.emigration?.departure_flight_number?.toUpperCase().startsWith('VJ');
+  const extraFee = isVietjetDeparture ? 15 : 0;
+  const adjustedSubtotal = subtotal + extraFee; 
 
-
-  // Final calculations including extra fee
-  const subtotal = bookingData?.sub_price || costData.subtotal;
-  const adjustedSubtotal = subtotal + extraFee;
-
-  const couponDiscount = bookingData?.coupon?.appliedCoupon
-    ? bookingData.coupon.appliedCoupon.type === 'value_discount'
-      ? bookingData.coupon.appliedCoupon.discount
-      : (adjustedSubtotal * bookingData.coupon.appliedCoupon.discount) / 100
+  const appliedDiscount = bookingData?.coupon_discount_amount
+    ? parseFloat(bookingData.coupon_discount_amount)
     : 0;
 
-  const totalExcludingTax = adjustedSubtotal - couponDiscount;
-  const vat = totalExcludingTax * 0.08;
-  const billedAmount = totalExcludingTax + vat;
+  const amountAfterCoupon = Math.max(0, adjustedSubtotal - appliedDiscount);
+  const vat = amountAfterCoupon * 0.08;
+  const billedAmount = amountAfterCoupon + vat;
+  // For display in table
+  const totalExcludingTax = amountAfterCoupon;
+  const couponDiscount = appliedDiscount;
 
   return (
     <div className="min-h-screen bg-white border border-gray-200  shadow-sm rounded-lg">
@@ -576,7 +575,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   クーポン
                 </td>
                 <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
-                  - ${couponDiscount.toFixed(2)}
+                  - ${appliedDiscount.toFixed(2)}
                 </td>
               </tr>
 
