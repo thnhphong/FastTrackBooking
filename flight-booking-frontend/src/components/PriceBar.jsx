@@ -453,7 +453,7 @@ const PriceBar = ({
                   value={paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(Number(e.target.value))}
                   className="w-full max-[1367px]:w-[92%] px-4 py-2 max-[1367px]:py-0  max-[1367px]:px-0 bg-[#a3e7a3] border border-gray-300 rounded-md text-base text-black font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                  max-[769px]:w-[950]"
+                  max-[769px]:w-[90%]"
                 >
                   {paymentMethods.map((method) => (
                     <option key={method.value} value={method.value} className="text-black ">
