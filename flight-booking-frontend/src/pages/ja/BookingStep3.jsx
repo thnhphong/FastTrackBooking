@@ -212,8 +212,8 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   };
 
   const costData = getCostBreakdown();
-  //check if flight is VietJet Air
-  const isVietJet = (bookingData?.immigration.arrival_flight_number?.toUpperCase().includes('VJ')) || (bookingData?.emigration.departure_flight_number?.toUpperCase().includes('VJ'));
+  //check if flight is VietJet Air(just for emigraiton)
+  const isVietJet = (bookingData?.emigration?.departure_flight_number?.toUpperCase().includes('VJ')) || false;
   const extraFee = isVietJet ? 15 : 0;
 
 
