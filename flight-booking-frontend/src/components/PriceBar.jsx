@@ -431,7 +431,7 @@ const PriceBar = ({
 
           <div className="hidden max-[1367px]:flex max-[1367px]:flex-col max-[1367px]:gap-10 max-[1367px]:mb-2 max-[769px]:w-[120%] max-[769px]:flex-col max-[769px]:py-1 max-[769px]:items-start max-[769px]:gap-10 max-[769px]:px-0">
             {/* Row 1 - summary + payment dropdown */}
-            <div className="flex items-start justify-between max-[1367px]:px-10 max-[769px]:px-0 max-[769px]:justify-start">
+            <div className="flex items-start gap-10 justify-between max-[1367px]:px-10 max-[769px]:px-0 max-[769px]:justify-start max-[769px]:gap-6">
               <div className="flex flex-row items-start gap-20 max-[1367px]:gap-10 max-[769px]:gap-3">
                 <div className="flex flex-col items-start">
                   <span className="text-base text-black font-bold">仮計算</span>

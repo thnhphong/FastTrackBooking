@@ -16,7 +16,7 @@ import {
   getCountryLabel,
 } from '../../utils/labelGetters';
 import { formatDate } from '../../utils/formHelpers';
-
+import BottomSection from '../../components/BottomSection';
 
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();

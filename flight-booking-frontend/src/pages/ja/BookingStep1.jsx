@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import PriceBar from '../../components/PriceBar';
 import ProcessIndicator from '../../components/ProcessIndicator';
 import Error from '../../components/Error';
@@ -7,9 +7,15 @@ import JapaneseDatePicker from '../../components/JapaneseDatePicker';
 import { useScrollToTop } from '../../hooks/useScrollToTop';
 import { airports, immigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../../constants/bookingOptions';
 import { isInputEmpty } from '../../utils/formHelpers';
+import { min } from 'date-fns';
+import BottomSection from '../../components/BottomSection'; 
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   useScrollToTop();
+  const [time, setTime] = useState({ hrs: '', mins: '' });
+  const hoursInputRef = useRef(null);
+  const minutesInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     // Immigration
     useImmigration: bookingData?.immigration ? true : false,
@@ -48,6 +54,40 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     departure_flight_number: bookingData?.emigration?.departure_flight_number ?? '',
     sameAsEntry: false, // Track if "Same as entry" checkbox is checked
   });
+
+  const handleTimeChange = (type, value) => {
+    // Only digits, max 2 characters
+    let val = value.replace(/\D/g, '').slice(0, 2);
+
+    // Apply range limit only when we have a value
+    if (val !== '') {
+      const num = Number(val);
+      const max = type === 'hrs' ? 23 : 59;
+
+      if (!isNaN(num)) {
+        val = Math.min(max, num).toString();
+      }
+    }
+
+    // Update display state (shows 1 or 2 digits as typed)
+    const newTime = { ...time, [type]: val };
+    setTime(newTime);
+
+    // Always save the properly formatted 2-digit time to formData
+    const hrs = newTime.hrs ? parseInt(newTime.hrs).toString().padStart(2, '0') : '00';
+    const mins = newTime.mins ? parseInt(newTime.mins).toString().padStart(2, '0') : '00';
+    setFormData(prev => ({ ...prev, departure_time: `${hrs}:${mins}` }));
+
+    // Auto-focus minutes ONLY when user has entered exactly 2 digits
+    if (
+      type === 'hrs' &&
+      val.length === 2 &&           // ← key condition
+      minutesInputRef.current
+    ) {
+      minutesInputRef.current.focus();
+      minutesInputRef.current.select();
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -267,9 +307,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   };
 
   return (
-
     <div className="min-h-screen bg-white">
-      <div className="w-full custom:max-w-[1140px] px-4 py-8 pb-32 text-left border border-gray-200 rounded-lg">
+      <div className="w-full custom:max-w-[1140px] px-4 pt-8 pb-4 text-left border border-gray-200 rounded-lg">
         <ProcessIndicator currentStep={1} />
         <div className="border-b-1 border-[#CBCBCB] my-4" />
 
@@ -627,8 +666,15 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
             </label>
             <div className="text-red-600 text-base px-4 mt-2">
               <span>
-                【お知らせ】2026年1月1日以降、Vietjet Airをご利用のお客様につきましては、航空会社および空港の規定変更に伴い、VJP Fasttrackサービスに15USD（税別）の追加料金が発生いたします。 誠に恐縮ではございますが、何卒ご理解賜りますようお願い申し上げます。
-              </span> 
+                【重要なお知らせ】
+                <br />
+                空港および航空会社の新たな運用規定に伴い、
+                2026年1月1日以降、以下の通り一時的な変更が発生いたします。
+                <br />
+                ・Vietjet Airをご利用のお客様につきましては、全ての空港において、出国時の優先レーン（優先出国サービス）の提供を一時停止いたします。
+                <br />
+                誠に恐れ入りますが、何卒ご理解賜りますようお願い申し上げます。
+              </span>
             </div>
           </div>
           <hr className="border-b-4 border-[#CBCBCB] my-8" />
@@ -801,20 +847,14 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     {/* Hours input box */}
                     <input
                       type="number"
+                      ref={hoursInputRef}
                       name="departure_time_hours"
                       min="0"
                       max="23"
+                      maxLength={2}
                       placeholder="時"
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[0] || '0') : ''}
-                      onChange={(e) => {
-                        const hours = e.target.value;
-                        const minutes = formData.departure_time ? formData.departure_time.split(':')[1] : '00';
-                        const timeValue = hours !== '' ? `${hours.padStart(2, '0')}:${minutes}` : '';
-                        setFormData(prev => ({
-                          ...prev,
-                          departure_time: timeValue,
-                        }));
-                      }}
+                      onChange={(e) => handleTimeChange('hrs', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                     {/* Colon separator */}
@@ -822,20 +862,14 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     {/* Minutes input box */}
                     <input
                       type="number"
+                      ref={minutesInputRef}
                       name="meeting_time_minutes"
                       min="0"
                       max="59"
+                      maxLength={2}
                       placeholder='分'
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[1] || '0') : ''}
-                      onChange={(e) => {
-                        const minutes = e.target.value;
-                        const hours = formData.departure_time ? formData.departure_time.split(':')[0] : '00';
-                        const timeValue = minutes !== '' ? `${hours}:${minutes.padStart(2, '0')}` : '';
-                        setFormData(prev => ({
-                          ...prev,
-                          departure_time: timeValue,
-                        }));
-                      }}
+                      onChange={(e) => handleTimeChange('mins', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
@@ -872,8 +906,8 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
             </div>
           )}
         </div>
-
       </div>
+      <BottomSection />
 
       {/* PriceBar - Always visible at bottom */}
       <PriceBar
