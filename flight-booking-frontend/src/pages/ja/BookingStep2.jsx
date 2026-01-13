@@ -8,6 +8,7 @@ import { useScrollToTop } from '../../hooks/useScrollToTop';
 import { surveyChannels, contactOptions, addOnsOptions } from '../../constants/bookingOptions';
 import { isInputEmpty, isValidEmail } from '../../utils/formHelpers';
 import line_qr from '../../assets/images/Line-QR.png';
+import BottomSection from '../../components/BottomSection';
 
 const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) => {
   useScrollToTop();
@@ -219,7 +220,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 max-[640px]:px-2 py-8 max-[640px]:py-4 pb-32">
+      <div className="max-w-6xl mx-auto px-4 max-[640px]:px-2 py-2 max-[640px]:py-1">
 
         {/* Error Message */}
         <Error message={showError ? "There Is A Problem With Your Answer. Please Check The Fields Below." : null} />
@@ -632,6 +633,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
         </form>
 
       </div>
+      <BottomSection />
     </div>
   );
 };

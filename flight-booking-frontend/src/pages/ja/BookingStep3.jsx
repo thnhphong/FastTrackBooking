@@ -17,12 +17,12 @@ import {
 } from '../../utils/labelGetters';
 import { formatDate } from '../../utils/formHelpers';
 import BottomSection from '../../components/BottomSection';
+import { getPriceFromMap, isTruthyFlag } from '../../utils/pricingHelpers';
 
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-
 
 
   useScrollToTop();
@@ -50,7 +50,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       }
 
       // 1.2 Guaranteed immigration clearance within 15 minutes (stored as string "true"/"false")
-      if (bookingData.immigration.use_immigration_fast_track === 'true') {
+      if (isTruthyFlag(bookingData.immigration.use_immigration_fast_track)) {
         breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'あり', amount: '$15' });
         subtotal += 15;
       } else {
@@ -58,7 +58,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       }
 
       // 1.3 Pick-up at the plane's exit (stored as string "true"/"false")
-      if (bookingData.immigration.tarmac_pickup === 'true') {
+      if (isTruthyFlag(bookingData.immigration.tarmac_pickup)) {
         breakdown.push({ no: '1.3', content: "飛行機の降り口でのお迎え", presence: 'あり', amount: '$60' });
         subtotal += 60;
       } else {
@@ -67,16 +67,28 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
       // 1.4 Entry Fasttrack Package
       const packagePrices = { '35$': 35, '40$': 40, '50$': 50, '300$': 300 };
-      const packagePrice = packagePrices[bookingData.immigration.immigration_package] || 0;
-      breakdown.push({ no: '1.4', content: '入国ファストトラックパッケージ', presence: 'あり', amount: `$${packagePrice}` });
+      const packagePrice = getPriceFromMap(bookingData.immigration.immigration_package, packagePrices);
+      const hasPackage = packagePrice > 0;
+      breakdown.push({
+        no: '1.4',
+        content: '入国ファストトラックパッケージ',
+        presence: hasPackage ? 'あり' : 'なし',
+        amount: `$${packagePrice}`,
+      });
       subtotal += packagePrice;
     }
 
     // 2 Full support for departures with Fasttrack
     if (bookingData?.emigration) {
       const emigrationPrices = { '50$': 50, '65$': 65, '300$': 300 };
-      const emigrationPrice = emigrationPrices[bookingData.emigration.emigration_package] || 0;
-      breakdown.push({ no: '2', content: '出国Fasttrackフルサポート', presence: 'あり', amount: `$${emigrationPrice}` });
+      const emigrationPrice = getPriceFromMap(bookingData.emigration.emigration_package, emigrationPrices);
+      const hasEmigrationPackage = emigrationPrice > 0;
+      breakdown.push({
+        no: '2',
+        content: '出国Fasttrackフルサポート',
+        presence: hasEmigrationPackage ? 'あり' : 'なし',
+        amount: `$${emigrationPrice}`,
+      });
       subtotal += emigrationPrice;
     }
 
@@ -212,6 +224,12 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   };
 
   const costData = getCostBreakdown();
+  const immigrationItems = bookingData?.immigration
+    ? costData.breakdown.filter(item => item.no.startsWith('1.'))
+    : [];
+  const emigrationItems = bookingData?.emigration
+    ? costData.breakdown.filter(item => item.no === '2')
+    : [];
   //check if flight is VietJet Air(just for emigraiton)
   const isVietJet = (bookingData?.emigration?.departure_flight_number?.toUpperCase().includes('VJ')) || false;
   const extraFee = isVietJet ? 15 : 0;
@@ -233,115 +251,407 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const couponDiscount = appliedDiscount;
 
   return (
-    <div className="min-h-screen bg-white border border-gray-200  shadow-sm rounded-lg">
-      <div className="max-w-6xl mx-auto px-2 max-[640px]:px-1 py-4">
-        <ProcessIndicator currentStep={3} />
-        <hr className="border-b-[0.4px] border-gray-200 mt-3 mb-4 " />
+    <div>
+      <div className="min-h-screen bg-white border border-gray-200  shadow-sm rounded-lg">
+        <div className="max-w-6xl mx-auto px-2 max-[640px]:px-1 py-4">
+          <ProcessIndicator currentStep={3} />
+          <hr className="border-b-[0.4px] border-gray-200 mt-3 mb-4 " />
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 ">
-            {error}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 ">
+              {error}
+            </div>
+          )}
+
+          {/* User Information Table - match reference UI layout */}
+          <div className="mb-6 bg-white border-2 border-gray-300 overflow-hidden mt-10 max-[640px]:mt-4">
+            <h2 className="text-xl max-[640px]:text-lg font-bold text-black text-center bg-gray-100 py-4 max-[640px]:py-2 px-6 max-[640px]:px-2 border-b border-gray-200">
+              利用者の情報
+            </h2>
+            <div className="p-0">
+              <table className="w-full border-collapse max-[640px]:text-sm">
+                <tbody>
+                  {/* Row 1: Last name & First name / Gender & DOB */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">性:</span>{' '}
+                      {bookingData?.passport?.last_name}{' '}
+                      <span className="font-semibold ml-4 max-[640px]:ml-2">名:</span>{' '}
+                      {bookingData?.passport?.first_name}
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">性別:</span>{' '}
+                      {getGenderLabel(bookingData?.passport?.gender)}{' '}
+                      <span className="font-semibold ml-6 max-[640px]:ml-2">生年月日:</span>{' '}
+                      {formatDate(bookingData?.passport?.birthday)}
+                    </td>
+                  </tr>
+
+                  {/* Row 2: Phone number & Nationality */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">国コード 付電話番号:</span>{' '}
+                      {bookingData?.user_phone_number}
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">国籍:</span>{' '}
+                      {getCountryLabel(
+                        bookingData?.nationality || bookingData?.passport?.nationality
+                      )}
+                    </td>
+                  </tr>
+
+                  {/* Row 3: Email / CC Email */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">案内を受け取るためのメールアドレス:</span>{' '}
+                      <span className="break-all">{bookingData?.passport?.email}</span>
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">CCを希望されるメールアドレス:</span>{' '}
+                      <span className="break-all">{bookingData?.passport?.email_cc || ''}</span>
+                    </td>
+                  </tr>
+
+                  {/* Row 4: Passport No / Passport Expiration */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">パスポート No.:</span>{' '}
+                      {bookingData?.passport?.passport_num}
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">パスポートの有効期限満了日:</span>{' '}
+                      {formatDate(bookingData?.passport?.expire_date)}
+                    </td>
+                  </tr>
+
+                  {/* Row 5: Company name / Referrer */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">会社名:</span>{' '}
+                      {bookingData?.passport?.company_name || 'Other'}
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">ご紹介の方のお名前:</span>{' '}
+                      {bookingData?.passport?.referer_name || ''}
+                    </td>
+                  </tr>
+
+                  {/* Row 6: Contact / Survey channel */}
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
+                      <span className="font-semibold">Line OA追加:</span>{' '}
+                      {getContactLabel(bookingData?.contact_method)}
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
+                      <span className="font-semibold">
+                        本アンケートをどのチャンネルから知りましたか？:
+                      </span>{' '}
+                      {getSurveyChannelLabel(bookingData?.survey_channel)}
+                    </td>
+                  </tr>
+
+                  {/* Row 7: Add-ons Section */}
+                  {bookingData?.add_ons && bookingData.add_ons.length > 0 && (
+                    <tr>
+                      <td colSpan="2" className="py-2 px-4 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                        <span className="font-semibold">以下のサービスについての無料相談をご希望しませんか。</span>
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                          {bookingData.add_ons.map((addOnValue) => (
+                            <li key={addOnValue}>{getAddOnLabel(addOnValue)}</li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
 
-        {/* User Information Table - match reference UI layout */}
-        <div className="mb-6 bg-white border-2 border-gray-300 overflow-hidden mt-10 max-[640px]:mt-4">
-          <h2 className="text-xl max-[640px]:text-lg font-bold text-black text-center bg-gray-100 py-4 max-[640px]:py-2 px-6 max-[640px]:px-2 border-b border-gray-200">
-            利用者の情報
-          </h2>
-          <div className="p-0">
+          {/* Reservation Service tables - dynamic width: 100% if 1 table, 50% if 2 */}
+          {(bookingData?.immigration || bookingData?.emigration) && (
+            <>
+              <h2 className="font-semibold text-black text-base mt-6">
+                ご予約サービス
+              </h2>
+
+              <hr className="border-b-3 border-[#CBCBCB] mt-3 mb-4" />
+              <div className="p-0">
+                <div className={`grid gap-6 max-[640px]:gap-4 ${bookingData?.immigration && bookingData?.emigration ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+                  {/* Fast Track Entry column */}
+                  {bookingData?.immigration && (
+                    <div className="border-2 border-gray-300 overflow-hidden">
+                      <div className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-semibold text-black text-center border-b border-gray-200 bg-gray-100 max-[640px]:text-sm">
+                        入国ファストトラック
+                      </div>
+                      <table className="w-full border-collapse max-[640px]:text-sm">
+                        <tbody>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>入国ファストトラック:</strong> {getImmigrationPackageLabel(bookingData.immigration.entry_fast_track_option)}
+                            </td>
+                          </tr>
+                          {bookingData.immigration.immigration_package !== '300$' && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>オプション：15分以内に入国審査手続き完了ン:</strong> {bookingData.immigration.use_immigration_fast_track === 'true' ? '利用する (15$)' : '利用しない'}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.immigration.arrival_airport)}
+                            </td>
+                          </tr>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>到着日:</strong> {formatDate(bookingData.immigration.arrival_date)}
+                            </td>
+                          </tr>
+                          {/* Other options – same table section as 入国ファストトラック */}
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm font-semibold text-center">
+                              他のオプション
+                            </td>
+                          </tr>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>飛行機の降り口でお迎え (60$):</strong> {bookingData.immigration.tarmac_pickup === 'true' ? 'ご利用する (60$)' : '利用しない'}
+                            </td>
+                          </tr>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>迎車利用:</strong> {getPickupVehicleLabel(bookingData.immigration.pickup_service)}
+                            </td>
+                          </tr>
+                          {bookingData.immigration.arrival_phone_number && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>お迎えのベトナム語を話せる方の電話番号（任意）:</strong> {bookingData.immigration.arrival_phone_number}
+                              </td>
+                            </tr>
+                          )}
+                          {bookingData.immigration.arrival_request && (
+                            <tr>
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>迎えや見送りの他のご希望があればご記入くださいませ。</strong> {bookingData.immigration.arrival_request}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Departure Fast Track column */}
+                  {bookingData?.emigration && (
+                    <div className="border-2 border-gray-300 overflow-hidden">
+                      <div className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-semibold text-black text-center border-b border-gray-200 bg-gray-100 max-[640px]:text-sm">
+                        出国ファストトラック
+                      </div>
+                      <table className="w-full border-collapse max-[640px]:text-sm">
+                        <tbody>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>出国ファストトラック:</strong> {getEmigrationPackageLabel(bookingData.emigration.departure_fast_track_option)}
+                            </td>
+                          </tr>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>フライトの予約番号や予約コード:</strong> {bookingData.emigration.departure_flight_reservation_code}
+                            </td>
+                          </tr>
+                          {bookingData.emigration.airline_membership_num && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>運行航空の会員番号やマイレージ番号（あれば）:</strong> {bookingData.emigration.airline_membership_num}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>便・フライトNo.:</strong> {bookingData.emigration.departure_flight_number}
+                            </td>
+                          </tr>
+                          {bookingData.emigration.seating_pref && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>席のご希望（出来るだけアレンジしますが、ご希望を応えない場合もあります）:</strong> {getSeatingPreferenceLabel(bookingData.emigration.departure_seating_preferences)}
+                              </td>
+                            </tr>
+                          )}
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.emigration.departure_airport_code)}
+                            </td>
+                          </tr>
+                          <tr className="border-b border-gray-200">
+                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                              <strong>出発日:</strong> {formatDate(bookingData.emigration.departure_date)}
+                            </td>
+                          </tr>
+                          {bookingData.emigration.departure_time && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>出発空港での待ち合わせご希望時間（出発の３時間前からご指定可）:</strong> {bookingData.emigration.departure_time}
+                              </td>
+                            </tr>
+                          )}
+                          {bookingData.emigration.departure_phone_number && (
+                            <tr className="border-b border-gray-200">
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>お見送りのベトナム語を話せる方の電話番号（任意）:</strong> {bookingData.emigration.departure_phone_number}
+                              </td>
+                            </tr>
+                          )}
+                          {bookingData.emigration.departure_request && (
+                            <tr>
+                              <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                                <strong>他のご希望があればご記入くださいませ。</strong> {bookingData.emigration.departure_request}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Cost Table */}
+
+          <h2 className="text-base font-semibold text-black mt-6">料金</h2>
+          <hr className="border-b-3 border-[#CBCBCB] mt-3 mb-4" />
+
+          <div className="overflow-x-auto">
             <table className="w-full border-collapse max-[640px]:text-sm">
+              <thead>
+                <tr className="border-b-2 border-gray-300">
+                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">No.</th>
+                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">内容</th>
+                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">有無</th>
+                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">金額</th>
+                </tr>
+              </thead>
               <tbody>
-                {/* Row 1: Last name & First name / Gender & DOB */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">性:</span>{' '}
-                    {bookingData?.passport?.last_name}{' '}
-                    <span className="font-semibold ml-4 max-[640px]:ml-2">名:</span>{' '}
-                    {bookingData?.passport?.first_name}
+                {immigrationItems.length > 0 && (
+                  <>
+                    <tr>
+                      <td colSpan="4" className="py-2 px-4 font-bold text-black bg-gray-100">
+                        入国ファストトラック:
+                      </td>
+                    </tr>
+                    {immigrationItems.map((item, index) => (
+                      <tr key={`immigration-${index}`} className="border-b border-gray-200">
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                          {item.no}
+                        </td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                          {item.content}
+                        </td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                          {item.presence}
+                        </td>
+                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">
+                          {item.amount}
+                        </td>
+                      </tr>
+                    ))}
+                  </>
+                )}
+
+                {emigrationItems.length > 0 && (
+                  emigrationItems.map((item, index) => (
+                    <tr key={`emigration-${index}`} className="border-b border-gray-200">
+                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                        {item.no}
+                      </td>
+                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                        {item.content}
+                      </td>
+                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
+                        {item.presence}
+                      </td>
+                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">
+                        {item.amount}
+                      </td>
+                    </tr>
+                  ))
+                )}
+
+                {/* Subtotal */}
+                <tr className="border-t-2 border-gray-300">
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    小計
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">性別:</span>{' '}
-                    {getGenderLabel(bookingData?.passport?.gender)}{' '}
-                    <span className="font-semibold ml-6 max-[640px]:ml-2">生年月日:</span>{' '}
-                    {formatDate(bookingData?.passport?.birthday)}
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                    ${subtotal.toFixed(2)}
                   </td>
                 </tr>
 
-                {/* Row 2: Phone number & Nationality */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">国コード 付電話番号:</span>{' '}
-                    {bookingData?.user_phone_number}
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">国籍:</span>{' '}
-                    {getCountryLabel(
-                      bookingData?.nationality || bookingData?.passport?.nationality
-                    )}
-                  </td>
-                </tr>
-
-                {/* Row 3: Email / CC Email */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">案内を受け取るためのメールアドレス:</span>{' '}
-                    <span className="break-all">{bookingData?.passport?.email}</span>
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">CCを希望されるメールアドレス:</span>{' '}
-                    <span className="break-all">{bookingData?.passport?.email_cc || ''}</span>
-                  </td>
-                </tr>
-
-                {/* Row 4: Passport No / Passport Expiration */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">パスポート No.:</span>{' '}
-                    {bookingData?.passport?.passport_num}
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">パスポートの有効期限満了日:</span>{' '}
-                    {formatDate(bookingData?.passport?.expire_date)}
-                  </td>
-                </tr>
-
-                {/* Row 5: Company name / Referrer */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">会社名:</span>{' '}
-                    {bookingData?.passport?.company_name || 'Other'}
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">ご紹介の方のお名前:</span>{' '}
-                    {bookingData?.passport?.referer_name || ''}
-                  </td>
-                </tr>
-
-                {/* Row 6: Contact / Survey channel */}
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                    <span className="font-semibold">Line OA追加:</span>{' '}
-                    {getContactLabel(bookingData?.contact_method)}
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                    <span className="font-semibold">
-                      本アンケートをどのチャンネルから知りましたか？:
-                    </span>{' '}
-                    {getSurveyChannelLabel(bookingData?.survey_channel)}
-                  </td>
-                </tr>
-
-                {/* Row 7: Add-ons Section */}
-                {bookingData?.add_ons && bookingData.add_ons.length > 0 && (
+                {/* Vietjet Extra Fee */}
+                {extraFee > 0 && (
                   <tr>
-                    <td colSpan="2" className="py-2 px-4 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                      <span className="font-semibold">以下のサービスについての無料相談をご希望しませんか。</span>
-                      <ul className="list-disc list-inside mt-2 space-y-1">
-                        {bookingData.add_ons.map((addOnValue) => (
-                          <li key={addOnValue}>{getAddOnLabel(addOnValue)}</li>
-                        ))}
-                      </ul>
+                    <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                      Vietjet Airの追加料金
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                      ${extraFee.toFixed(2)}
+                    </td>
+                  </tr>
+                )}
+
+                {/* Coupon */}
+                <tr>
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    クーポン
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
+                    - ${couponDiscount.toFixed(2)}
+                  </td>
+                </tr>
+
+                {/* Total excluding tax */}
+                <tr>
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    合計（税抜き）
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                    ${totalExcludingTax.toFixed(2)}
+                  </td>
+                </tr>
+
+                {/* VAT */}
+                <tr>
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    消費税 VAT(8%)
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                    ${vat.toFixed(2)}
+                  </td>
+                </tr>
+
+                {/* Final Total */}
+                <tr className="border-t-2 border-gray-300">
+                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    請求額
+                  </td>
+                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">
+                    ${billedAmount.toFixed(2)}
+                  </td>
+                </tr>
+
+                {/* Payment Method */}
+                {bookingData?.payment_method && (
+                  <tr>
+                    <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                      お支払い方法
+                    </td>
+                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
+                      {getPaymentMethodLabel(bookingData.payment_method)}
                     </td>
                   </tr>
                 )}
@@ -350,305 +660,28 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
           </div>
         </div>
 
-        {/* Reservation Service tables - dynamic width: 100% if 1 table, 50% if 2 */}
-        {(bookingData?.immigration || bookingData?.emigration) && (
-          <>
-            <h2 className="font-semibold text-black text-base mt-6">
-              ご予約サービス
-            </h2>
-
-            <hr className="border-b-3 border-[#CBCBCB] mt-3 mb-4" />
-            <div className="p-0">
-              <div className={`grid gap-6 max-[640px]:gap-4 ${bookingData?.immigration && bookingData?.emigration ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
-                {/* Fast Track Entry column */}
-                {bookingData?.immigration && (
-                  <div className="border-2 border-gray-300 overflow-hidden">
-                    <div className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-semibold text-black text-center border-b border-gray-200 bg-gray-100 max-[640px]:text-sm">
-                      入国ファストトラック
-                    </div>
-                    <table className="w-full border-collapse max-[640px]:text-sm">
-                      <tbody>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>入国ファストトラック:</strong> {getImmigrationPackageLabel(bookingData.immigration.entry_fast_track_option)}
-                          </td>
-                        </tr>
-                        {bookingData.immigration.immigration_package !== '300$' && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>オプション：15分以内に入国審査手続き完了ン:</strong> {bookingData.immigration.use_immigration_fast_track === 'true' ? '利用する (15$)' : '利用しない'}
-                            </td>
-                          </tr>
-                        )}
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.immigration.arrival_airport)}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>到着日:</strong> {formatDate(bookingData.immigration.arrival_date)}
-                          </td>
-                        </tr>
-                        {/* Other options – same table section as 入国ファストトラック */}
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm font-semibold text-center">
-                            他のオプション
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>飛行機の降り口でお迎え (60$):</strong> {bookingData.immigration.tarmac_pickup === 'true' ? 'ご利用する (60$)' : '利用しない'}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>迎車利用:</strong> {getPickupVehicleLabel(bookingData.immigration.pickup_service)}
-                          </td>
-                        </tr>
-                        {bookingData.immigration.arrival_phone_number && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>お迎えのベトナム語を話せる方の電話番号（任意）:</strong> {bookingData.immigration.arrival_phone_number}
-                            </td>
-                          </tr>
-                        )}
-                        {bookingData.immigration.arrival_request && (
-                          <tr>
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>迎えや見送りの他のご希望があればご記入くださいませ。</strong> {bookingData.immigration.arrival_request}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {/* Departure Fast Track column */}
-                {bookingData?.emigration && (
-                  <div className="border-2 border-gray-300 overflow-hidden">
-                    <div className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-semibold text-black text-center border-b border-gray-200 bg-gray-100 max-[640px]:text-sm">
-                      出国ファストトラック
-                    </div>
-                    <table className="w-full border-collapse max-[640px]:text-sm">
-                      <tbody>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>出国ファストトラック:</strong> {getEmigrationPackageLabel(bookingData.emigration.departure_fast_track_option)}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>フライトの予約番号や予約コード:</strong> {bookingData.emigration.departure_flight_reservation_code}
-                          </td>
-                        </tr>
-                        {bookingData.emigration.airline_membership_num && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>運行航空の会員番号やマイレージ番号（あれば）:</strong> {bookingData.emigration.airline_membership_num}
-                            </td>
-                          </tr>
-                        )}
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>便・フライトNo.:</strong> {bookingData.emigration.departure_flight_number}
-                          </td>
-                        </tr>
-                        {bookingData.emigration.seating_pref && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>席のご希望（出来るだけアレンジしますが、ご希望を応えない場合もあります）:</strong> {getSeatingPreferenceLabel(bookingData.emigration.departure_seating_preferences)}
-                            </td>
-                          </tr>
-                        )}
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>ご利用の対象空港:</strong> {getAirportLabel(bookingData.emigration.departure_airport_code)}
-                          </td>
-                        </tr>
-                        <tr className="border-b border-gray-200">
-                          <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                            <strong>出発日:</strong> {formatDate(bookingData.emigration.departure_date)}
-                          </td>
-                        </tr>
-                        {bookingData.emigration.departure_time && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>出発空港での待ち合わせご希望時間（出発の３時間前からご指定可）:</strong> {bookingData.emigration.departure_time}
-                            </td>
-                          </tr>
-                        )}
-                        {bookingData.emigration.departure_phone_number && (
-                          <tr className="border-b border-gray-200">
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>お見送りのベトナム語を話せる方の電話番号（任意）:</strong> {bookingData.emigration.departure_phone_number}
-                            </td>
-                          </tr>
-                        )}
-                        {bookingData.emigration.departure_request && (
-                          <tr>
-                            <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                              <strong>他のご希望があればご記入くださいませ。</strong> {bookingData.emigration.departure_request}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Cost Table */}
-
-        <h2 className="text-base font-semibold text-black mt-6">料金</h2>
-        <hr className="border-b-3 border-[#CBCBCB] mt-3 mb-4" />
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse max-[640px]:text-sm">
-            <thead>
-              <tr className="border-b-2 border-gray-300">
-                <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">No.</th>
-                <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">内容</th>
-                <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">有無</th>
-                <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">金額</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Existing breakdown rows */}
-              {bookingData?.immigration && costData.breakdown.filter(item => item.no.startsWith('1.')).length > 0 && (
-                <>
-                  <tr>
-                    <td colSpan="4" className="py-2 px-4 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm bg-gray-100">
-                      入国ファストトラック:
-                    </td>
-                  </tr>
-                  {costData.breakdown
-                    .filter(item => item.no.startsWith('1.'))
-                    .map((item, index) => (
-                      <tr key={`immigration-${index}`} className="border-b border-gray-200">
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.no}</td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.content}</td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.presence}</td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">{item.amount}</td>
-                      </tr>
-                    ))}
-                </>
-              )}
-
-              {bookingData?.emigration && costData.breakdown.some(item => item.no === '2') && (
-                costData.breakdown
-                  .filter(item => item.no === '2')
-                  .map((item, index) => (
-                    <tr key={`emigration-${index}`} className="border-b border-gray-200">
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.no}</td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.content}</td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">{item.presence}</td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">{item.amount}</td>
-                    </tr>
-                  ))
-              )}
-
-              {/* Subtotal */}
-              <tr className="border-t-2 border-gray-300">
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  小計
-                </td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${subtotal.toFixed(2)}
-                </td>
-              </tr>
-
-              {/* Vietjet Extra Fee */}
-              {extraFee > 0 && (
-                <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                    Vietjet Airの追加料金
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                    ${extraFee.toFixed(2)}
-                  </td>
-                </tr>
-              )}
-
-              {/* Coupon */}
-              <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  クーポン
-                </td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
-                  - ${appliedDiscount.toFixed(2)}
-                </td>
-              </tr>
-
-              {/* Total excluding tax */}
-              <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  合計（税抜き）
-                </td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${totalExcludingTax.toFixed(2)}
-                </td>
-              </tr>
-
-              {/* VAT */}
-              <tr>
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  消費税 VAT(8%)
-                </td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                  ${vat.toFixed(2)}
-                </td>
-              </tr>
-
-              {/* Final Total */}
-              <tr className="border-t-2 border-gray-300">
-                <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                  請求額
-                </td>
-                <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">
-                  ${billedAmount.toFixed(2)}
-                </td>
-              </tr>
-
-              {/* Payment Method */}
-              {bookingData?.payment_method && (
-                <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
-                    お支払い方法
-                  </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                    {getPaymentMethodLabel(bookingData.payment_method)}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Navigation Buttons */}
+        <div className="flex justify-center gap-8 mt-6 mb-2 max-[640px]:gap-2 max-[640px]:px-4 max-[640px]:pb-4">
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={isSubmitting}
+            className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 text-gray-500 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            前へ
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 bg-[#01ae00] text-white rounded-full hover:bg-[#018800] focus:outline-none focus:ring-2 focus:ring-green-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? '予約中...' : '予約する'}
+          </button>
         </div>
       </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex justify-center gap-4 mt-8 max-[640px]:gap-2 max-[640px]:px-4 max-[640px]:pb-4">
-        <button
-          type="button"
-          onClick={handleBack}
-          disabled={isSubmitting}
-          className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 text-gray-500 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          前へ
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 bg-[#01ae00] text-white rounded-full hover:bg-[#018800] focus:outline-none focus:ring-2 focus:ring-green-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? '予約中...' : '予約する'}
-        </button>
-      </div>
+      <BottomSection />
     </div>
+
   );
 };
 

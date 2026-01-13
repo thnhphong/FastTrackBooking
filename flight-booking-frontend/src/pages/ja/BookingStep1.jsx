@@ -225,6 +225,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         arrival_request: formData.arrival_request,
         // Persist \"他のオプション\" checkbox state so it remains checked when returning to Step 1
         useOtherOptions: formData.useOtherOptions,
+        immigration_package: immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$',
       } : null,
       emigration: formData.useEmigration ? {
         departure_fast_track_option: formData.departure_fast_track_option,
@@ -237,6 +238,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         departure_request: formData.departure_request,
         departure_date: formData.departure_date,
         departure_time: formData.departure_time,
+        emigration_package: emigrationPackages[formData.departure_fast_track_option]?.priceKey || '50$',
       } : null,
       type: formData.useImmigration && formData.useEmigration ? 'both' :
         formData.useImmigration ? 'immigration' : 'emigration',

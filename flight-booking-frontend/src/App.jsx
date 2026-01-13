@@ -11,6 +11,7 @@ import Navbar from './components/NavBar';
 //english pages 
 //vietnamese pages
 import LineInquiry from './components/LineInquiry';
+import Footer from './components/Footer';
 import './App.css';
 
 const getDefaultBookingData = () => ({

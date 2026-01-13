@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-
+import Footer from '../../components/Footer';
 const BookingSuccess = ({ onNewBooking }) => {
   const navigate = useNavigate();
 
@@ -12,6 +12,7 @@ const BookingSuccess = ({ onNewBooking }) => {
   };
 
   return (
+    <div >
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Spacer */}
@@ -169,6 +170,8 @@ const BookingSuccess = ({ onNewBooking }) => {
           </div>
         </div>
       </div>
+    </div>
+    <Footer />
     </div>
   );
 };

@@ -16,6 +16,7 @@ import {
   getCountryLabel,
 } from '../../utils/labelGetters';
 import { formatDate } from '../../utils/formHelpers';
+import { getPriceFromMap, isTruthyFlag } from '../../utils/pricingHelpers';
 
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       }
 
       // 1.2 Guaranteed immigration clearance within 15 minutes (stored as string "true"/"false")
-      if (bookingData.immigration.use_immigration_fast_track === 'true') {
+      if (isTruthyFlag(bookingData.immigration.use_immigration_fast_track)) {
         breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'あり', amount: '$15' });
         subtotal += 15;
       } else {
@@ -55,7 +56,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       }
 
       // 1.3 Pick-up at the plane's exit (stored as string "true"/"false")
-      if (bookingData.immigration.tarmac_pickup === 'true') {
+      if (isTruthyFlag(bookingData.immigration.tarmac_pickup)) {
         breakdown.push({ no: '1.3', content: "飛行機の降り口でのお迎え", presence: 'あり', amount: '$60' });
         subtotal += 60;
       } else {
@@ -64,16 +65,28 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
       // 1.4 Entry Fasttrack Package
       const packagePrices = { '35$': 35, '40$': 40, '50$': 50, '300$': 300 };
-      const packagePrice = packagePrices[bookingData.immigration.immigration_package] || 0;
-      breakdown.push({ no: '1.4', content: '入国ファストトラックパッケージ', presence: 'あり', amount: `$${packagePrice}` });
+      const packagePrice = getPriceFromMap(bookingData.immigration.immigration_package, packagePrices);
+      const hasPackage = packagePrice > 0;
+      breakdown.push({
+        no: '1.4',
+        content: '入国ファストトラックパッケージ',
+        presence: hasPackage ? 'あり' : 'なし',
+        amount: `$${packagePrice}`,
+      });
       subtotal += packagePrice;
     }
 
     // 2 Full support for departures with Fasttrack
     if (bookingData?.emigration) {
-      const emigrationPrices = { '50$': 50, '300$': 300 };
-      const emigrationPrice = emigrationPrices[bookingData.emigration.emigration_package] || 0;
-      breakdown.push({ no: '2', content: '出国Fasttrackフルサポート', presence: 'あり', amount: `$${emigrationPrice}` });
+      const emigrationPrices = { '50$': 50, '65$': 65, '300$': 300 };
+      const emigrationPrice = getPriceFromMap(bookingData.emigration.emigration_package, emigrationPrices);
+      const hasEmigrationPackage = emigrationPrice > 0;
+      breakdown.push({
+        no: '2',
+        content: '出国Fasttrackフルサポート',
+        presence: hasEmigrationPackage ? 'あり' : 'なし',
+        amount: `$${emigrationPrice}`,
+      });
       subtotal += emigrationPrice;
     }
 
