@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import logo from '..//assets/images/VJP-FastTrack-logo.png';
 
 const Footer = () => {
   const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
@@ -37,7 +36,7 @@ const Footer = () => {
     }
   }, [isSubmenuOpen]);
   return (
-    <footer className="w-[100vw] mx-auto bg-[#1a3e92] text-white mt-10 max-[640px]:mt-8">
+    <footer className=" max-w-screen mx-auto bg-[#1a3e92] text-white mt-10 max-[640px]:mt-8">
       <div className="w-[90vw] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-8 max-[640px]:px-2 max-[640px]:py-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8">
           {/* Logo and Social Media Section */}
@@ -47,7 +46,7 @@ const Footer = () => {
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-64 max-[640px]:w-100 max-w-xs rounded flex items-center justify-center">
                   <img
-                    src={logo}
+                    src="/src/assets/images/VJP-FastTrack-logo.png"
                     alt="VJP Flight Booking Logo"
                     className="w-100 h-auto"
                   />
@@ -103,7 +102,7 @@ const Footer = () => {
                 {isSubmenuOpen && (
                   <ul
                     ref={submenuRef}
-                    className="absolute left-1/2 bg-white text-black min-w-[260px] max-w-[400px] py-1 z-50 shadow-lg"
+                    className="absolute left-full ml-2 bg-white text-black min-w-[260px] max-w-[400px] py-2 z-50 shadow-lg"
                     style={submenuStyle}
                     onMouseEnter={() => setIsSubmenuOpen(true)}
                     onMouseLeave={() => setIsSubmenuOpen(false)}
