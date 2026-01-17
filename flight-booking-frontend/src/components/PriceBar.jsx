@@ -205,7 +205,7 @@ const PriceBar = ({
     }
 
     try {
-      const response = await validateCoupon(normalizedCode);
+      const response = await validateCoupon(normalizedCode, total);
       if (response.valid) {
         const coupon = response.coupon;
         setAppliedCoupon(coupon);

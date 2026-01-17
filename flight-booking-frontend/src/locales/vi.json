@@ -1,0 +1,28 @@
+{
+  "booking": {
+    "step1": {
+      "title": "ステップ1：フライトを選択",
+      "description": "出発地と到着地を選択してください",
+      "next": "ステップ2へ進む"
+    },
+    "step2": {
+      "title": "ステップ2：乗客情報",
+      "next": "ステップ3へ進む"
+    }
+  },
+  "common": {
+    "next": "次へ",
+    "back": "戻る",
+    "total": "合計: {{amount}}"
+  },
+  "navbar": {
+    "home": "ホーム",
+    "booking": "予約する"
+  },
+  "process": {
+    "step1": "フライト",
+    "step2": "乗客",
+    "step3": "支払い",
+    "success": "確認"
+  }
+}
