@@ -1,5 +1,8 @@
 {
   "booking": {
+    "back_label": "Back",
+    "review_booking_information_label": "Review Booking Information",
+    "enter_user_information_btn_label": "Enter User Information",
     "process_indicator_step1_label_1": "Enter Quote and Flight Information",
     "process_indicator_step1_label_2": "Enter User Information",
     "process_indicator_step1_label_3": "Review Booking Information",
@@ -194,7 +197,6 @@
       "vat_label": "VAT (8%)",
       "billed_amount_label": "Total amount",
       "payment_method_label": "Payment method",
-      "back_label": "Back",
       "reserve_label": "Reservation Information",
       "reserving_label": "Reserving...",
       "reservation_service_label": "Reservation Service"

@@ -261,6 +261,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     apiData.amount_after_coupon = prices.amountAfterDiscount.toFixed(2);
     apiData.tax = prices.vat.toFixed(2);
     apiData.total = prices.grandTotal.toFixed(2);
+    apiData.payment_method =
+      bookingData?.payment_method !== undefined && bookingData?.payment_method !== null
+        ? String(bookingData.payment_method)
+        : null;
 
     // Clean up empty/null fields
     Object.keys(apiData).forEach((key) => {
@@ -329,6 +333,15 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   // For display in table
   const totalExcludingTax = amountAfterCoupon;
   const couponDiscount = appliedDiscount;
+
+  const costHeaderCellClass =
+    'py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 border border-gray-200 text-left font-semibold text-black text-base max-[640px]:text-sm';
+  const costCellBaseClass =
+    'py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 border border-gray-200 text-black text-base max-[640px]:text-sm';
+  const costCellRightClass = `${costCellBaseClass} text-right`;
+  const costCellBoldRightClass = `${costCellRightClass} font-bold`;
+  const costSectionHeaderClass =
+    'py-2 px-4 max-[640px]:py-2 max-[640px]:px-2 border border-gray-200 font-bold text-black bg-gray-100 text-center';
 
   return (
     <div>
@@ -618,129 +631,103 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
             <table className="w-full border-collapse max-[640px]:text-sm">
               <thead>
                 <tr className="border-b-2 border-gray-300">
-                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">No.</th>
-                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">{t(`booking.step3.content_label`)}</th>
-                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-left font-semibold text-black text-base max-[640px]:text-sm">{t(`booking.step3.presence_label`)}</th>
-                  <th className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">{t(`booking.step3.amount_label`)}</th>
+                  <th className={costHeaderCellClass}>No.</th>
+                  <th className={costHeaderCellClass}>{t(`booking.step3.content_label`)}</th>
+                  <th className={costHeaderCellClass}>{t(`booking.step3.presence_label`)}</th>
+                  <th className={costHeaderCellClass}>{t(`booking.step3.amount_label`)}</th>
                 </tr>
               </thead>
               <tbody>
-                {immigrationItems.length > 0 && (
+                {immigrationItems.length > 0 ? (
                   <>
                     <tr>
-                      <td colSpan="4" className="py-2 px-4 font-bold text-black bg-gray-100">
+                      <td colSpan="4" className={costSectionHeaderClass}>
                         {t(`booking.step3.immigration_fast_track_label`)}:
                       </td>
                     </tr>
                     {immigrationItems.map((item, index) => (
                       <tr key={`immigration-${index}`} className="border-b border-gray-200">
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                          {item.no}
-                        </td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                          {item.content}
-                        </td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                          {item.presence}
-                        </td>
-                        <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">
-                          {item.amount}
-                        </td>
+                        <td className={costCellBaseClass}>{item.no}</td>
+                        <td className={costCellBaseClass}>{item.content}</td>
+                        <td className={costCellBaseClass}>{item.presence}</td>
+                        <td className={costCellRightClass}>{item.amount}</td>
                       </tr>
                     ))}
                   </>
-                )}
+                ) : null}
 
-                {emigrationItems.length > 0 && (
+                {emigrationItems.length > 0 ? (
                   emigrationItems.map((item, index) => (
                     <tr key={`emigration-${index}`} className="border-b border-gray-200">
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                        {item.no}
-                      </td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                        {item.content}
-                      </td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
-                        {item.presence}
-                      </td>
-                      <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right text-black text-base max-[640px]:text-sm">
-                        {item.amount}
-                      </td>
+                      <td className={costCellBaseClass}>{item.no}</td>
+                      <td className={costCellBaseClass}>{item.content}</td>
+                      <td className={costCellBaseClass}>{item.presence}</td>
+                      <td className={costCellRightClass}>{item.amount}</td>
                     </tr>
                   ))
-                )}
+                ) : null}
 
                 {/* Subtotal */}
                 <tr className="border-t-2 border-gray-300">
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  <td colSpan="3" className={costCellBoldRightClass}>
                     {t(`booking.step3.subtotal_label`)}
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                    ${subtotal.toFixed(2)}
-                  </td>
+                  <td className={costCellRightClass}>${subtotal.toFixed(2)}</td>
                 </tr>
 
                 {/* Vietjet Extra Fee */}
                 {extraFee > 0 && (
                   <tr>
-                    <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    <td colSpan="3" className={costCellBoldRightClass}>
                       {t(`booking.step3.vietjet_extra_fee_label`)}
                     </td>
-                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                      ${extraFee.toFixed(2)}
-                    </td>
+                    <td className={costCellRightClass}>${extraFee.toFixed(2)}</td>
                   </tr>
                 )}
 
                 {/* Coupon */}
                 <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  <td colSpan="3" className={costCellBoldRightClass}>
                     {t(`booking.step3.coupon_label`)}
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-green-600 text-base max-[640px]:text-sm">
+                  <td className={`${costCellRightClass} text-green-600`}>
                     - ${couponDiscount.toFixed(2)}
                   </td>
                 </tr>
 
                 {/* Total excluding tax */}
                 <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  <td colSpan="3" className={costCellBoldRightClass}>
                     {t(`booking.step3.total_excluding_tax_label`)}
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                    ${totalExcludingTax.toFixed(2)}
-                  </td>
+                  <td className={costCellRightClass}>${totalExcludingTax.toFixed(2)}</td>
                 </tr>
 
                 {/* VAT */}
                 <tr>
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  <td colSpan="3" className={costCellBoldRightClass}>
                     {t(`booking.step3.vat_label`)}
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                    ${vat.toFixed(2)}
-                  </td>
+                  <td className={costCellRightClass}>${vat.toFixed(2)}</td>
                 </tr>
 
                 {/* Final Total */}
                 <tr className="border-t-2 border-gray-300">
-                  <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                  <td colSpan="3" className={costCellBoldRightClass}>
                     {t(`booking.step3.billed_amount_label`)}
                   </td>
-                  <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-red-600 text-xl max-[640px]:text-base">
+                  <td className={`${costCellRightClass} text-red-600 text-xl max-[640px]:text-base font-bold`}>
                     ${billedAmount.toFixed(2)}
                   </td>
                 </tr>
 
                 {/* Payment Method */}
-                {bookingData?.payment_method && (
+                {bookingData?.payment_method !== undefined && bookingData?.payment_method !== null && (
                   <tr>
-                    <td colSpan="3" className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 font-bold text-black text-base max-[640px]:text-sm text-right">
+                    <td colSpan="3" className={costCellBoldRightClass}>
                       {t(`booking.step3.payment_method_label`)}
                     </td>
-                    <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-right font-bold text-black text-base max-[640px]:text-sm">
-                      {getPaymentMethodLabel(bookingData.payment_method)}
-                    </td>
+                    <td className={costCellRightClass}>{getPaymentMethodLabel(bookingData.payment_method)}</td>
                   </tr>
                 )}
               </tbody>

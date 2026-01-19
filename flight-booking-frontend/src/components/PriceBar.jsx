@@ -281,14 +281,14 @@ const PriceBar = ({
           <div className="flex flex-wrap justify-between items-start max-[1367px]:hidden max-[1367px]:justify-around">
             {/* 仮計算 */}
             <div className="flex flex-col items-start">
-              <span className="text-base text-black font-bold">{t(`booking.step1.preliminary_calculation_label`)}</span>
+              <span className="text-base text-black font-bold">{t(`booking.preliminary_calculation_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
             </div>
 
             {/* クーポン Section - Hidden on max-[1367px] */}
             <div className="relative flex flex-col gap-2 min-h-[70px] max-[1367px]:hidden">
               <div className="flex items-center gap-2">
-                <span className="text-base text-black font-bold">{t(`booking.step1.coupon_label`)}</span>
+                <span className="text-base text-black font-bold">{t(`booking.coupon_label`)}</span>
                 <input
                   type="text"
                   placeholder=""
@@ -338,13 +338,13 @@ const PriceBar = ({
 
             {/* 税金 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">{t(`booking.step1.tax_label`)}</span>
+              <span className="text-base text-black font-bold">{t(`booking.tax_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${vat.toFixed(2)}</span>
             </div>
 
             {/* 合計 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">{t(`booking.step1.total_label`)}</span>
+              <span className="text-base text-black font-bold">{t(`booking.total_label`)}</span>
               <span className="w-24 p-2 text-center font-bold">
                 ${total.toFixed(2)}
               </span>
@@ -354,7 +354,7 @@ const PriceBar = ({
               <div className="flex flex-row items-between gap-9 w-full">
                 {/* Payment Method Section */}
                 <div className="flex justify-start items-end gap-4 flex-1">
-                  <label className="text-base font-bold text-black whitespace-nowrap">支払方法</label>
+                  <label className="text-base font-bold text-black whitespace-nowrap">{t(`booking.payment_method_label`)}</label>
 
                   {/* Radio buttons for larger screens */}
                   <fieldset className="flex gap-5 max-[1367px]:hidden">
@@ -373,7 +373,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">現金払い</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_0`)}</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -390,7 +390,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">オンラインでクレジット決済</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_1`)}</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -407,7 +407,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">ベトナム口座振込</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_2`)}</span>
                     </label>
                   </fieldset>
 

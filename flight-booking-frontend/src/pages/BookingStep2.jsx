@@ -621,14 +621,14 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
               onClick={handleBack}
               className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 font-medium text-base max-[640px]:w-full"
             >
-              戻る
+              {t(`booking.back_label`)}
             </button>
             <button
               //hover with bg-white-500 with slow transition
               type="submit"
               className="px-8 py-3 bg-[#01ae00] text-white rounded-full hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium transition-all duration-300 text-base max-[391px]:text-sm max-[640px]:w-full"
             >
-              予約情報の確認
+              {t(`booking.review_booking_information_label`)}
             </button>
           </div>
         </form>

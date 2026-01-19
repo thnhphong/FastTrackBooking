@@ -1,5 +1,8 @@
 {
   "booking": {
+    "back_label": "Quay lại",
+    "review_booking_information_label": "Xem lại thông tin đặt chỗ",
+    "enter_user_information_btn_label": "Nhập thông tin hành khách",
     "process_indicator_step1_label_1": "Nhập thông tin báo giá và chuyến bay",
     "process_indicator_step1_label_2": "Nhập thông tin hành khách",
     "process_indicator_step1_label_3": "Xem lại thông tin đặt chỗ",

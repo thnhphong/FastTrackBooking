@@ -1,5 +1,8 @@
 {
   "booking": {
+    "back_label": "前へ",
+    "review_booking_information_label": "予約情報の確認",
+    "enter_user_information_btn_label": "利用者情報のご記入",
     "process_indicator_step1_label_1": "お見積とフライト情報のご記入",
     "process_indicator_step1_label_2": "利用者情報のご記入",
     "process_indicator_step1_label_3": "予約情報の確認",
@@ -194,7 +197,6 @@
       "vat_label": "消費税 VAT(8%)",
       "billed_amount_label": "請求額",
       "payment_method_label": "お支払い方法",
-      "back_label": "前へ",
       "reserve_label": "予約する",
       "reserving_label": "予約中...",
       "reservation_service_label": "ご予約サービス"
