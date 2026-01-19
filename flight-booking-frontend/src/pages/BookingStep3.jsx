@@ -3,18 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../services/bookingService';
 import ProcessIndicator from '../components/ProcessIndicator';
 import { useScrollToTop } from '../hooks/useScrollToTop';
-import {
-  getImmigrationPackageLabel,
-  getEmigrationPackageLabel,
-  getPickupVehicleLabel,
-  getSeatingPreferenceLabel,
-  getAirportLabel,
-  getContactLabel,
-  getSurveyChannelLabel,
-  getAddOnLabel,
-  getPaymentMethodLabel,
-  getCountryLabel,
-} from '../utils/labelGetters';
 import { formatDate } from '../utils/formHelpers';
 import BottomSection from '../components/BottomSection';
 import { getPriceFromMap, isTruthyFlag } from '../utils/pricingHelpers';
@@ -30,8 +18,57 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
 
 
   const getGenderLabel = (value) => {
-    return value === 'male' ? '男性' : value === 'female' ? '女性' : value;
+    if (value === 'male') return t('booking.step2.sex_label_male');
+    if (value === 'female') return t('booking.step2.sex_label_female');
+    return value || '';
   };
+
+  const translateEnum = (namespace, value) => {
+    if (value === undefined || value === null || value === '') return '';
+    const key = String(value);
+    const translated = t(`${namespace}.${key}`, { defaultValue: '' });
+    return translated || key;
+  };
+
+  const nationalityTranslationKeys = {
+    JPN: 'booking.step2.nationality_label_japan',
+    JAPAN: 'booking.step2.nationality_label_japan',
+    VNM: 'booking.step2.nationality_label_vietnam',
+    VIETNAM: 'booking.step2.nationality_label_vietnam',
+    OTHERS: 'booking.step2.nationality_label_others',
+    OTHER: 'booking.step2.nationality_label_others',
+  };
+
+  const getNationalityLabel = (value) => {
+    if (!value) return '';
+    const normalized = String(value).toUpperCase();
+    const translationKey = nationalityTranslationKeys[normalized];
+    if (translationKey) {
+      return t(translationKey);
+    }
+    return value;
+  };
+
+  const getContactMethodLabel = (value) => translateEnum('booking.step2.contact_options', value);
+  const getSurveyChannelLabel = (value) => translateEnum('booking.step2.survey_channels', value);
+  const getAddOnLabel = (value) => translateEnum('booking.step3.add_ons', value);
+  const getImmigrationPackageLabel = (value) => translateEnum('booking.step1.immigration_packages', value);
+  const getEmigrationPackageLabel = (value) => translateEnum('booking.step1.emigration_packages', value);
+  const getPickupVehicleLabel = (value) => translateEnum('booking.step1.pickup_vehicles', value);
+  const getSeatingPreferenceLabel = (value) => translateEnum('booking.step1.seating_preferences', value);
+  const getAirportLabel = (value) => translateEnum('booking.step1.airports', value);
+  const getPaymentMethodLabel = (value) => {
+    if (value === undefined || value === null || value === '') return '';
+    const translated = t(`booking.payment_method_label_${value}`, { defaultValue: '' });
+    return translated || String(value);
+  };
+
+  const presenceLabels = {
+    yes: t('booking.step3.presence_value_yes', { defaultValue: 'Included' }),
+    no: t('booking.step3.presence_value_no', { defaultValue: 'Not included' }),
+  };
+
+  const getPresenceLabel = (isIncluded) => (isIncluded ? presenceLabels.yes : presenceLabels.no);
 
   // ────────────────────────────────────────────────
   // Central price calculation – used for UI + API
@@ -92,56 +129,56 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     let subtotal = 0;
 
     if (bookingData?.immigration) {
-      // 1.1 Use of pick-up vehicle
-      if (bookingData.immigration.pickup_service && bookingData.immigration.pickup_service !== 0) {
-        const vehiclePrices = { 1: 20, 2: 25, 3: 50 };
-        const price = vehiclePrices[bookingData.immigration.pickup_service] || 0;
-        if (price > 0) {
-          breakdown.push({ no: '1.1', content: '迎車利用', presence: 'あり', amount: `$${price}` });
-          subtotal += price;
-        }
-      } else {
-        breakdown.push({ no: '1.1', content: '迎車利用', presence: 'なし', amount: '$0' });
-      }
+      const pickupService = bookingData.immigration.pickup_service;
+      const vehiclePrices = { 1: 20, 2: 25, 3: 50 };
+      const pickupPrice = vehiclePrices[pickupService] || 0;
+      const hasPickupService = pickupPrice > 0;
+      breakdown.push({
+        no: '1.1',
+        content: t('booking.step1.pickup_vehicle_label'),
+        presence: getPresenceLabel(hasPickupService),
+        amount: `$${hasPickupService ? pickupPrice : 0}`,
+      });
+      if (hasPickupService) subtotal += pickupPrice;
 
-      // 1.2 Guaranteed immigration clearance within 15 minutes (stored as string "true"/"false")
-      if (isTruthyFlag(bookingData.immigration.use_immigration_fast_track)) {
-        breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'あり', amount: '$15' });
-        subtotal += 15;
-      } else {
-        breakdown.push({ no: '1.2', content: '15分以内に入国審査手続き完了', presence: 'なし', amount: '$0' });
-      }
+      const fastTrackSelected = isTruthyFlag(bookingData.immigration.use_immigration_fast_track);
+      breakdown.push({
+        no: '1.2',
+        content: t('booking.step1.use_immigration_fast_track_label'),
+        presence: getPresenceLabel(fastTrackSelected),
+        amount: `$${fastTrackSelected ? 15 : 0}`,
+      });
+      if (fastTrackSelected) subtotal += 15;
 
-      // 1.3 Pick-up at the plane's exit (stored as string "true"/"false")
-      if (isTruthyFlag(bookingData.immigration.tarmac_pickup)) {
-        breakdown.push({ no: '1.3', content: "飛行機の降り口でのお迎え", presence: 'あり', amount: '$60' });
-        subtotal += 60;
-      } else {
-        breakdown.push({ no: '1.3', content: "飛行機の降り口でのお迎え", presence: 'なし', amount: '$0' });
-      }
+      const tarmacPickupSelected = isTruthyFlag(bookingData.immigration.tarmac_pickup);
+      breakdown.push({
+        no: '1.3',
+        content: t('booking.step1.tarmac_pickup_label'),
+        presence: getPresenceLabel(tarmacPickupSelected),
+        amount: `$${tarmacPickupSelected ? 60 : 0}`,
+      });
+      if (tarmacPickupSelected) subtotal += 60;
 
-      // 1.4 Entry Fasttrack Package
       const packagePrices = { '35$': 35, '40$': 40, '50$': 50, '300$': 300 };
       const packagePrice = getPriceFromMap(bookingData.immigration.immigration_package, packagePrices);
       const hasPackage = packagePrice > 0;
       breakdown.push({
         no: '1.4',
-        content: '入国ファストトラックパッケージ',
-        presence: hasPackage ? 'あり' : 'なし',
+        content: t('booking.step1.entry_fast_track_option_label'),
+        presence: getPresenceLabel(hasPackage),
         amount: `$${packagePrice}`,
       });
       subtotal += packagePrice;
     }
 
-    // 2 Full support for departures with Fasttrack
     if (bookingData?.emigration) {
       const emigrationPrices = { '50$': 50, '65$': 65, '300$': 300 };
       const emigrationPrice = getPriceFromMap(bookingData.emigration.emigration_package, emigrationPrices);
       const hasEmigrationPackage = emigrationPrice > 0;
       breakdown.push({
         no: '2',
-        content: '出国Fasttrackフルサポート',
-        presence: hasEmigrationPackage ? 'あり' : 'なし',
+        content: t('booking.step1.departure_fast_track_option_label'),
+        presence: getPresenceLabel(hasEmigrationPackage),
         amount: `$${emigrationPrice}`,
       });
       subtotal += emigrationPrice;
@@ -338,7 +375,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                     </td>
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
                       <span className="font-semibold">{t(`booking.step3.nationality_label`)}:</span>{' '}
-                      {getCountryLabel(
+                      {getNationalityLabel(
                         bookingData?.nationality || bookingData?.passport?.nationality
                       )}
                     </td>
@@ -359,11 +396,11 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   {/* Row 4: Passport No / Passport Expiration */}
                   <tr className="border-b border-gray-200">
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                      <span className="font-semibold">パスポート No.:</span>{' '}
+                      <span className="font-semibold">{t(`booking.step3.passport_number_label`)}:</span>{' '}
                       {bookingData?.passport?.passport_num}
                     </td>
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                      <span className="font-semibold">パスポートの有効期限満了日:</span>{' '}
+                      <span className="font-semibold">{t(`booking.step3.passport_expiry_date_label`)}:</span>{' '}
                       {formatDate(bookingData?.passport?.expire_date)}
                     </td>
                   </tr>
@@ -371,11 +408,11 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   {/* Row 5: Company name / Referrer */}
                   <tr className="border-b border-gray-200">
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
-                      <span className="font-semibold">会社名:</span>{' '}
+                      <span className="font-semibold">{t(`booking.step3.company_name_label`)}:</span>{' '}
                       {bookingData?.passport?.company_name || 'Other'}
                     </td>
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
-                      <span className="font-semibold">ご紹介の方のお名前:</span>{' '}
+                      <span className="font-semibold">{t(`booking.step3.referred_by_name_label`)}:</span>{' '}
                       {bookingData?.passport?.referer_name || ''}
                     </td>
                   </tr>
@@ -384,7 +421,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   <tr className="border-b border-gray-200">
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
                       <span className="font-semibold">{t(`booking.step3.contact_method_label`)}:</span>{' '}
-                      {getContactLabel(bookingData?.contact_method)}
+                      {getContactMethodLabel(bookingData?.contact_method)}
                     </td>
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
                       <span className="font-semibold">
@@ -440,7 +477,9 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                               <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
                                 {/* fix オプション：15分以内に入国審査手続き完了: booking.step3.use_immigration_fast_track_option_1 with string "利用する (15$)"*/}
                                 <strong>{t(`booking.step3.use_immigration_fast_track_label`)}:</strong>
-                                {bookingData.immigration.use_immigration_fast_track === 'true' ? "利用する (15$)" : "利用しない"}
+                                {bookingData.immigration.use_immigration_fast_track === 'true'
+                                  ? t(`booking.step1.use_immigration_fast_track_option_1`)
+                                  : t(`booking.step1.use_immigration_fast_track_option_0`)}
                               </td>
                             </tr>
                           )}
@@ -463,7 +502,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                           <tr className="border-b border-gray-200">
                             <td className="py-2 px-4 max-[640px]:py-1 max-[640px]:px-2 text-black text-base max-[640px]:text-sm">
 
-                              <strong>{t(`booking.step3.tarmac_pickup_label`)}:</strong> {bookingData.immigration.tarmac_pickup === 'true' ? "ご利用する (60$)" : "利用しない"}
+                              <strong>{t(`booking.step3.tarmac_pickup_label`)}:</strong>{' '}
+                              {bookingData.immigration.tarmac_pickup === 'true'
+                                ? t(`booking.step1.use_tarmac_pickup_option_1`)
+                                : t(`booking.step1.use_tarmac_pickup_option_0`)}
                             </td>
                           </tr>
                           <tr className="border-b border-gray-200">

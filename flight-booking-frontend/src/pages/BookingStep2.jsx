@@ -298,7 +298,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                               onChange={handleInputChange}
                               className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                             />
-                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>男性</span>
+                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step2.sex_label_male`)}</span>
                           </label>
                           <label className="flex items-center cursor-pointer">
                             <input
@@ -309,7 +309,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                               onChange={handleInputChange}
                               className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                             />
-                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>女性</span>
+                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step2.sex_label_female`)}</span>
                           </label>
                         </fieldset>
                       </FieldRequired>
@@ -336,10 +336,34 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                   </div>
                   {/* Phone Number and Nationality - side by side */}
                   <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-6 max-[640px]:gap-4">
+
+                    {/* Nationality */}
+                    <div className="text-start relative">
+                      <FieldRequired
+                        label={t(`booking.step2.nationality_label`)}
+                        required={true}
+                      >
+                        <select
+                          name="nationality"
+                          value={formData.nationality}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base appearance-none pr-10"
+                        >
+                          <option value="JPN">{t(`booking.step2.nationality_label_japan`)}</option> {/* Japan */}
+                          <option value="VNM">{t(`booking.step2.nationality_label_vietnam`)}</option> {/* Vietnam */}
+                          <option value="others">{t(`booking.step2.nationality_label_others`)}</option> {/* Other */}
+                        </select>
+                        <div className="absolute right-3 bottom-1.5 transform -translate-y-1/2 pointer-events-none">
+                          <svg className="w-5 h-5 text-[#bbbbbb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </FieldRequired>
+                    </div>
                     {/* Phone Number */}
                     <div className="text-start">
                       <FieldRequired
-                        label="国コード 付電話番号"
+                        label={t(`booking.step2.user_phone_number_label`)}
                         required={true}
                         error={errors.user_phone_number}
                         isEmpty={isInputEmpty(formData.user_phone_number)}
@@ -352,29 +376,6 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           placeholder=""
                           className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.phone_num ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                         />
-                      </FieldRequired>
-                    </div>
-                    {/* Nationality */}
-                    <div className="text-start relative">
-                      <FieldRequired
-                        label="国籍"
-                        required={false}
-                      >
-                        <select
-                          name="nationality"
-                          value={formData.nationality}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base appearance-none pr-10"
-                        >
-                          <option value="JPN">日本</option> {/* Japan */}
-                          <option value="VNM">ベトナム</option> {/* Vietnam */}
-                          <option value="others">その他</option> {/* Other */}
-                        </select>
-                        <div className="absolute right-3 bottom-1.5 transform -translate-y-1/2 pointer-events-none">
-                          <svg className="w-5 h-5 text-[#bbbbbb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
                       </FieldRequired>
                     </div>
                   </div>
@@ -456,12 +457,10 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       {showPassportWarning && (
                         <div className="flex-1 min-w-0 ml-14 max-[640px]:ml-0 font-bold max-[640px]:px-8">
                           <div className="text-red-600 font-bold text-base">
-                            ★ 要注意★
+                            {t(`booking.step2.passport_expiry_date_warning_label_1`)}
                           </div>
                           <div className="text-red-600 text-sm leading-relaxed">
-                            お客様のパスポートの有効期限が /n
-                            6か月未満のため、
-                            ビザ免除での入国はできません。
+                            {t(`booking.step2.passport_expiry_date_warning_label_2`)}
                           </div>
                         </div>
                       )}
@@ -540,7 +539,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       ))}
                     </fieldset>
                     <p className="mt-3 text-base text-blue-600 text-start">
-                      ※ベトナムの空港では無料Wi-Fiがあります。
+                      {t(`booking.step2.wifi_notice_label`)}
                     </p>
                   </FieldRequired>
                 </div>

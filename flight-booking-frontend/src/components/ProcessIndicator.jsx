@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 const ProcessIndicator = ({ currentStep }) => {
+  const { t } = useTranslation()
   const steps = [
-    { number: 1, label: 'お見積とフライト情報のご記入' }, //Enter your quote and flight information
-    { number: 2, label: '利用者情報のご記入' }, //Enter user information
-    { number: 3, label: '予約情報の確認' }, //Check reservation information
+    { number: 1, label: t(`booking.process_indicator_step1_label_1`) },
+    { number: 2, label: t(`booking.process_indicator_step1_label_2`) },
+    { number: 3, label: t(`booking.process_indicator_step1_label_3`) },
   ];
 
   return (

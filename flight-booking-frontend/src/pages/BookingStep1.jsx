@@ -323,15 +323,17 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         <div className="mb-6 p-4 text-left flex-col justify-center">
           <div className="flex flex-col text-[15px] text-gray-700 text-center mb-6">
             <p>
-              ✔️アカウント登録不要 ✔️パスポート写真送付不要 ✔️丁寧に対応 ✔️当日予約可
+              {t(`booking.information_label_1`)}
             </p>
-            <p>✔️日本語24時間対応 ✔️夜間・早朝の追加料無 ✔️予約簡単 ✔️日本語領収書発行可</p>
+            <p>
+              {t(`booking.information_label_2`)}
+              </p>
           </div>
 
-          {/* line esim */}
+          {/*
           <div className="flex flex-col text-[15px] font-bold text-right text-blue-700 underline">
             <a href="https://vietjapan.vip/line-chat/" target='_blank'>📱LINE予約でeSIMプレゼント＞＞</a>
-          </div>
+          </div> */}
 
         </div>
         {/* Your desired service */}
@@ -533,7 +535,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     onChange={handleInputChange}
                     className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:outline-none"
                   />
-                  <span className="ml-3 text-base text-black">
+                  <span className="ml-3 text-base text-black font-semibold">
                     {t(`booking.step1.other_option_label`)}
                   </span>
                 </label>

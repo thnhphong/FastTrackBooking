@@ -8,7 +8,7 @@ const FieldRequired = ({ label, required, children, error, isEmpty, customErrorM
   return (
     //make the field with higher height 
     <div>
-      <label className={`block text-base font-regular mb-2 ${(hasError || showCustomError) ? 'text-[#c02b0b]' : 'text-black'}`}>
+      <label className={`block text-base font-semibold mb-2 ${(hasError || showCustomError) ? 'text-[#c02b0b]' : 'text-black'}`}>
         {label}
         {required && (
           <span className="text-[#c02b0b] font-regular italic ml-1">

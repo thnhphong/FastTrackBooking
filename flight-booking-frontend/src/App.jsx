@@ -195,7 +195,7 @@ function LanguageWrapper({ lang, page, bookingData, setBookingData }) {
             <div className="text-blue-800 flex flex-start w-[90vw] mx-auto mb-8 font-bold hover:underline max-[1150px]:w-[96vw]">
               <a href="https://vietjapan.vip/book-domestic/" target="_blank" rel="noopener noreferrer">
                 {lang === 'ja' && 'ベトナム国内線ファストトラックの予約はこちら＞＞'}
-                {lang === 'en' && 'Book Domestic Flight Fast Track here >>'}
+                {lang === 'en' && 'Vietnam Domestic Fast Track Booking Here >>'}
                 {lang === 'vi' && 'Đặt Fast Track chuyến bay nội địa tại đây >>'}
               </a>
             </div>

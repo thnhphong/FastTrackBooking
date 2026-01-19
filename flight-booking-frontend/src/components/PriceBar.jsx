@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateCoupon } from '../services/bookingService';
-
+import { useTranslation } from 'react-i18next';
 const PriceBar = ({
   bookingData,
   onCouponApply,
@@ -8,6 +8,7 @@ const PriceBar = ({
   onPrimaryAction,
   primaryActionDisabled = false,
 }) => {
+  const { t } = useTranslation();
   // Initialize coupon state from bookingData to persist across steps
   const [couponCode, setCouponCode] = useState(bookingData?.coupon?.code || '');
   const [appliedCoupon, setAppliedCoupon] = useState(bookingData?.coupon?.appliedCoupon || null);
@@ -280,14 +281,14 @@ const PriceBar = ({
           <div className="flex flex-wrap justify-between items-start max-[1367px]:hidden max-[1367px]:justify-around">
             {/* 仮計算 */}
             <div className="flex flex-col items-start">
-              <span className="text-base text-black font-bold">仮計算</span>
+              <span className="text-base text-black font-bold">{t(`booking.step1.preliminary_calculation_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
             </div>
 
             {/* クーポン Section - Hidden on max-[1367px] */}
             <div className="relative flex flex-col gap-2 min-h-[70px] max-[1367px]:hidden">
               <div className="flex items-center gap-2">
-                <span className="text-base text-black font-bold">クーポン</span>
+                <span className="text-base text-black font-bold">{t(`booking.step1.coupon_label`)}</span>
                 <input
                   type="text"
                   placeholder=""
@@ -309,7 +310,7 @@ const PriceBar = ({
                   disabled={couponCode.trim() === '' || !!appliedCoupon}
                   className="px-3 py-2 bg-[#01ae00] text-white rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                 >
-                  適用
+                  {t(`booking.apply_label`)}
                 </button>
               </div>
 
@@ -337,13 +338,13 @@ const PriceBar = ({
 
             {/* 税金 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">税金</span>
+              <span className="text-base text-black font-bold">{t(`booking.step1.tax_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${vat.toFixed(2)}</span>
             </div>
 
             {/* 合計 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">合計</span>
+              <span className="text-base text-black font-bold">{t(`booking.step1.total_label`)}</span>
               <span className="w-24 p-2 text-center font-bold">
                 ${total.toFixed(2)}
               </span>
@@ -434,21 +435,21 @@ const PriceBar = ({
             <div className="flex items-start gap-10 justify-between max-[1367px]:px-10 max-[769px]:px-0 max-[769px]:justify-start max-[769px]:gap-6">
               <div className="flex flex-row items-start gap-20 max-[1367px]:gap-10 max-[769px]:gap-3">
                 <div className="flex flex-col items-start">
-                  <span className="text-base text-black font-bold">仮計算</span>
+                  <span className="text-base text-black font-bold">{t(`booking.preliminary_calculation_label`)}</span>
                   <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-base font-bold text-black">税金</span>
+                  <span className="text-base font-bold text-black">{t(`booking.tax_label`)}</span>
                   <span className="text-base font-regular text-black">${vat.toFixed(2)}</span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-base font-bold text-black">合計</span>
+                  <span className="text-base font-bold text-black">{t(`booking.total_label`)}</span>
                   <span className="text-start font-bold text-black">${total.toFixed(2)}</span>
                 </div>
               </div>
               {/* make label + select into a col*/}
               <div className="flex flex-col gap-1 min-[1367px]:hidden max-[1367px]:block max-[769px]:w-[40%] max-[769px]:py-0 max-[769px]:items-start">
-                <label className="text-base font-bold text-black">支払方法</label>
+                <label className="text-base font-bold text-black">{t(`booking.payment_method_label`)}</label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(Number(e.target.value))}
@@ -457,7 +458,7 @@ const PriceBar = ({
                 >
                   {paymentMethods.map((method) => (
                     <option key={method.value} value={method.value} className="text-black ">
-                      {method.label}
+                      {t(`booking.payment_method_label_${method.value}`)}
                     </option>
                   ))}
                 </select>
@@ -489,7 +490,7 @@ const PriceBar = ({
               )}
 
               <div className="flex w-full items-center max-[769px]:py-0 gap-0">
-                <span className="text-base text-black font-bold">クーポン</span>
+                <span className="text-base text-black font-bold">{t(`booking.coupon_label`)}</span>
                 <input
                   type="text"
                   placeholder=""
@@ -508,7 +509,7 @@ const PriceBar = ({
                   disabled={couponCode.trim() === '' || !!appliedCoupon}
                   className="px-3 py-2 bg-[#01ae00] text-white rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                 >
-                  適用
+                  {t(`booking.apply_label`)}
                 </button>
                 {primaryActionLabel && onPrimaryAction && (
                   <button
