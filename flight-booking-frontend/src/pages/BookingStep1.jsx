@@ -5,15 +5,14 @@ import Error from '../components/Error';
 import FieldRequired from '../components/FieldRequired';
 import JapaneseDatePicker from '../components/JapaneseDatePicker';
 import { useScrollToTop } from '../hooks/useScrollToTop';
-import { airports, immigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../constants/bookingOptions';
+import { airports, immigrationPackages, sgnImmigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../constants/bookingOptions';
 import { isInputEmpty } from '../utils/formHelpers';
-import { min } from 'date-fns';
 import BottomSection from '../components/BottomSection';
 import { useTranslation } from 'react-i18next';
 
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   useScrollToTop();
   const [time, setTime] = useState({ hrs: '', mins: '' });
   const hoursInputRef = useRef(null);
@@ -57,6 +56,45 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     departure_flight_number: bookingData?.emigration?.departure_flight_number ?? '',
     sameAsEntry: false, // Track if "Same as entry" checkbox is checked
   });
+
+  const normalizeAirportValue = (airportValue) => {
+    if (airportValue === '' || airportValue === null || airportValue === undefined) {
+      return null;
+    }
+    const parsed = Number(airportValue);
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  const getSelectedAirportCode = (airportValue) => {
+    const normalizedValue = normalizeAirportValue(airportValue);
+    if (normalizedValue === null) {
+      return null;
+    }
+    return airports.find(airport => airport.value === normalizedValue)?.code ?? null;
+  };
+
+  const getActiveImmigrationPackages = (airportValue) => {
+    const airportCode = getSelectedAirportCode(airportValue);
+    return airportCode === 'SGN' ? sgnImmigrationPackages : immigrationPackages;
+  };
+
+  const getSelectedImmigrationPackage = (airportValue, selectedValue) => {
+    const activePackages = getActiveImmigrationPackages(airportValue);
+    const normalizedValue = Number(selectedValue);
+    const matched = activePackages.find(pkg => pkg.value === normalizedValue);
+    return matched ?? activePackages[0];
+  };
+
+  const selectedAirportCode = getSelectedAirportCode(formData.arrival_airport);
+  const isSgnAirport = selectedAirportCode === 'SGN';
+  const activeImmigrationPackages = getActiveImmigrationPackages(formData.arrival_airport);
+  const immigrationPackageTranslationKey = isSgnAirport ? 'sgn_immigration_packages' : 'immigration_packages';
+  const immigrationPackageFieldLabel = isSgnAirport
+    ? t(`booking.step1.sgn_fast_track_label`)
+    : t(`booking.step1.entry_fast_track_option_label`);
+  const selectedImmigrationPackage = getSelectedImmigrationPackage(formData.arrival_airport, formData.entry_fast_track_option);
+  const hasSelectedArrivalAirport = formData.arrival_airport !== '' && formData.arrival_airport !== null && formData.arrival_airport !== undefined;
+  const showImmigrationFastTrackAddon = hasSelectedArrivalAirport && !isSgnAirport && selectedImmigrationPackage?.priceKey !== '300$';
 
   const handleTimeChange = (type, value) => {
     // Only digits, max 2 characters
@@ -102,6 +140,20 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         delete newErrors[name];
         return newErrors;
       });
+    }
+
+    if (name === 'arrival_airport') {
+      const normalizedAirportValue = normalizeAirportValue(value);
+      const airportCode = getSelectedAirportCode(normalizedAirportValue);
+      setFormData(prev => ({
+        ...prev,
+        [name]: normalizedAirportValue,
+        ...(airportCode === 'SGN' ? {
+          entry_fast_track_option: 0,
+          use_immigration_fast_track: 'false',
+        } : {}),
+      }));
+      return;
     }
 
     // Auto-select first package when checkbox is checked
@@ -228,7 +280,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         arrival_request: formData.arrival_request,
         // Persist \"他のオプション\" checkbox state so it remains checked when returning to Step 1
         useOtherOptions: formData.useOtherOptions,
-        immigration_package: immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$',
+        immigration_package: selectedImmigrationPackage?.priceKey || '35$',
       } : null,
       emigration: formData.useEmigration ? {
         departure_fast_track_option: formData.departure_fast_track_option,
@@ -263,9 +315,12 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     const newErrors = {};
 
     if (formData.useImmigration) {
-      if (formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined) {
+      if (hasSelectedArrivalAirport && (formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined)) {
         newErrors.entry_fast_track_option = 'Please select an immigration package';
       }
+
+      const selectedImmigrationPackage = getSelectedImmigrationPackage(formData.arrival_airport, formData.entry_fast_track_option);
+      const requiresFastTrackOption = !isSgnAirport && selectedImmigrationPackage?.priceKey !== '300$';
 
       if (!formData.arrival_flight_reservation_code || !formData.arrival_flight_reservation_code.trim()) {
         newErrors.arrival_flight_reservation_code = 'This field is required';
@@ -276,11 +331,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       if (!formData.arrival_date) {
         newErrors.arrival_date = 'This field is required';
       }
-      if (formData.arrival_airport === '' || formData.arrival_airport === null || formData.arrival_airport === undefined) {
+      if (!hasSelectedArrivalAirport) {
         newErrors.arrival_airport = 'This field is required';
       }
-      // Always validate use_immigration_fast_track for non-300$ packages (not part of "Other options")
-      if (formData.entry_fast_track_option !== 3 && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '')) {
+      // Always validate use_immigration_fast_track for packages that are not priced at 300$
+      if (requiresFastTrackOption && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '')) {
         newErrors.use_immigration_fast_track = 'This field is required';
       }
       // Only validate pickup_service if "Other options" is checked
@@ -327,7 +382,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
             </p>
             <p>
               {t(`booking.information_label_2`)}
-              </p>
+            </p>
           </div>
 
           {/*
@@ -357,90 +412,196 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
           {formData.useImmigration && (
             //make the div bigger 
             <div className="mb-6 w-full">
+              <div>
+                <h1 className="text-md font-bold text-black mb-4 text-left">{t(`booking.step1.immigration_package_title`)}</h1>
+                <p className="text-gray-700 text-left">{t(`booking.step1.immigration_package_description`)}</p>
+              </div>
               <hr className="border-b-4 border-[#CBCBCB] my-8" />
-              {/* Immigration Package and Complete within 15 minutes group using cols-2*/}
-              <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-4">
-                <div className="mb-6">
-                  <FieldRequired label={t(`booking.step1.entry_fast_track_option_label`)} required={true} error={errors.entry_fast_track_option} isEmpty={formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined}>
-                    <fieldset className="space-y-2 w-[98%] border-none p-0 m-0">
-                      {immigrationPackages.map(pkg => (
-                        <label key={pkg.value} className="flex items-center cursor-pointer">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                  <FieldRequired
+                    label={t(`booking.step1.airport_label`)}
+                    required={true}
+                    error={errors.arrival_airport}
+                    isEmpty={formData.arrival_airport === '' || formData.arrival_airport === null || formData.arrival_airport === undefined}
+                  >
+                    <fieldset className="space-y-2 border-none p-0 m-0">
+                      {airports.map(airport => (
+                        <label key={airport.value} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="entry_fast_track_option"
-                            value={pkg.value}
-                            checked={formData.entry_fast_track_option === pkg.value}
+                            name="arrival_airport"
+                            value={airport.value}
+                            checked={formData.arrival_airport === airport.value || formData.arrival_airport === String(airport.value)}
                             onChange={handleInputChange}
-                            className="w-4 h-4 ..."
+                            required={formData.useImmigration}
+                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
                           />
-                          <span className="ml-3 text-base text-left text-black">
-                            {t(`booking.step1.immigration_packages.${pkg.value}`)}
-                          </span>
+                          <span className="ml-3 text-base text-left text-black">{t(`booking.step1.airports.${airport.value}`)}</span>
                         </label>
                       ))}
                     </fieldset>
                   </FieldRequired>
+                  {hasSelectedArrivalAirport && showImmigrationFastTrackAddon && (
+                    <div className="mt-6">
+                      <FieldRequired
+                        label={t(`booking.step1.use_immigration_fast_track_label`)}
+                        required={true}
+                        error={errors.use_immigration_fast_track}
+                        isEmpty={!formData.use_immigration_fast_track || formData.use_immigration_fast_track === ''}
+                      >
+                        <fieldset className="space-y-2 border-none p-0 m-0">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="radio"
+                              name="use_immigration_fast_track"
+                              value="false"
+                              checked={formData.use_immigration_fast_track === 'false'}
+                              onChange={() => {
+                                if (errors.use_immigration_fast_track) {
+                                  setErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors.use_immigration_fast_track;
+                                    return newErrors;
+                                  });
+                                }
+                                setFormData(prev => ({ ...prev, use_immigration_fast_track: 'false' }));
+                              }}
+                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            />
+                            <span
+                              className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}
+                            >
+                              {t(`booking.step1.use_immigration_fast_track_option_0`)}
+                            </span>
+                          </label>
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="radio"
+                              name="use_immigration_fast_track"
+                              value="true"
+                              checked={formData.use_immigration_fast_track === 'true'}
+                              onChange={() => {
+                                if (errors.use_immigration_fast_track) {
+                                  setErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors.use_immigration_fast_track;
+                                    return newErrors;
+                                  });
+                                }
+                                setFormData(prev => ({ ...prev, use_immigration_fast_track: 'true' }));
+                              }}
+                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            />
+                            <span
+                              className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}
+                            >
+                              {t(`booking.step1.use_immigration_fast_track_option_1`)}
+                            </span>
+                          </label>
+                          <p className="text-md text-[#1362cb] mt-2 text-left">
+                            {t(`booking.step1.immigration_fast_track_notice`)}
+                          </p>
+                        </fieldset>
+                      </FieldRequired>
+                    </div>
+                  )}
                 </div>
-                {/* Only show "Complete within 15 min" option for first 3 packages (not 300$) - always visible, not part of "Other options" */}
-                {formData.entry_fast_track_option !== 3 && (
-                  <div className="mt-6">
-                    <FieldRequired
-                      label={t(`booking.step1.use_immigration_fast_track_label`)}
-                      required={true}
-                      error={errors.use_immigration_fast_track}
-                      isEmpty={!formData.use_immigration_fast_track || formData.use_immigration_fast_track === ''}
-                    >
-                      <fieldset className="space-y-2 border-none p-0 m-0">
-                        <label className="flex items-center cursor-pointer">
-                          <input
-                            type="radio"
-                            name="use_immigration_fast_track"
-                            value="false"
-                            checked={formData.use_immigration_fast_track === 'false'}
-                            onChange={() => {
-                              if (errors.use_immigration_fast_track) {
-                                setErrors(prev => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors.use_immigration_fast_track;
-                                  return newErrors;
-                                });
-                              }
-                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'false' }));
-                            }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
-                          />
-                          <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step1.use_immigration_fast_track_option_0`)}</span>
-                        </label>
-                        <label className="flex items-center cursor-pointer">
-                          <input
-                            type="radio"
-                            name="use_immigration_fast_track"
-                            value="true"
-                            checked={formData.use_immigration_fast_track === 'true'}
-                            onChange={() => {
-                              if (errors.use_immigration_fast_track) {
-                                setErrors(prev => {
-                                  const newErrors = { ...prev };
-                                  delete newErrors.use_immigration_fast_track;
-                                  return newErrors;
-                                });
-                              }
-                              setFormData(prev => ({ ...prev, use_immigration_fast_track: 'true' }));
-                            }}
-                            className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
-                          />
-                          <span className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step1.use_immigration_fast_track_option_1`)}</span>
-                        </label>
-                        <p className="text-md text-[#1362cb] mt-2 text-left">
-                          {t(`booking.step1.immigration_fast_track_notice`)}
-                        </p>
-                      </fieldset>
-                    </FieldRequired>
-                  </div>
-                )}
+                <div>
+                  {hasSelectedArrivalAirport ? (
+                    <div className="mb-6">
+                      <FieldRequired
+                        label={immigrationPackageFieldLabel}
+                        required={true}
+                        error={errors.entry_fast_track_option}
+                        isEmpty={formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined}
+                      >
+                        <fieldset className="space-y-2 w-[98%] border-none p-0 m-0">
+                          {activeImmigrationPackages.map(pkg => (
+                            <label key={pkg.value} className="flex items-center cursor-pointer">
+                              <input
+                                type="radio"
+                                name="entry_fast_track_option"
+                                value={pkg.value}
+                                checked={Number(formData.entry_fast_track_option) === pkg.value}
+                                onChange={handleInputChange}
+                                className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
+                              />
+                              <span className="ml-3 text-base text-left text-black">
+                                {t(`booking.step1.${immigrationPackageTranslationKey}.${pkg.value}`)}
+                              </span>
+                            </label>
+                          ))}
+                        </fieldset>
+                      </FieldRequired>
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <FieldRequired
+                        label={t(`booking.step1.use_immigration_fast_track_label`)}
+                        required={true}
+                        error={errors.use_immigration_fast_track}
+                        isEmpty={!formData.use_immigration_fast_track || formData.use_immigration_fast_track === ''}
+                      >
+                        <fieldset className="space-y-2 border-none p-0 m-0">
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="radio"
+                              name="use_immigration_fast_track"
+                              value="false"
+                              checked={formData.use_immigration_fast_track === 'false'}
+                              onChange={() => {
+                                if (errors.use_immigration_fast_track) {
+                                  setErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors.use_immigration_fast_track;
+                                    return newErrors;
+                                  });
+                                }
+                                setFormData(prev => ({ ...prev, use_immigration_fast_track: 'false' }));
+                              }}
+                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            />
+                            <span
+                              className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}
+                            >
+                              {t(`booking.step1.use_immigration_fast_track_option_0`)}
+                            </span>
+                          </label>
+                          <label className="flex items-center cursor-pointer">
+                            <input
+                              type="radio"
+                              name="use_immigration_fast_track"
+                              value="true"
+                              checked={formData.use_immigration_fast_track === 'true'}
+                              onChange={() => {
+                                if (errors.use_immigration_fast_track) {
+                                  setErrors(prev => {
+                                    const newErrors = { ...prev };
+                                    delete newErrors.use_immigration_fast_track;
+                                    return newErrors;
+                                  });
+                                }
+                                setFormData(prev => ({ ...prev, use_immigration_fast_track: 'true' }));
+                              }}
+                              className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.use_immigration_fast_track && (!formData.use_immigration_fast_track || formData.use_immigration_fast_track === '') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
+                            />
+                            <span
+                              className={`ml-3 text-base ${errors.use_immigration_fast_track && formData.use_immigration_fast_track === undefined ? 'text-[#c02b0b]' : 'text-black'}`}
+                            >
+                              {t(`booking.step1.use_immigration_fast_track_option_1`)}
+                            </span>
+                          </label>
+                          <p className="text-md text-[#1362cb] mt-2 text-left">
+                            {t(`booking.step1.immigration_fast_track_notice`)}
+                          </p>
+                        </fieldset>
+                      </FieldRequired>
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
                 <div>
                   <FieldRequired
                     label={t(`booking.step1.flight_reservation_code_label`)}
@@ -478,27 +639,6 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border text-base border-[#f2f2f2] rounded-lg focus:outline-none ${errors.arrival_flight_number ? 'border-[#c02b0b]' : 'border-[#b98d5d]'
                         }`}
                     />
-                  </FieldRequired>
-                </div>
-
-                <div>
-                  <FieldRequired label={t(`booking.step1.airport_label`)} required={true} error={errors.arrival_airport} isEmpty={formData.arrival_airport === '' || formData.arrival_airport === null || formData.arrival_airport === undefined}>
-                    <fieldset className="space-y-2 border-none p-0 m-0">
-                      {airports.map(airport => (
-                        <label key={airport.value} className="flex items-center cursor-pointer">
-                          <input
-                            type="radio"
-                            name="arrival_airport"
-                            value={airport.value}
-                            checked={formData.arrival_airport === airport.value || formData.arrival_airport === String(airport.value)}
-                            onChange={handleInputChange}
-                            required={formData.useImmigration}
-                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
-                          />
-                          <span className="ml-3 text-base text-left text-black">{t(`booking.step1.airports.${airport.value}`)}</span>
-                        </label>
-                      ))}
-                    </fieldset>
                   </FieldRequired>
                 </div>
 
@@ -913,19 +1053,15 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         </div>
       </div>
       <BottomSection />
-      
       {/* PriceBar - Always visible at bottom */}
       <PriceBar
         bookingData={{
           ...bookingData,
           immigration: formData.useImmigration ? {
             entry_fast_track_option: formData.entry_fast_track_option ?? 0,
-            immigration_package: immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$',
+            immigration_package: selectedImmigrationPackage?.priceKey || '35$',
             tarmac_pickup: formData.useOtherOptions ? formData.tarmac_pickup : 'false',
-            use_immigration_fast_track:
-              (immigrationPackages[formData.entry_fast_track_option]?.priceKey || '35$') !== '300$'
-                ? formData.use_immigration_fast_track
-                : 'false',
+            use_immigration_fast_track: showImmigrationFastTrackAddon ? formData.use_immigration_fast_track : 'false',
             pickup_service: formData.useOtherOptions ? formData.pickup_service : 0,
           } : null,
           emigration: formData.useEmigration ? {
@@ -942,7 +1078,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
           (formData.useEmigration && (formData.departure_fast_track_option === '' || formData.departure_fast_track_option === null || formData.departure_fast_track_option === undefined))
         }
       />
-    </div>
+    </div >
   );
 };
 

@@ -13,6 +13,13 @@ export const immigrationPackages = [
   { value: 3, priceKey: '300$' },
 ];
 
+export const sgnImmigrationPackages = [
+  { value: 0, priceKey: '35$' },
+  { value: 1, priceKey: '50$' },
+  { value: 2, priceKey: '65$' },
+  { value: 3, priceKey: '300$' },
+];
+
 export const emigrationPackages = [
   { value: 0, priceKey: '50$' },
   { value: 1, priceKey: '65$' },

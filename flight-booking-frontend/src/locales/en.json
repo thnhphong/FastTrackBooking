@@ -20,12 +20,21 @@
     "step1": {
       "title": "Your desired service",
       "immigration_package_checkbox": "Use of the immigration fast track (from $35)",
+      "immigration_package_title": "Choose your basic package",
+      "immigration_package_description": "*Please note: Fees vary by airport.",
       "entry_fast_track_option_label": "Fast Track Entry Package",
+      "sgn_fast_track_label": "SGN Fast Track Entry Package",
       "immigration_packages": {
         "0": "VIP_IN1_Use priority lane only at immigration (Fee: $35)",
         "1": "VIP_IN2_Priority lane at immigration + escort to pick-up location outside the airport (Fee: $40)",
         "2": "VIP_IN3_Priority lane access at immigration + baggage claim support + escort to pick-up location outside the airport (Fee: $50)",
         "3": "VIP_IN6_VVIP Priority Lane Use/Non-stop Package (Fee: $300)"
+      },
+      "sgn_immigration_packages": {
+        "0": "IN_Priority ($35): Priority immigration lane (cuts wait time by 50%+, but crowded periods may still see 30+ min waits).",
+        "1": "IN_Priority Plus ($50): Priority lane plus escort to your pick-up point outside the airport.",
+        "2": "IN_Premium ($65): Top priority lane (reduces wait by over 90%; waits capped at 10 minutes).",
+        "3": "IN_Black ($300): Non-stop immigration pass (procedure handled for you with zero waiting time)."
       },
       "use_immigration_fast_track_label": "Option: Passport control completed in under 15 minutes",
       "use_immigration_fast_track_option_0": "Do not use",

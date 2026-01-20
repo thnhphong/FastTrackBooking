@@ -20,12 +20,21 @@
     "step1": {
       "title": "Dịch vụ bạn mong muốn",
       "immigration_package_checkbox": "Sử dụng Fast Track nhập cảnh (từ $35)",
+      "immigration_package_title": "Chọn gói cơ bản",
+      "immigration_package_description": "*Lưu ý: Giá cả khác nhau tùy theo sân bay.",
       "entry_fast_track_option_label": "Gói Fast Track nhập cảnh",
+      "sgn_fast_track_label": "Gói Fast Track nhập cảnh dành riêng cho SGN",
       "immigration_packages": {
         "0": "VIP_IN1_Tận dụng làn ưu tiên tại cửa nhập cảnh (Phí $35)",
         "1": "VIP_IN2_Làn ưu tiên tại cửa nhập cảnh + dẫn khách đến điểm đón bên ngoài sân bay (Phí $40)",
         "2": "VIP_IN3_Làn ưu tiên tại cửa nhập cảnh + hỗ trợ lấy hành lý + dẫn đến điểm đón bên ngoài sân bay (Phí $50)",
         "3": "VIP_IN6_Gói VVIP ưu tiên tối đa/Không dừng (Phí $300)"
+      },
+      "sgn_immigration_packages": {
+        "0": "IN_Priority (35$): Làn ưu tiên nhập cảnh bình thường (rút ngắn hơn 50% thời gian chờ, nhưng khi đông vẫn có thể phải chờ 30 phút trở lên).",
+        "1": "IN_Priority Plus (50$): Làn ưu tiên và hướng dẫn đến điểm đón bên ngoài sân bay.",
+        "2": "IN_Premium (65$): Làn ưu tiên cao nhất (giảm hơn 90% thời gian chờ; tối đa 10 phút).",
+        "3": "IN_Black (300$): Đi thẳng qua thủ tục nhập cảnh (dịch vụ hoàn tất giúp bạn, không chờ đợi)."
       },
       "use_immigration_fast_track_label": "Tùy chọn: Hoàn tất thủ tục nhập cảnh trong vòng 15 phút",
       "use_immigration_fast_track_option_0": "Không sử dụng",
