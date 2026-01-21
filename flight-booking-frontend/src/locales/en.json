@@ -89,6 +89,17 @@
         "7": "Rear window seat",
         "8": "Rear aisle seat",
         "9": "Rear middle seat or window seat"
+      },
+      "class_document_label": "Class documents",
+      "class_document_options": {
+        "economy": "Economy class",
+        "business": "Business class"
+      },
+      "baggage_availability_label": "Baggage availability",
+      "baggage_availability_options": {
+        "available": "Available",
+        "not_available": "Not available",
+        "undecided": "Undecided"
       }
     },
     "step2": {

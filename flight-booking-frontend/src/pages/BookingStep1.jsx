@@ -34,6 +34,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
     arrival_phone_number: bookingData?.immigration?.arrival_phone_number ?? '',
     arrival_request: bookingData?.immigration?.arrival_request ?? '',
+    arrival_class_document: bookingData?.arrival_class_document || '',
+    arrival_baggage_availability: bookingData?.arrival_baggage_availability || '',
+    departure_class_document: bookingData?.departure_class_document || '',
+    departure_baggage_availability: bookingData?.departure_baggage_availability || '',
     useOtherOptions: bookingData?.immigration?.useOtherOptions === true ||
       bookingData?.immigration?.useOtherOptions === 'true' ||
       // Auto-check if pickup_service is not 0 or tarmac_pickup is true
@@ -48,7 +52,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     departure_flight_reservation_code: bookingData?.emigration?.departure_flight_reservation_code ?? '',
     airline_membership_num: bookingData?.emigration?.airline_membership_num ?? '',
     departure_airport_code: typeof bookingData?.emigration?.departure_airport_code === 'number' ? bookingData.emigration.departure_airport_code : (bookingData?.emigration?.departure_airport_code !== undefined && bookingData?.emigration?.departure_airport_code !== null ? Number(bookingData.emigration.departure_airport_code) : ''),
-    departure_seating_preferences: typeof bookingData?.emigration?.departure_seating_preferences === 'number' ? bookingData.emigration.departure_seating_preferences : (bookingData?.emigration?.departure_seating_preferences !== undefined && bookingData?.emigration?.departure_seating_preferences !== null ? Number(bookingData.emigration.departure_seating_preferences) : ''),
+    departure_seating_preferences:
+      bookingData?.emigration?.departure_seating_preferences !== undefined && bookingData?.emigration?.departure_seating_preferences !== null
+        ? Number(bookingData.emigration.departure_seating_preferences)
+        : 0,
     departure_phone_number: bookingData?.emigration?.departure_phone_number ?? '',
     departure_request: bookingData?.emigration?.departure_request ?? '',
     departure_date: bookingData?.emigration?.departure_date ?? '',
@@ -89,9 +96,6 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const isSgnAirport = selectedAirportCode === 'SGN';
   const activeImmigrationPackages = getActiveImmigrationPackages(formData.arrival_airport);
   const immigrationPackageTranslationKey = isSgnAirport ? 'sgn_immigration_packages' : 'immigration_packages';
-  const immigrationPackageFieldLabel = isSgnAirport
-    ? t(`booking.step1.sgn_fast_track_label`)
-    : t(`booking.step1.entry_fast_track_option_label`);
   const selectedImmigrationPackage = getSelectedImmigrationPackage(formData.arrival_airport, formData.entry_fast_track_option);
   const hasSelectedArrivalAirport = formData.arrival_airport !== '' && formData.arrival_airport !== null && formData.arrival_airport !== undefined;
   const showImmigrationFastTrackAddon = hasSelectedArrivalAirport && !isSgnAirport && selectedImmigrationPackage?.priceKey !== '300$';
@@ -156,6 +160,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       return;
     }
 
+    const processedName = ['arrival_class_document', 'arrival_baggage_availability', 'departure_class_document', 'departure_baggage_availability'].includes(name)
+      ? name
+      : name;
+
     // Auto-select first package when checkbox is checked
     if (type === 'checkbox' && name === 'useImmigration' && checked && formData.entry_fast_track_option === '') {
       setFormData(prev => ({
@@ -207,7 +215,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     setFormData(prev => {
       const updated = {
         ...prev,
-        [name]:
+        [processedName]:
           type === 'checkbox'
             ? Boolean(checked) // Ensure checkbox values are always boolean
             : ['pickup_service', 'entry_fast_track_option', 'departure_fast_track_option', 'arrival_airport', 'departure_airport_code', 'seating_pref', 'departure_seating_preferences'].includes(
@@ -342,6 +350,12 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       if (formData.useOtherOptions && (formData.pickup_service === null || formData.pickup_service === undefined)) {
         newErrors.pickup_service = 'This field is required';
       }
+      if (!formData.arrival_class_document) {
+        newErrors.arrival_class_document = 'This field is required';
+      }
+      if (!formData.arrival_baggage_availability) {
+        newErrors.arrival_baggage_availability = 'This field is required';
+      }
     }
 
     if (formData.useEmigration) {
@@ -359,6 +373,12 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       }
       if (formData.departure_airport_code === '' || formData.departure_airport_code === null || formData.departure_airport_code === undefined) {
         newErrors.departure_airport_code = 'This field is required';
+      }
+      if (!formData.departure_class_document) {
+        newErrors.departure_class_document = 'This field is required';
+      }
+      if (!formData.departure_baggage_availability) {
+        newErrors.departure_baggage_availability = 'This field is required';
       }
     }
 
@@ -511,7 +531,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   {hasSelectedArrivalAirport ? (
                     <div className="mb-6">
                       <FieldRequired
-                        label={immigrationPackageFieldLabel}
+                        label={t(`booking.step1.entry_fast_track_option_label`)}
                         required={true}
                         error={errors.entry_fast_track_option}
                         isEmpty={formData.entry_fast_track_option === '' || formData.entry_fast_track_option === null || formData.entry_fast_track_option === undefined}
@@ -660,6 +680,61 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                         }`}
                       error={errors.arrival_date}
                     />
+                  </FieldRequired>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <FieldRequired
+                    label={t(`booking.step1.class_document_label`)}
+                    required={true}
+                    error={errors.arrival_class_document}
+                    isEmpty={!formData.arrival_class_document}
+                  >
+                    <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
+                      {['economy', 'business'].map(option => (
+                        <label key={`imm-class-${option}`} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="arrival_class_document"
+                            value={option}
+                            checked={formData.arrival_class_document === option}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
+                          />
+                          <span className="ml-3 text-base text-left text-black">
+                            {t(`booking.step1.class_document_options.${option}`)}
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  </FieldRequired>
+                </div>
+                <div>
+                  <FieldRequired
+                    label={t(`booking.step1.baggage_availability_label`)}
+                    required={true}
+                    error={errors.arrival_baggage_availability}
+                    isEmpty={!formData.arrival_baggage_availability}
+                  >
+                    <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
+                      {['available', 'not_available', 'undecided'].map(option => (
+                        <label key={`imm-bag-${option}`} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="arrival_baggage_availability"
+                            value={option}
+                            checked={formData.arrival_baggage_availability === option}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
+                          />
+                          <span className="ml-3 text-base text-left text-black">
+                            {t(`booking.step1.baggage_availability_options.${option}`)}
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
                   </FieldRequired>
                 </div>
               </div>
@@ -1018,6 +1093,61 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                <div>
+                  <FieldRequired
+                    label={t(`booking.step1.class_document_label`)}
+                    required={true}
+                    error={errors.departure_class_document}
+                    isEmpty={!formData.departure_class_document}
+                  >
+                    <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
+                      {['economy', 'business'].map(option => (
+                        <label key={`em-class-${option}`} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="departure_class_document"
+                            value={option}
+                            checked={formData.departure_class_document === option}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
+                          />
+                          <span className="ml-3 text-base text-left text-black">
+                            {t(`booking.step1.class_document_options.${option}`)}
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  </FieldRequired>
+                </div>
+                <div>
+                  <FieldRequired
+                    label={t(`booking.step1.baggage_availability_label`)}
+                    required={true}
+                    error={errors.departure_baggage_availability}
+                    isEmpty={!formData.departure_baggage_availability}
+                  >
+                    <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
+                      {['available', 'not_available', 'undecided'].map(option => (
+                        <label key={`em-bag-${option}`} className="flex items-center cursor-pointer">
+                          <input
+                            type="radio"
+                            name="departure_baggage_availability"
+                            value={option}
+                            checked={formData.departure_baggage_availability === option}
+                            onChange={handleInputChange}
+                            className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
+                          />
+                          <span className="ml-3 text-base text-left text-black">
+                            {t(`booking.step1.baggage_availability_options.${option}`)}
+                          </span>
+                        </label>
+                      ))}
+                    </fieldset>
+                  </FieldRequired>
                 </div>
               </div>
 

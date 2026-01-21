@@ -89,6 +89,17 @@
         "7": "後方 窓側",
         "8": "後方 通路側",
         "9": "後方 真ん中席又は窓側"
+      },
+      "class_document_label": "クラスの書類",
+      "class_document_options": {
+        "economy": "エコノミークラス",
+        "business": "ビジネスクラス"
+      },
+      "baggage_availability_label": "預かり荷物有無",
+      "baggage_availability_options": {
+        "available": "ある",
+        "not_available": "ない",
+        "undecided": "未定"
       }
     },
     "step2": {

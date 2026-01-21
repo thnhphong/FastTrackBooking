@@ -89,6 +89,17 @@
         "7": "Ghế cửa sổ dãy sau",
         "8": "Ghế lối đi dãy sau",
         "9": "Ghế giữa hoặc cửa sổ dãy sau"
+      },
+      "class_document_label": "Giấy tờ hạng vé",
+      "class_document_options": {
+        "economy": "Hạng phổ thông",
+        "business": "Hạng thương gia"
+      },
+      "baggage_availability_label": "Tình trạng hành lý ký gửi",
+      "baggage_availability_options": {
+        "available": "Có",
+        "not_available": "Không",
+        "undecided": "Chưa quyết định"
       }
     },
     "step2": {
