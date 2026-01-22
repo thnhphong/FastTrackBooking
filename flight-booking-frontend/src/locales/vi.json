@@ -31,10 +31,10 @@
         "3": "VIP_IN6_Gói VVIP ưu tiên tối đa/Không dừng (Phí $300)"
       },
       "sgn_immigration_packages": {
-        "0": "IN_Priority (35$): Làn ưu tiên nhập cảnh bình thường (rút ngắn hơn 50% thời gian chờ, nhưng khi đông vẫn có thể phải chờ 30 phút trở lên).",
-        "1": "IN_Priority Plus (50$): Làn ưu tiên và hướng dẫn đến điểm đón bên ngoài sân bay.",
-        "2": "IN_Premium (65$): Làn ưu tiên cao nhất (giảm hơn 90% thời gian chờ; tối đa 10 phút).",
-        "3": "IN_Black (300$): Đi thẳng qua thủ tục nhập cảnh (dịch vụ hoàn tất giúp bạn, không chờ đợi)."
+        "4": "IN_Priority (35$): Làn ưu tiên nhập cảnh bình thường (rút ngắn hơn 50% thời gian chờ, nhưng khi đông vẫn có thể phải chờ 30 phút trở lên).",
+        "5": "IN_Priority Plus (50$): Làn ưu tiên và hướng dẫn đến điểm đón bên ngoài sân bay.",
+        "6": "IN_Premium (65$): Làn ưu tiên cao nhất (giảm hơn 90% thời gian chờ; tối đa 10 phút).",
+        "7": "IN_Black (300$): Đi thẳng qua thủ tục nhập cảnh (dịch vụ hoàn tất giúp bạn, không chờ đợi)."
       },
       "use_immigration_fast_track_label": "Tùy chọn: Hoàn tất thủ tục nhập cảnh trong vòng 15 phút",
       "use_immigration_fast_track_option_0": "Không sử dụng",

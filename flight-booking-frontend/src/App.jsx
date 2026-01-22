@@ -83,11 +83,11 @@ function App() {
 
         {/* English - with /en prefix */}
         <Route path="/en/book-now" element={<LanguageWrapper lang="en" page="booking" bookingData={bookingData} setBookingData={setBookingData} />} />
-        <Route path="/en/booking_success" element={<LanguageWrapper lang="en" page="success" bookingData={bookingData} setBookingData={setBookingData} />} />
+        <Route path="/en/booking_success" element={<Navigate to="/booking_success" replace />} />
 
         {/* Vietnamese - with /vi prefix */}
         <Route path="/vi/book-now" element={<LanguageWrapper lang="vi" page="booking" bookingData={bookingData} setBookingData={setBookingData} />} />
-        <Route path="/vi/booking_success" element={<LanguageWrapper lang="vi" page="success" bookingData={bookingData} setBookingData={setBookingData} />} />
+        <Route path="/vi/booking_success" element={<Navigate to="/booking_success" replace />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/book-now" replace />} />
@@ -178,7 +178,7 @@ function LanguageWrapper({ lang, page, bookingData, setBookingData }) {
 
       {/* Render page based on 'page' prop */}
       {page === 'success' ? (
-        <BookingSuccessPage lang={lang} bookingData={bookingData} setBookingData={setBookingData} />
+        <BookingSuccessPage lang={lang} setBookingData={setBookingData} />
       ) : (
         <>
           <Navbar />
@@ -201,7 +201,7 @@ function LanguageWrapper({ lang, page, bookingData, setBookingData }) {
             </div>
 
             <div className="App">
-              <BookingStepRouter lang={lang} bookingData={bookingData} setBookingData={setBookingData} />
+              <BookingStepRouter bookingData={bookingData} setBookingData={setBookingData} />
             </div>
           </div>
         </>
@@ -211,7 +211,7 @@ function LanguageWrapper({ lang, page, bookingData, setBookingData }) {
 }
 
 // Booking Success Page Component
-function BookingSuccessPage({ lang, bookingData, setBookingData }) {
+function BookingSuccessPage({ lang, setBookingData }) {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -223,9 +223,7 @@ function BookingSuccessPage({ lang, bookingData, setBookingData }) {
     }
   }, [setBookingData]);
 
-  const getBookingUrl = () => {
-    return lang === 'ja' ? '/book-now' : `/${lang}/book-now`;
-  };
+  const getBookingUrl = () => (lang === 'ja' ? '/book-now' : `/${lang}/book-now`);
 
   return (
     <BookingSuccess
@@ -239,7 +237,7 @@ function BookingSuccessPage({ lang, bookingData, setBookingData }) {
 }
 
 // Router component to handle step routing with internal state
-function BookingStepRouter({ lang, bookingData, setBookingData }) {
+function BookingStepRouter({ bookingData, setBookingData }) {
   const [currentStep, setCurrentStep] = useState(1);
 
   const handleNextStep = () => {

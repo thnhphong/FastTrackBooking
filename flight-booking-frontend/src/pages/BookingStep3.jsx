@@ -192,6 +192,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   // Prepare data for API – uses the same calculation
   // ────────────────────────────────────────────────
   const prepareApiData = () => {
+
     const apiData = {};
 
     if (bookingData?.immigration && bookingData?.emigration) {
@@ -212,6 +213,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
     apiData.contact_email_to = bookingData?.contact_email_to || bookingData?.passport?.email || '';
     apiData.contact_email_cc = bookingData?.contact_email_cc || bookingData?.passport?.email_cc || '';
     apiData.passport_number = bookingData?.passport_number || bookingData?.passport?.passport_num || '';
+    apiData.arrival_class_documents = bookingData?.arrival_class_documents || '';
+    apiData.arrival_checked_baggage_availability = bookingData?.arrival_checked_baggage_availability || '';
+    apiData.departure_class_documents = bookingData?.departure_class_documents || '';
+    apiData.departure_checked_baggage_availability = bookingData?.departure_checked_baggage_availability || '';
     apiData.optional_company_name = bookingData?.optional_company_name || bookingData?.passport?.company_name || '';
     apiData.referred_by_name = bookingData?.referred_by_name || bookingData?.passport?.referer_name || '';
 
@@ -231,7 +236,9 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.arrival_flight_reservation_code = bookingData.immigration.arrival_flight_reservation_code || '';
       apiData.arrival_phone_number = bookingData.immigration.arrival_phone_number || '';
       apiData.arrival_request = bookingData.immigration.arrival_request || '';
-      apiData.entry_fast_track_option = String(bookingData.immigration.entry_fast_track_option || '');
+      apiData.entry_fast_track_option = String(
+        bookingData.immigration.entry_fast_track_option ?? ''
+      );
       apiData.tarmac_pickup = isTruthyFlag(bookingData.immigration.tarmac_pickup) ? 'true' : 'false';
       apiData.pickup_service = String(bookingData.immigration.pickup_service || '0');
       apiData.use_immigration_fast_track = isTruthyFlag(bookingData.immigration.use_immigration_fast_track) ? 'true' : 'false';
@@ -246,8 +253,12 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       apiData.departure_flight_reservation_code = bookingData.emigration.departure_flight_reservation_code || '';
       apiData.departure_phone_number = bookingData.emigration.departure_phone_number || '';
       apiData.departure_request = bookingData.emigration.departure_request || '';
-      apiData.departure_fast_track_option = String(bookingData.emigration.departure_fast_track_option || '');
-      apiData.departure_seating_preferences = String(bookingData.emigration.departure_seating_preferences || '');
+      apiData.departure_fast_track_option = String(
+        bookingData.emigration.departure_fast_track_option ?? ''
+      );
+      apiData.departure_seating_preferences = String(
+        bookingData.emigration.departure_seating_preferences ?? ''
+      );
       apiData.departure_time = bookingData.emigration.departure_time || '';
       apiData.use_departure_fast_track = (bookingData.emigration.departure_fast_track_option === 1 || bookingData.emigration.departure_fast_track_option === '1') ? '1' : '0';
     }

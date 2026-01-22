@@ -5,7 +5,16 @@ import Error from '../components/Error';
 import FieldRequired from '../components/FieldRequired';
 import JapaneseDatePicker from '../components/JapaneseDatePicker';
 import { useScrollToTop } from '../hooks/useScrollToTop';
-import { airports, immigrationPackages, sgnImmigrationPackages, emigrationPackages, pickupVehicles, seatingPreferences } from '../constants/bookingOptions';
+import {
+  airports,
+  immigrationPackages,
+  sgnImmigrationPackages,
+  emigrationPackages,
+  pickupVehicles,
+  seatingPreferences,
+  classDocuments,
+  baggageAvailabilityOptions,
+} from '../constants/bookingOptions';
 import { isInputEmpty } from '../utils/formHelpers';
 import BottomSection from '../components/BottomSection';
 import { useTranslation } from 'react-i18next';
@@ -34,10 +43,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       : (bookingData?.immigration?.pickup_service ? String(bookingData.immigration.pickup_service) : '0'),
     arrival_phone_number: bookingData?.immigration?.arrival_phone_number ?? '',
     arrival_request: bookingData?.immigration?.arrival_request ?? '',
-    arrival_class_document: bookingData?.arrival_class_document || '',
-    arrival_baggage_availability: bookingData?.arrival_baggage_availability || '',
-    departure_class_document: bookingData?.departure_class_document || '',
-    departure_baggage_availability: bookingData?.departure_baggage_availability || '',
+    arrival_class_documents: bookingData?.arrival_class_documents || '',
+    arrival_checked_baggage_availability: bookingData?.arrival_checked_baggage_availability || '',
+    departure_class_documents: bookingData?.departure_class_documents || '',
+    departure_checked_baggage_availability: bookingData?.departure_checked_baggage_availability || '',
     useOtherOptions: bookingData?.immigration?.useOtherOptions === true ||
       bookingData?.immigration?.useOtherOptions === 'true' ||
       // Auto-check if pickup_service is not 0 or tarmac_pickup is true
@@ -160,7 +169,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       return;
     }
 
-    const processedName = ['arrival_class_document', 'arrival_baggage_availability', 'departure_class_document', 'departure_baggage_availability'].includes(name)
+    const processedName = ['arrival_class_documents', 'arrival_checked_baggage_availability', 'departure_class_documents', 'departure_checked_baggage_availability'].includes(name)
       ? name
       : name;
 
@@ -274,6 +283,10 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     setShowError(false);
     const updatedData = {
       ...bookingData,
+      arrival_class_documents: formData.useImmigration ? formData.arrival_class_documents : '',
+      arrival_checked_baggage_availability: formData.useImmigration ? formData.arrival_checked_baggage_availability : '',
+      departure_class_documents: formData.useEmigration ? formData.departure_class_documents : '',
+      departure_checked_baggage_availability: formData.useEmigration ? formData.departure_checked_baggage_availability : '',
       immigration: formData.useImmigration ? {
         entry_fast_track_option: formData.entry_fast_track_option,
         arrival_flight_reservation_code: formData.arrival_flight_reservation_code,
@@ -350,11 +363,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       if (formData.useOtherOptions && (formData.pickup_service === null || formData.pickup_service === undefined)) {
         newErrors.pickup_service = 'This field is required';
       }
-      if (!formData.arrival_class_document) {
-        newErrors.arrival_class_document = 'This field is required';
+      if (!formData.arrival_class_documents) {
+        newErrors.arrival_class_documents = 'This field is required';
       }
-      if (!formData.arrival_baggage_availability) {
-        newErrors.arrival_baggage_availability = 'This field is required';
+      if (!formData.arrival_checked_baggage_availability) {
+        newErrors.arrival_checked_baggage_availability = 'This field is required';
       }
     }
 
@@ -374,11 +387,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       if (formData.departure_airport_code === '' || formData.departure_airport_code === null || formData.departure_airport_code === undefined) {
         newErrors.departure_airport_code = 'This field is required';
       }
-      if (!formData.departure_class_document) {
-        newErrors.departure_class_document = 'This field is required';
+      if (!formData.departure_class_documents) {
+        newErrors.departure_class_documents = 'This field is required';
       }
-      if (!formData.departure_baggage_availability) {
-        newErrors.departure_baggage_availability = 'This field is required';
+      if (!formData.departure_checked_baggage_availability) {
+        newErrors.departure_checked_baggage_availability = 'This field is required';
       }
     }
 
@@ -689,22 +702,22 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label={t(`booking.step1.class_document_label`)}
                     required={true}
-                    error={errors.arrival_class_document}
-                    isEmpty={!formData.arrival_class_document}
+                    error={errors.arrival_class_documents}
+                    isEmpty={!formData.arrival_class_documents}
                   >
                     <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
-                      {['economy', 'business'].map(option => (
-                        <label key={`imm-class-${option}`} className="flex items-center cursor-pointer">
+                      {classDocuments.map(({ value, labelKey }) => (
+                        <label key={`imm-class-${value}`} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="arrival_class_document"
-                            value={option}
-                            checked={formData.arrival_class_document === option}
+                            name="arrival_class_documents"
+                            value={value}
+                            checked={formData.arrival_class_documents === value}
                             onChange={handleInputChange}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
                           />
                           <span className="ml-3 text-base text-left text-black">
-                            {t(`booking.step1.class_document_options.${option}`)}
+                            {t(`booking.step1.class_document_options.${labelKey}`)}
                           </span>
                         </label>
                       ))}
@@ -715,22 +728,22 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label={t(`booking.step1.baggage_availability_label`)}
                     required={true}
-                    error={errors.arrival_baggage_availability}
-                    isEmpty={!formData.arrival_baggage_availability}
+                    error={errors.arrival_checked_baggage_availability}
+                    isEmpty={!formData.arrival_checked_baggage_availability}
                   >
                     <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
-                      {['available', 'not_available', 'undecided'].map(option => (
-                        <label key={`imm-bag-${option}`} className="flex items-center cursor-pointer">
+                      {baggageAvailabilityOptions.map(({ value, labelKey }) => (
+                        <label key={`imm-bag-${value}`} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="arrival_baggage_availability"
-                            value={option}
-                            checked={formData.arrival_baggage_availability === option}
+                            name="arrival_checked_baggage_availability"
+                            value={value}
+                            checked={formData.arrival_checked_baggage_availability === value}
                             onChange={handleInputChange}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
                           />
                           <span className="ml-3 text-base text-left text-black">
-                            {t(`booking.step1.baggage_availability_options.${option}`)}
+                            {t(`booking.step1.baggage_availability_options.${labelKey}`)}
                           </span>
                         </label>
                       ))}
@@ -1101,22 +1114,22 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label={t(`booking.step1.class_document_label`)}
                     required={true}
-                    error={errors.departure_class_document}
-                    isEmpty={!formData.departure_class_document}
+                    error={errors.departure_class_documents}
+                    isEmpty={!formData.departure_class_documents}
                   >
                     <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
-                      {['economy', 'business'].map(option => (
-                        <label key={`em-class-${option}`} className="flex items-center cursor-pointer">
+                      {classDocuments.map(({ value, labelKey }) => (
+                        <label key={`em-class-${value}`} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="departure_class_document"
-                            value={option}
-                            checked={formData.departure_class_document === option}
+                            name="departure_class_documents"
+                            value={value}
+                            checked={formData.departure_class_documents === value}
                             onChange={handleInputChange}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
                           />
                           <span className="ml-3 text-base text-left text-black">
-                            {t(`booking.step1.class_document_options.${option}`)}
+                            {t(`booking.step1.class_document_options.${labelKey}`)}
                           </span>
                         </label>
                       ))}
@@ -1127,22 +1140,22 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                   <FieldRequired
                     label={t(`booking.step1.baggage_availability_label`)}
                     required={true}
-                    error={errors.departure_baggage_availability}
-                    isEmpty={!formData.departure_baggage_availability}
+                    error={errors.departure_checked_baggage_availability}
+                    isEmpty={!formData.departure_checked_baggage_availability}
                   >
                     <fieldset className="space-y-2 border-none p-0 m-0 flex gap-20">
-                      {['available', 'not_available', 'undecided'].map(option => (
-                        <label key={`em-bag-${option}`} className="flex items-center cursor-pointer">
+                      {baggageAvailabilityOptions.map(({ value, labelKey }) => (
+                        <label key={`em-bag-${value}`} className="flex items-center cursor-pointer">
                           <input
                             type="radio"
-                            name="departure_baggage_availability"
-                            value={option}
-                            checked={formData.departure_baggage_availability === option}
+                            name="departure_checked_baggage_availability"
+                            value={value}
+                            checked={formData.departure_checked_baggage_availability === value}
                             onChange={handleInputChange}
                             className="w-4 h-4 focus:outline-none cursor-pointer text-blue-600 border-gray-300"
                           />
                           <span className="ml-3 text-base text-left text-black">
-                            {t(`booking.step1.baggage_availability_options.${option}`)}
+                            {t(`booking.step1.baggage_availability_options.${labelKey}`)}
                           </span>
                         </label>
                       ))}
