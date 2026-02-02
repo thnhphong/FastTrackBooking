@@ -5,6 +5,7 @@ import Error from '../components/Error';
 import FieldRequired from '../components/FieldRequired';
 import JapaneseDatePicker from '../components/JapaneseDatePicker';
 import { useScrollToTop } from '../hooks/useScrollToTop';
+
 //also check the 0 index option when click to sgnImmigrationPackages
 import {
   airports,
@@ -19,7 +20,6 @@ import {
 import { isInputEmpty } from '../utils/formHelpers';
 import BottomSection from '../components/BottomSection';
 import { useTranslation } from 'react-i18next';
-
 
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const { t } = useTranslation();
@@ -652,7 +652,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                         </fieldset>
                       </FieldRequired>
                       {isSgnAirport && (
-                        <p className="text-sm text-red-600 mt-3 whitespace-pre-line">
+                        <p className="text-base text-red-600 mt-3 whitespace-pre-line font-medium">
                           {t(`booking.step1.entry_fast_track_option_important_notice`)}
                         </p>
                       )}
@@ -762,7 +762,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                         }`}
                     />
                   </FieldRequired>
-                  <p className="text-base font-regular text-blue-600 mt-2 text-left text-[#165dfc]">
+                  <p className="text-base font-medium text-blue-600 mt-2 text-left text-[#165dfc]">
                     {t(`booking.step1.arrival_flight_number_notice`)}
                   </p>
                 </div>
@@ -786,7 +786,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       error={errors.arrival_date}
                     />
                   </FieldRequired>
-                  <p className="text-base font-regular mt-2 text-left text-[#165dfc]">
+                  <p className="text-base font-medium mt-2 text-left text-[#165dfc]">
                     {t(`booking.date_notice`)}
                   </p>
                 </div>
@@ -824,7 +824,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
-                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                  <p className="text-base font-medium text-blue-600 mt-2 text-left">
                     {t(`booking.step1.arrival_time_notice`)}
                   </p>
                 </div>
@@ -896,7 +896,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     onChange={handleInputChange}
                     className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:outline-none"
                   />
-                  <span className="ml-3 text-base text-black font-semibold">
+                  <span className="ml-3 text-base text-black">
                     {t(`booking.step1.other_option_label`)}
                   </span>
                 </label>
@@ -1035,7 +1035,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
               />
               <span className="text-black text-base">{t(`booking.step1.emigration_package_checkbox`)}</span>
             </label>
-            <div className="text-red-600 text-base px-4 mt-2">
+            <div className="text-red-600 text-base px-4 mt-2 font-medium">
               <span>
                 {t(`booking.step1.important_notice`)}
               </span>
@@ -1203,7 +1203,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       error={errors.departure_date}
                     />
                   </FieldRequired>
-                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                  <p className="text-base font-medium text-blue-600 mt-2 text-left">
                     {t(`booking.date_notice`)}
                   </p>
                 </div>
@@ -1242,7 +1242,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
-                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                  <p className="text-base font-medium text-blue-600 mt-2 text-left">
                     {t(`booking.step1.departure_time_notice`)}
                   </p>
                 </div>
@@ -1342,11 +1342,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     onChange={handleInputChange}
                     className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:outline-none"
                   />
-                  <span className="ml-3 text-base text-black font-semibold">
+                  <span className="ml-3 text-base text-black">
                     {t(`booking.step1.departure_driver_phone_number_and_route_info_checkbox`)}
                   </span>
                 </label>
-                <p className="text-base font-regular text-red-600 mt-3 whitespace-pre-line">
+                <p className="text-base font-medium text-red-600 mt-3 whitespace-pre-line">
                   {t(`booking.step1.departure_driver_phone_number_and_route_info_notice`)}
                 </p>
               </div>

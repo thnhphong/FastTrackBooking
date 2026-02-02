@@ -208,6 +208,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
       const arrivalAirportMap = { 0: 'SGN', 1: 'DAD', 2: 'HAN' };
       apiData.arrival_airport = arrivalAirportMap[bookingData.immigration.arrival_airport] || '';
       apiData.arrival_date = bookingData.immigration.arrival_date || '';
+      apiData.arrival_time = bookingData.immigration.arrival_time || '';
       apiData.arrival_flight_number = bookingData.immigration.arrival_flight_number || '';
       apiData.arrival_flight_reservation_code = bookingData.immigration.arrival_flight_reservation_code || '';
       apiData.arrival_phone_number = bookingData.immigration.arrival_phone_number || '';
@@ -401,7 +402,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
                   <tr className="border-b border-gray-200">
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2 border-r border-gray-200">
                       <span className="font-semibold">{t(`booking.step3.company_name_label`)}:</span>{' '}
-                      {bookingData?.passport?.company_name || 'Other'}
+                      {bookingData?.passport?.company_name}
                     </td>
                     <td className="py-3 px-4 max-[640px]:py-2 max-[640px]:px-2 text-black text-base max-[640px]:text-sm w-1/2">
                       <span className="font-semibold">{t(`booking.step3.referred_by_name_label`)}:</span>{' '}

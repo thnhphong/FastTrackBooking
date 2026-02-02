@@ -1,11 +1,10 @@
 // components/LanguageSwitcher.jsx
 import { React, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const LanguageSwitcher = ({ currentLang }) => {
   const { i18n } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
 
   // Language labels in different languages
@@ -72,7 +71,7 @@ const LanguageSwitcher = ({ currentLang }) => {
   }, [newPath]); 
 
   return (
-    <div className="flex items-center gap-1 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+    <div className="flex items-center gap-1 bg-white rounded-lg p-1 border border-gray-200">
       {languages.map((language) => (
         <button
           key={language.code}

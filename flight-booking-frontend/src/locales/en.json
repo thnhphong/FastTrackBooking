@@ -140,16 +140,16 @@
         "1": "Service introduction email",
         "2": "Facebook",
         "3": "Advertisement",
-        "4": "Search engine (Google, Yahoo, etc.)",
-        "5": "Repeat customer"
+        "4": "Search sites (Google, Yahoo, etc.)",
+        "5": "Reuse"
       },
       "contact_options": {
-        "0": "Added and sent a message",
-        "1": "Will add LINE later",
-        "2": "Email only (may cause delays at the airport)",
-        "3": "Phone only (may incur charges or roaming issues)",
-        "4": "Contact via ZALO using the number above",
-        "5": "No contact method at the airport, would like consultation"
+        "0": "Joined and sent a message",
+        "1": "Add LINE later",
+        "2": "Please only send by email (response may be delayed at the airport)",
+        "3": "Phone only (problems with charges and roaming may occur)",
+        "4": "Please contact me at ZALO at the number above.",
+        "5": "I have no means of communication at the airport and would like to ask for advice."
       },
       "add_ons": {
         "0": "Airport lounge",
@@ -158,10 +158,10 @@
         "3": "Massage, health care, beauty care",
         "4": "Shopping spots",
         "5": "Interpreter and tour guide",
-        "6": "Car rental",
+        "6": "Rental car",
         "7": "Golf",
-        "8": "Flight tickets (purchase, changes, etc.)",
-        "9": "Vietnam supplier search and business connections"
+        "8": "Airline tickets (purchase, change, etc.)",
+        "9": "Finding Vietnamese suppliers and connecting with Vietnamese companies"
       }
     },
     "step3": {
@@ -181,7 +181,7 @@
       "contact_method_label": "Add LINE OA",
       "survey_channel_label": "From which channel did you find out about this survey?",
       "add_ons_label": "Would you like a free consultation for the following services?",
-      "free_consultation_notice_label": "Our staff will provide free consultation in Japanese, and in some cases, we may offer discount vouchers for partner services. We appreciate your cooperation.",
+      "free_consultation_notice_label": "Our staff will provide free consultations in Japanese, and in some cases we may even give you discount coupons for affiliated services, so we appreciate your cooperation.",
       "add_ons": {
         "0": "Airport lounge",
         "1": "Restaurants for Japanese and foreign tourists",
