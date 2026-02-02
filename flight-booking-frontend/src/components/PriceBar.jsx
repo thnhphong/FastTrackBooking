@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateCoupon } from '../services/bookingService';
 import { useTranslation } from 'react-i18next';
+import { getBookingSubtotalInfo } from '../utils/pricingHelpers';
 const PriceBar = ({
   bookingData,
   onCouponApply,
@@ -21,30 +22,6 @@ const PriceBar = ({
     bookingData?.payment_method ?? 1 // 0: cash, 1: online_credit, 2: vietnam_bank_transfer
   );
   const isCalculatingRef = useRef(false);
-
-  // Package prices
-  const packagePrices = {
-    immigration: {
-      '35$': 35,
-      '40$': 40,
-      '50$': 50,
-      '65$': 65,
-      '300$': 300,
-    },
-    emigration: {
-      '50$': 50,
-      '65$': 65,
-      '300$': 300,
-    },
-    pickupVehicle: {
-      0: 0,
-      1: 20,
-      2: 25,
-      3: 50,
-    },
-    pickupAtExit: 60,
-    completeWithin15min: 15,
-  };
 
   // Sync coupon state when bookingData.coupon changes (e.g., when navigating between steps)
   useEffect(() => {
@@ -84,38 +61,8 @@ const PriceBar = ({
     if (isCalculatingRef.current) return;
     isCalculatingRef.current = true;
 
-    let calculatedSubtotal = 0;
-
-    // Immigration package price
-    if (bookingData?.immigration?.immigration_package) {
-      const price = packagePrices.immigration[bookingData.immigration.immigration_package] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Emigration package price
-    if (bookingData?.emigration?.emigration_package) {
-      const price = packagePrices.emigration[bookingData.emigration.emigration_package] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Pickup vehicle
-    if (
-      bookingData?.immigration?.pickup_service !== undefined &&
-      bookingData?.immigration?.pickup_service !== null
-    ) {
-      const price = packagePrices.pickupVehicle[bookingData.immigration.pickup_service] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Pickup at exit (stored as string "true"/"false")
-    if (bookingData?.immigration?.tarmac_pickup === 'true') {
-      calculatedSubtotal += packagePrices.pickupAtExit;
-    }
-
-    // Complete within 15 min (stored as string "true"/"false")
-    if (bookingData?.immigration?.use_immigration_fast_track === 'true') {
-      calculatedSubtotal += packagePrices.completeWithin15min;
-    }
+    const { baseSubtotal, extraFee } = getBookingSubtotalInfo(bookingData);
+    const calculatedSubtotal = baseSubtotal + extraFee;
 
     // Apply coupon discount
     let discount = 0;
@@ -174,6 +121,7 @@ const PriceBar = ({
     bookingData?.immigration?.tarmac_pickup,
     bookingData?.immigration?.use_immigration_fast_track,
     bookingData?.emigration?.emigration_package,
+    bookingData?.emigration?.departure_flight_number,
     appliedCoupon?.id,
     appliedCoupon?.type,
     appliedCoupon?.discount,

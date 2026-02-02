@@ -5,7 +5,7 @@ import ProcessIndicator from '../components/ProcessIndicator';
 import { useScrollToTop } from '../hooks/useScrollToTop';
 import { formatDate } from '../utils/formHelpers';
 import BottomSection from '../components/BottomSection';
-import { getPriceFromMap, isTruthyFlag } from '../utils/pricingHelpers';
+import { getPriceFromMap, isTruthyFlag, getBookingSubtotalInfo } from '../utils/pricingHelpers';
 import { useTranslation } from 'react-i18next';
 
 const BookingStep3 = ({ bookingData, onPrevStep }) => {
@@ -74,31 +74,7 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   // Central price calculation – used for UI + API
   // ────────────────────────────────────────────────
   const calculateFinalPrices = () => {
-    // Always recompute base subtotal from current bookingData choices
-    // (ignore bookingData.sub_price – it's likely stale)
-    let baseSubtotal = 0;
-
-    if (bookingData?.immigration) {
-      if (bookingData.immigration.pickup_service && bookingData.immigration.pickup_service !== 0) {
-        const vehiclePrices = { 1: 20, 2: 25, 3: 50 };
-        baseSubtotal += vehiclePrices[bookingData.immigration.pickup_service] || 0;
-      }
-      if (isTruthyFlag(bookingData.immigration.use_immigration_fast_track)) baseSubtotal += 15;
-      if (isTruthyFlag(bookingData.immigration.tarmac_pickup)) baseSubtotal += 60;
-
-      const immPackagePrices = { '35$': 35, '40$': 40, '50$': 50, '300$': 300 };
-      baseSubtotal += getPriceFromMap(bookingData.immigration.immigration_package, immPackagePrices);
-    }
-
-    if (bookingData?.emigration) {
-      const emiPackagePrices = { '50$': 50, '65$': 65, '300$': 300 };
-      baseSubtotal += getPriceFromMap(bookingData.emigration.emigration_package, emiPackagePrices);
-    }
-
-    const isVietJet =
-      bookingData?.emigration?.departure_flight_number?.toUpperCase().includes('VJ') || false;
-    const extraFee = isVietJet ? 15 : 0;
-
+    const { baseSubtotal, extraFee, isVietJet } = getBookingSubtotalInfo(bookingData);
     const subtotalWithExtra = baseSubtotal + extraFee;
 
     const discount = bookingData?.coupon_discount_amount
@@ -325,22 +301,14 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
   const emigrationItems = bookingData?.emigration
     ? costData.breakdown.filter(item => item.no === '2')
     : [];
-  //check if flight is VietJet Air(just for emigraiton)
-  const isVietJet = (bookingData?.emigration?.departure_flight_number?.toUpperCase().includes('VJ')) || false;
-  const extraFee = isVietJet ? 15 : 0;
 
+  const subtotal = bookingData?.sub_price ?? prices.subtotal;
+  const extraFee = prices.extraFee;
 
-  // Final calculations including extra fee
-  const subtotal = bookingData?.sub_price || costData.subtotal;
-  const adjustedSubtotal = subtotal + extraFee;
-
-  const appliedDiscount = bookingData?.coupon_discount_amount
-    ? parseFloat(bookingData.coupon_discount_amount)
-    : 0;
-
-  const amountAfterCoupon = Math.max(0, adjustedSubtotal - appliedDiscount);
-  const vat = amountAfterCoupon * 0.08;
-  const billedAmount = amountAfterCoupon + vat;
+  const appliedDiscount = prices.discount;
+  const amountAfterCoupon = prices.amountAfterDiscount;
+  const vat = prices.vat;
+  const billedAmount = prices.grandTotal;
   // For display in table
   const totalExcludingTax = amountAfterCoupon;
   const couponDiscount = appliedDiscount;

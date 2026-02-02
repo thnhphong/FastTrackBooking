@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import PriceBar from '../components/PriceBar';
 import ProcessIndicator from '../components/ProcessIndicator';
 import Error from '../components/Error';
@@ -121,6 +121,61 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const selectedImmigrationPackage = getSelectedImmigrationPackage(formData.arrival_airport, formData.entry_fast_track_option);
   const hasSelectedArrivalAirport = formData.arrival_airport !== '' && formData.arrival_airport !== null && formData.arrival_airport !== undefined;
   const showImmigrationFastTrackAddon = hasSelectedArrivalAirport && !isSgnAirport && selectedImmigrationPackage?.priceKey !== '300$';
+
+  const priceBookingData = useMemo(() => {
+    const derivedImmigration = formData.useImmigration ? {
+      ...bookingData?.immigration,
+      entry_fast_track_option: formData.entry_fast_track_option,
+      immigration_package: selectedImmigrationPackage?.priceKey || '35$',
+      pickup_service: formData.pickup_service,
+      tarmac_pickup: formData.tarmac_pickup,
+      use_immigration_fast_track: formData.use_immigration_fast_track,
+      arrival_flight_number: formData.arrival_flight_number,
+      arrival_flight_reservation_code: formData.arrival_flight_reservation_code,
+      arrival_phone_number: formData.arrival_phone_number,
+      arrival_request: formData.arrival_request,
+    } : null;
+
+    const derivedEmigration = formData.useEmigration ? {
+      ...bookingData?.emigration,
+      departure_fast_track_option: formData.departure_fast_track_option,
+      emigration_package: emigrationPackages[formData.departure_fast_track_option]?.priceKey || '50$',
+      departure_date: formData.departure_date,
+      departure_time: formData.departure_time,
+      departure_flight_number: formData.departure_flight_number,
+      departure_flight_reservation_code: formData.departure_flight_reservation_code,
+      departure_phone_number: formData.departure_phone_number,
+      departure_request: formData.departure_request,
+      departure_seating_preferences: formData.departure_seating_preferences,
+    } : null;
+
+    return {
+      ...bookingData,
+      immigration: derivedImmigration,
+      emigration: derivedEmigration,
+    };
+  }, [
+    bookingData,
+    formData.arrival_flight_number,
+    formData.arrival_flight_reservation_code,
+    formData.arrival_phone_number,
+    formData.arrival_request,
+    formData.departure_fast_track_option,
+    formData.departure_flight_number,
+    formData.departure_flight_reservation_code,
+    formData.departure_phone_number,
+    formData.departure_request,
+    formData.departure_seating_preferences,
+    formData.departure_time,
+    formData.departure_date,
+    formData.entry_fast_track_option,
+    formData.pickup_service,
+    formData.tarmac_pickup,
+    formData.useImmigration,
+    formData.useEmigration,
+    formData.use_immigration_fast_track,
+    selectedImmigrationPackage?.priceKey,
+  ]);
 
   const handleTimeChange = (field, type, value) => {
     // Only digits, max 2 characters
@@ -1168,7 +1223,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       maxLength={2}
                       placeholder={t(`booking.step1.time_hour_placeholder`)}
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[0] || '0') : ''}
-                      onChange={(e) => handleTimeChange('hrs', e.target.value)}
+                      onChange={(e) => handleTimeChange('departure', 'hrs', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                     {/* Colon separator */}
@@ -1183,7 +1238,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       maxLength={2}
                       placeholder={t(`booking.step1.time_min_placeholder`)}
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[1] || '0') : ''}
-                      onChange={(e) => handleTimeChange('mins', e.target.value)}
+                      onChange={(e) => handleTimeChange('departure', 'mins', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
@@ -1302,20 +1357,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
       <BottomSection />
       {/* PriceBar - Always visible at bottom */}
       <PriceBar
-        bookingData={{
-          ...bookingData,
-          immigration: formData.useImmigration ? {
-            entry_fast_track_option: formData.entry_fast_track_option ?? 0,
-            immigration_package: selectedImmigrationPackage?.priceKey || '35$',
-            tarmac_pickup: formData.useOtherOptions ? formData.tarmac_pickup : 'false',
-            use_immigration_fast_track: showImmigrationFastTrackAddon ? formData.use_immigration_fast_track : 'false',
-            pickup_service: formData.useOtherOptions ? formData.pickup_service : 0,
-          } : null,
-          emigration: formData.useEmigration ? {
-            departure_fast_track_option: formData.departure_fast_track_option ?? 0,
-            emigration_package: emigrationPackages[formData.departure_fast_track_option]?.priceKey || '50$',
-          } : null,
-        }}
+        bookingData={priceBookingData}
         onCouponApply={handlePriceUpdate}
         onPrimaryAction={handleNext}
         primaryActionLabel="利用者情報のご記入"
