@@ -1,16 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { parse, differenceInMonths } from 'date-fns';
-import ProcessIndicator from '../../components/ProcessIndicator';
-import Error from '../../components/Error';
-import FieldRequired from '../../components/FieldRequired';
-import JapaneseDatePicker from '../../components/JapaneseDatePicker';
-import { useScrollToTop } from '../../hooks/useScrollToTop';
-import { surveyChannels, contactOptions, addOnsOptions } from '../../constants/bookingOptions';
-import { isInputEmpty, isValidEmail } from '../../utils/formHelpers';
-import line_qr from '../../assets/images/Line-QR.png';
-import BottomSection from '../../components/BottomSection';
+import ProcessIndicator from '../components/ProcessIndicator';
+import Error from '../components/Error';
+import FieldRequired from '../components/FieldRequired';
+import JapaneseDatePicker from '../components/JapaneseDatePicker';
+import { useScrollToTop } from '../hooks/useScrollToTop';
+import { surveyChannels, contactOptions, addOnsOptions } from '../constants/bookingOptions';
+import { isInputEmpty, isValidEmail } from '../utils/formHelpers';
+import line_qr from '../assets/images/Line-QR.png';
+import BottomSection from '../components/BottomSection';
+import { useTranslation } from 'react-i18next';
 
 const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) => {
+  const { t } = useTranslation();
   useScrollToTop();
   // Form state using API-style field names from ApiJson.txt
   const [formData, setFormData] = useState({
@@ -242,7 +244,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Last Name */}
                 <div>
                   <FieldRequired
-                    label="性（パスポートと同じくご記入ください）"
+                      label={t(`booking.step2.last_name_label`)}
                     required={true}
                     error={errors.last_name}
                     isEmpty={isInputEmpty(formData.last_name)}
@@ -260,7 +262,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* First Name */}
                 <div>
                   <FieldRequired
-                    label="名（パスポートと同じくご記入ください）"
+                    label={t(`booking.step2.first_name_label`)}
                     required={true}
                     error={errors.first_name}
                     isEmpty={isInputEmpty(formData.first_name)}
@@ -281,7 +283,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                     {/* Sex (numeric: 0=male, 1=female) */}
                     <div>
                       <FieldRequired
-                        label="性別"
+                        label={t(`booking.step2.sex_label`)}
                         required={true}
                         error={errors.sex}
                         isEmpty={formData.sex === '' || formData.sex === null || formData.sex === undefined || (typeof formData.sex !== 'number')}
@@ -296,7 +298,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                               onChange={handleInputChange}
                               className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                             />
-                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>男性</span>
+                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step2.sex_label_male`)}</span>
                           </label>
                           <label className="flex items-center cursor-pointer">
                             <input
@@ -307,7 +309,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                               onChange={handleInputChange}
                               className={`w-4 h-4 focus:outline-none cursor-pointer ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'border-[#c02b0b] text-[#c02b0b]' : 'text-blue-600 border-gray-300'}`}
                             />
-                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>女性</span>
+                            <span className={`ml-3 text-base ${errors.sex && (formData.sex === '' || formData.sex === null || formData.sex === undefined || typeof formData.sex !== 'number') ? 'text-[#c02b0b]' : 'text-black'}`}>{t(`booking.step2.sex_label_female`)}</span>
                           </label>
                         </fieldset>
                       </FieldRequired>
@@ -315,7 +317,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                     {/* Date of Birth */}
                     <div>
                       <FieldRequired
-                        label="生年月日"
+                        label={t(`booking.step2.date_of_birth_label`)}
                         required={true}
                         error={errors.date_of_birth}
                         isEmpty={!formData.date_of_birth}
@@ -324,7 +326,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           name="date_of_birth"
                           value={formData.date_of_birth}
                           onChange={handleInputChange}
-                          placeholder="年/月/日"
+                          placeholder={t(`booking.date_placeholder`)}
                           maxDate={new Date()}
                           className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.date_of_birth ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                           error={errors.date_of_birth}
@@ -334,10 +336,34 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                   </div>
                   {/* Phone Number and Nationality - side by side */}
                   <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-6 max-[640px]:gap-4">
+
+                    {/* Nationality */}
+                    <div className="text-start relative">
+                      <FieldRequired
+                        label={t(`booking.step2.nationality_label`)}
+                        required={true}
+                      >
+                        <select
+                          name="nationality"
+                          value={formData.nationality}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base appearance-none pr-10"
+                        >
+                          <option value="JPN">{t(`booking.step2.nationality_label_japan`)}</option> {/* Japan */}
+                          <option value="VNM">{t(`booking.step2.nationality_label_vietnam`)}</option> {/* Vietnam */}
+                          <option value="others">{t(`booking.step2.nationality_label_others`)}</option> {/* Other */}
+                        </select>
+                        <div className="absolute right-3 bottom-1.5 transform -translate-y-1/2 pointer-events-none">
+                          <svg className="w-5 h-5 text-[#bbbbbb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </FieldRequired>
+                    </div>
                     {/* Phone Number */}
                     <div className="text-start">
                       <FieldRequired
-                        label="国コード 付電話番号"
+                        label={t(`booking.step2.user_phone_number_label`)}
                         required={true}
                         error={errors.user_phone_number}
                         isEmpty={isInputEmpty(formData.user_phone_number)}
@@ -352,36 +378,13 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                         />
                       </FieldRequired>
                     </div>
-                    {/* Nationality */}
-                    <div className="text-start relative">
-                      <FieldRequired
-                        label="国籍"
-                        required={false}
-                      >
-                        <select
-                          name="nationality"
-                          value={formData.nationality}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base appearance-none pr-10"
-                        >
-                          <option value="JPN">日本</option> {/* Japan */}
-                          <option value="VNM">ベトナム</option> {/* Vietnam */}
-                          <option value="others">その他</option> {/* Other */}
-                        </select>
-                        <div className="absolute right-3 bottom-1.5 transform -translate-y-1/2 pointer-events-none">
-                          <svg className="w-5 h-5 text-[#bbbbbb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </FieldRequired>
-                    </div>
                   </div>
                 </div>
 
                 {/* Email */}
                 <div className="text-start">
                   <FieldRequired
-                    label="案内を受け取るためのメールアドレス"
+                    label={t(`booking.step2.contact_email_to_label`)}
                     required={true}
                     error={errors.contact_email_to}
                     isEmpty={isInputEmpty(formData.contact_email_to)}
@@ -400,7 +403,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Email CC */}
                 <div>
                   <FieldRequired
-                    label="CCを希望されるメールアドレス"
+                    label={t(`booking.step2.contact_email_cc_label`)}
                     required={false}
                   >
                     <input
@@ -416,7 +419,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Passport Number - 50% */}
                 <div className="text-start">
                   <FieldRequired
-                    label="パスポート No."
+                    label={t(`booking.step2.passport_number_label`)}
                     required={true}
                     error={errors.passport_number}
                     isEmpty={isInputEmpty(formData.passport_number)}
@@ -434,7 +437,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Passport Expiration Date + Warning - 50% */}
                 <div className="text-start">
                   <FieldRequired
-                    label="パスポートの有効期限"
+                    label={t(`booking.step2.passport_expiry_date_label`)}
                     required={true}
                     error={errors.passport_expiry_date}
                     isEmpty={!formData.passport_expiry_date}
@@ -445,7 +448,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                           name="passport_expiry_date"
                           value={formData.passport_expiry_date}
                           onChange={handleInputChange}
-                          placeholder="年/月/日"
+                          placeholder={t(`booking.date_placeholder`)}
                           minDate={new Date()}
                           className={`text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base ${errors.passport_expiry_date ? 'border-[#c02b0b]' : 'border-[#b98d5d]'}`}
                           error={errors.passport_expiry_date}
@@ -454,12 +457,10 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                       {showPassportWarning && (
                         <div className="flex-1 min-w-0 ml-14 max-[640px]:ml-0 font-bold max-[640px]:px-8">
                           <div className="text-red-600 font-bold text-base">
-                            ★ 要注意★
+                            {t(`booking.step2.passport_expiry_date_warning_label_1`)}
                           </div>
                           <div className="text-red-600 text-sm leading-relaxed">
-                            お客様のパスポートの有効期限が<br />
-                            6か月未満のため、<br />
-                            ビザ免除での入国はできません。
+                            {t(`booking.step2.passport_expiry_date_warning_label_2`)}
                           </div>
                         </div>
                       )}
@@ -470,7 +471,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Company Name */}
                 <div className="text-start">
                   <FieldRequired
-                    label="会社宛に領収書の発行が要る場合、会社名のご記入ください。"
+                    label={t(`booking.step2.optional_company_name_label`)}
                     required={false}
                   >
                     <input
@@ -487,7 +488,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Referer Name */}
                 <div className="text-start">
                   <FieldRequired
-                    label="任意情報： ご紹介の方のお名前"
+                    label={t(`booking.step2.referred_by_name_label`)}
                     required={false}
                   >
                     <input
@@ -516,7 +517,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                 {/* Contact Options */}
                 <div className="flex-1">
                   <FieldRequired
-                    label="お客様に最適なサポートを提供するために、弊社のLINE公式アカウントと友だち追加をお願いいたします。"
+                    label={t(`booking.step2.contact_method_label`)}
                     required={true}
                     error={errors.contact_method}
                     isEmpty={formData.contact_method === '' || formData.contact_method === null || formData.contact_method === undefined}
@@ -533,12 +534,12 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                             onChange={handleInputChange}
                             className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                           />
-                          <span className="ml-3 text-base text-black">{option.label}</span>
+                          <span className="ml-3 text-base text-black">{t(`booking.step2.contact_options.${option.value}`)}</span>
                         </label>
                       ))}
                     </fieldset>
                     <p className="mt-3 text-base text-blue-600 text-start">
-                      ※ベトナムの空港では無料Wi-Fiがあります。
+                      {t(`booking.step2.wifi_notice_label`)}
                     </p>
                   </FieldRequired>
                 </div>
@@ -548,7 +549,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
             {/* Survey Channel Section */}
             <div className="mb-6 pt-5 border-gray-200 text-start">
               <FieldRequired
-                label="弊社のファストトラックサービスはどのチャンネルから知りましたか？"
+                label={t(`booking.step2.survey_channel_label`)}
                 required={true}
                 error={errors.survey_channel}
                 isEmpty={!formData.survey_channel}
@@ -564,7 +565,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                         onChange={handleInputChange}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">{channel.label}</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.step2.survey_channels.${channel.value}`)}</span>
                     </label>
                   ))}
                 </fieldset>
@@ -574,7 +575,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
             {/* Add-ons Section */}
             <div className="pt-4 border-gray-200 text-start">
               <label className="block text-base font-medium text-black mb-4">
-                以下のサービスについての無料相談をご希望しませんか。
+                {t(`booking.step2.add_ons_label`)}
               </label>
               <div className="grid grid-cols-2 max-[640px]:grid-cols-1 gap-3 max-[640px]:gap-2">
                 {/* Left Column: value 0, 2, 4, 6, 8 */}
@@ -587,7 +588,7 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                         onChange={(e) => handleAddOnChange(addOn.value, e.target.checked)}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:outline-none"
                       />
-                      <span className="ml-3 text-base text-black">{addOn.label}</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.step2.add_ons.${addOn.value}`)}</span>
                     </label>
                   ))}
                 </div>
@@ -601,13 +602,13 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
                         onChange={(e) => handleAddOnChange(addOn.value, e.target.checked)}
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:outline-none"
                       />
-                      <span className="ml-3 text-base text-black">{addOn.label}</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.step2.add_ons.${addOn.value}`)}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <p className="mt-4 text-base text-blue-900">
-                弊社のスタッフが日本語で無料相談を行い、場合によっては提携サービスの割引券をプレゼントすることもありますので、 ぜひご協力をよろしくお願いいたします。
+                {t(`booking.step2.free_consultation_notice_label`)}
               </p>
             </div>
 
@@ -620,14 +621,14 @@ const BookingStep2 = ({ bookingData, setBookingData, onNextStep, onPrevStep }) =
               onClick={handleBack}
               className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 font-medium text-base max-[640px]:w-full"
             >
-              戻る
+              {t(`booking.back_label`)}
             </button>
             <button
               //hover with bg-white-500 with slow transition
               type="submit"
               className="px-8 py-3 bg-[#01ae00] text-white rounded-full hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 font-medium transition-all duration-300 text-base max-[391px]:text-sm max-[640px]:w-full"
             >
-              予約情報の確認
+              {t(`booking.review_booking_information_label`)}
             </button>
           </div>
         </form>

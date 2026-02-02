@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { validateCoupon } from '../services/bookingService';
-
+import { useTranslation } from 'react-i18next';
+import { getBookingSubtotalInfo } from '../utils/pricingHelpers';
 const PriceBar = ({
   bookingData,
   onCouponApply,
@@ -8,6 +9,7 @@ const PriceBar = ({
   onPrimaryAction,
   primaryActionDisabled = false,
 }) => {
+  const { t } = useTranslation();
   // Initialize coupon state from bookingData to persist across steps
   const [couponCode, setCouponCode] = useState(bookingData?.coupon?.code || '');
   const [appliedCoupon, setAppliedCoupon] = useState(bookingData?.coupon?.appliedCoupon || null);
@@ -20,29 +22,6 @@ const PriceBar = ({
     bookingData?.payment_method ?? 1 // 0: cash, 1: online_credit, 2: vietnam_bank_transfer
   );
   const isCalculatingRef = useRef(false);
-
-  // Package prices
-  const packagePrices = {
-    immigration: {
-      '35$': 35,
-      '40$': 40,
-      '50$': 50,
-      '300$': 300,
-    },
-    emigration: {
-      '50$': 50,
-      '65$': 65,
-      '300$': 300,
-    },
-    pickupVehicle: {
-      0: 0,
-      1: 20,
-      2: 25,
-      3: 50,
-    },
-    pickupAtExit: 60,
-    completeWithin15min: 15,
-  };
 
   // Sync coupon state when bookingData.coupon changes (e.g., when navigating between steps)
   useEffect(() => {
@@ -82,38 +61,8 @@ const PriceBar = ({
     if (isCalculatingRef.current) return;
     isCalculatingRef.current = true;
 
-    let calculatedSubtotal = 0;
-
-    // Immigration package price
-    if (bookingData?.immigration?.immigration_package) {
-      const price = packagePrices.immigration[bookingData.immigration.immigration_package] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Emigration package price
-    if (bookingData?.emigration?.emigration_package) {
-      const price = packagePrices.emigration[bookingData.emigration.emigration_package] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Pickup vehicle
-    if (
-      bookingData?.immigration?.pickup_service !== undefined &&
-      bookingData?.immigration?.pickup_service !== null
-    ) {
-      const price = packagePrices.pickupVehicle[bookingData.immigration.pickup_service] || 0;
-      calculatedSubtotal += price;
-    }
-
-    // Pickup at exit (stored as string "true"/"false")
-    if (bookingData?.immigration?.tarmac_pickup === 'true') {
-      calculatedSubtotal += packagePrices.pickupAtExit;
-    }
-
-    // Complete within 15 min (stored as string "true"/"false")
-    if (bookingData?.immigration?.use_immigration_fast_track === 'true') {
-      calculatedSubtotal += packagePrices.completeWithin15min;
-    }
+    const { baseSubtotal, extraFee } = getBookingSubtotalInfo(bookingData);
+    const calculatedSubtotal = baseSubtotal + extraFee;
 
     // Apply coupon discount
     let discount = 0;
@@ -172,6 +121,7 @@ const PriceBar = ({
     bookingData?.immigration?.tarmac_pickup,
     bookingData?.immigration?.use_immigration_fast_track,
     bookingData?.emigration?.emigration_package,
+    bookingData?.emigration?.departure_flight_number,
     appliedCoupon?.id,
     appliedCoupon?.type,
     appliedCoupon?.discount,
@@ -205,7 +155,7 @@ const PriceBar = ({
     }
 
     try {
-      const response = await validateCoupon(normalizedCode);
+      const response = await validateCoupon(normalizedCode, total);
       if (response.valid) {
         const coupon = response.coupon;
         setAppliedCoupon(coupon);
@@ -280,14 +230,14 @@ const PriceBar = ({
           <div className="flex flex-wrap justify-between items-start max-[1367px]:hidden max-[1367px]:justify-around">
             {/* 仮計算 */}
             <div className="flex flex-col items-start">
-              <span className="text-base text-black font-bold">仮計算</span>
+              <span className="text-base text-black font-bold">{t(`booking.preliminary_calculation_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
             </div>
 
             {/* クーポン Section - Hidden on max-[1367px] */}
             <div className="relative flex flex-col gap-2 min-h-[70px] max-[1367px]:hidden">
               <div className="flex items-center gap-2">
-                <span className="text-base text-black font-bold">クーポン</span>
+                <span className="text-base text-black font-bold">{t(`booking.coupon_label`)}</span>
                 <input
                   type="text"
                   placeholder=""
@@ -309,7 +259,7 @@ const PriceBar = ({
                   disabled={couponCode.trim() === '' || !!appliedCoupon}
                   className="px-3 py-2 bg-[#01ae00] text-white rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                 >
-                  適用
+                  {t(`booking.apply_label`)}
                 </button>
               </div>
 
@@ -337,13 +287,13 @@ const PriceBar = ({
 
             {/* 税金 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">税金</span>
+              <span className="text-base text-black font-bold">{t(`booking.tax_label`)}</span>
               <span className="text-base font-regular text-[#ff0000]">${vat.toFixed(2)}</span>
             </div>
 
             {/* 合計 */}
             <div className="flex items-center gap-2">
-              <span className="text-base text-black font-bold">合計</span>
+              <span className="text-base text-black font-bold">{t(`booking.total_label`)}</span>
               <span className="w-24 p-2 text-center font-bold">
                 ${total.toFixed(2)}
               </span>
@@ -353,7 +303,7 @@ const PriceBar = ({
               <div className="flex flex-row items-between gap-9 w-full">
                 {/* Payment Method Section */}
                 <div className="flex justify-start items-end gap-4 flex-1">
-                  <label className="text-base font-bold text-black whitespace-nowrap">支払方法</label>
+                  <label className="text-base font-bold text-black whitespace-nowrap">{t(`booking.payment_method_label`)}</label>
 
                   {/* Radio buttons for larger screens */}
                   <fieldset className="flex gap-5 max-[1367px]:hidden">
@@ -372,7 +322,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">現金払い</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_0`)}</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -389,7 +339,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">オンラインでクレジット決済</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_1`)}</span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -406,7 +356,7 @@ const PriceBar = ({
                         }}
                         className="w-4 h-4 text-blue-600 border-gray-300 focus:outline-none cursor-pointer"
                       />
-                      <span className="ml-3 text-base text-black">ベトナム口座振込</span>
+                      <span className="ml-3 text-base text-black">{t(`booking.payment_method_label_2`)}</span>
                     </label>
                   </fieldset>
 
@@ -434,21 +384,21 @@ const PriceBar = ({
             <div className="flex items-start gap-10 justify-between max-[1367px]:px-10 max-[769px]:px-0 max-[769px]:justify-start max-[769px]:gap-6">
               <div className="flex flex-row items-start gap-20 max-[1367px]:gap-10 max-[769px]:gap-3">
                 <div className="flex flex-col items-start">
-                  <span className="text-base text-black font-bold">仮計算</span>
+                  <span className="text-base text-black font-bold">{t(`booking.preliminary_calculation_label`)}</span>
                   <span className="text-base font-regular text-[#ff0000]">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-base font-bold text-black">税金</span>
+                  <span className="text-base font-bold text-black">{t(`booking.tax_label`)}</span>
                   <span className="text-base font-regular text-black">${vat.toFixed(2)}</span>
                 </div>
                 <div className="flex flex-col items-start">
-                  <span className="text-base font-bold text-black">合計</span>
+                  <span className="text-base font-bold text-black">{t(`booking.total_label`)}</span>
                   <span className="text-start font-bold text-black">${total.toFixed(2)}</span>
                 </div>
               </div>
               {/* make label + select into a col*/}
               <div className="flex flex-col gap-1 min-[1367px]:hidden max-[1367px]:block max-[769px]:w-[40%] max-[769px]:py-0 max-[769px]:items-start">
-                <label className="text-base font-bold text-black">支払方法</label>
+                <label className="text-base font-bold text-black">{t(`booking.payment_method_label`)}</label>
                 <select
                   value={paymentMethod}
                   onChange={(e) => handlePaymentMethodChange(Number(e.target.value))}
@@ -457,7 +407,7 @@ const PriceBar = ({
                 >
                   {paymentMethods.map((method) => (
                     <option key={method.value} value={method.value} className="text-black ">
-                      {method.label}
+                      {t(`booking.payment_method_label_${method.value}`)}
                     </option>
                   ))}
                 </select>
@@ -489,7 +439,7 @@ const PriceBar = ({
               )}
 
               <div className="flex w-full items-center max-[769px]:py-0 gap-0">
-                <span className="text-base text-black font-bold">クーポン</span>
+                <span className="text-base text-black font-bold">{t(`booking.coupon_label`)}</span>
                 <input
                   type="text"
                   placeholder=""
@@ -508,7 +458,7 @@ const PriceBar = ({
                   disabled={couponCode.trim() === '' || !!appliedCoupon}
                   className="px-3 py-2 bg-[#01ae00] text-white rounded-full hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
                 >
-                  適用
+                  {t(`booking.apply_label`)}
                 </button>
                 {primaryActionLabel && onPrimaryAction && (
                   <button
