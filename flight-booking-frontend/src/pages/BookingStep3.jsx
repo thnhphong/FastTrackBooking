@@ -754,9 +754,10 @@ const BookingStep3 = ({ bookingData, onPrevStep }) => {
             disabled={isSubmitting}
             className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 text-gray-500 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t(`booking.step3.back_label`)}
+            {t(`booking.back_label`)}
           </button>
           <button
+            name="submitBookingButton"
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="px-6 py-3 max-[640px]:px-4 max-[640px]:py-2 bg-[#01ae00] text-white rounded-full hover:bg-[#018800] focus:outline-none focus:ring-2 focus:ring-green-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"

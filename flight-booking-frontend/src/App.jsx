@@ -124,15 +124,15 @@ function LanguageWrapper({ lang, page, bookingData, setBookingData }) {
 
   // Page titles for each language
   const pageTitles = {
-    ja: 'ベトナムファストトラック | 日本人向け空港入国・出国優先サービス – VJPファストトラック公式 - 日本人向けベトナムファストトラック | ベトナム 優先入国審査 | ベトナムファストトラック',
-    en: 'VJP Fast Track - Vietnamese Airport Support for Japanese Travelers | Smooth Entry and Exit Procedures',
+    ja: 'ベトナムファストトラック | 日本人向け空港入国・出国優先サービス – VJPファストトラック公式 - 日本人向けベトナム空港サポート | 入国・出国手続きがスムーズに',
+    en: 'VJPファストトラック - Vietnamese Airport Support for Japanese Travelers | Smooth Entry and Exit Procedures',
     vi: 'VJP Fast Track - Dịch vụ hỗ trợ sân bay Việt Nam cho du khách Nhật Bản | Thủ tục xuất nhập cảnh nhanh chóng'
   };
 
   // Meta descriptions for each language
   const metaDescriptions = {
-    ja: 'VJPファストトラックサービスは、日本人のお客様に向けたベトナムの空港での優先サービスをご提供します。入国・出国手続きがスムーズで、待ち時間を最小限に抑え、快適な旅を実現します | タンソンニャット国際空港 優先レーン | ベトナムファストトラック | ベトナム 優先入国審査 | ハノイ ファストトラック',
-    en: 'VJP Fast Track service provides priority services at Vietnamese airports for Japanese travelers. Smooth entry and exit procedures with minimal waiting time for comfortable travel | Tan Son Nhat Airport Priority Lane | Vietnam Fast Track | Hanoi Fast Track',
+    ja: 'VJPファストトラックサービスは、日本人向けベトナム空港サポートでの優先サポートをご提供します。入国・出国手続きがスムーズで、待ち時間を最小限に抑え、快適な旅を実現します。今すぐご予約ください！',
+    en: 'VJP Fast Track Service offers priority support for Japanese travelers at Vietnamese airports. Experience smooth entry and exit procedures, minimize waiting times, and enjoy a comfortable journey. Book now!',
     vi: 'Dịch vụ VJP Fast Track cung cấp dịch vụ ưu tiên tại các sân bay Việt Nam cho du khách Nhật Bản. Thủ tục xuất nhập cảnh nhanh chóng với thời gian chờ tối thiểu | Làn ưu tiên sân bay Tân Sơn Nhất | Fast Track Việt Nam | Fast Track Hà Nội'
   };
 

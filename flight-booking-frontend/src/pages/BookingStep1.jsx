@@ -5,6 +5,7 @@ import Error from '../components/Error';
 import FieldRequired from '../components/FieldRequired';
 import JapaneseDatePicker from '../components/JapaneseDatePicker';
 import { useScrollToTop } from '../hooks/useScrollToTop';
+//also check the 0 index option when click to sgnImmigrationPackages
 import {
   airports,
   immigrationPackages,
@@ -23,9 +24,19 @@ import { useTranslation } from 'react-i18next';
 const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const { t } = useTranslation();
   useScrollToTop();
-  const [time, setTime] = useState({ hrs: '', mins: '' });
-  const hoursInputRef = useRef(null);
-  const minutesInputRef = useRef(null);
+  const parseTimeParts = (timeString) => {
+    if (!timeString) {
+      return { hrs: '', mins: '' };
+    }
+    const [hrs = '', mins = ''] = timeString.split(':');
+    return { hrs, mins };
+  };
+  const [departureTimeInput, setDepartureTimeInput] = useState(() => parseTimeParts(bookingData?.emigration?.departure_time));
+  const [arrivalTimeInput, setArrivalTimeInput] = useState(() => parseTimeParts(bookingData?.immigration?.arrival_time));
+  const departureHoursInputRef = useRef(null);
+  const departureMinutesInputRef = useRef(null);
+  const arrivalHoursInputRef = useRef(null);
+  const arrivalMinutesInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     // Immigration
@@ -35,6 +46,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     arrival_flight_number: bookingData?.immigration?.arrival_flight_number ?? '',
     arrival_airport: typeof bookingData?.immigration?.arrival_airport === 'number' ? bookingData.immigration.arrival_airport : (bookingData?.immigration?.arrival_airport !== undefined && bookingData?.immigration?.arrival_airport !== null ? Number(bookingData.immigration.arrival_airport) : ''),
     arrival_date: bookingData?.immigration?.arrival_date ?? '',
+    arrival_time: bookingData?.immigration?.arrival_time ?? '',
     // Store as strings like pickup_service, not booleans
     tarmac_pickup: (bookingData?.immigration?.tarmac_pickup === 'true' || bookingData?.immigration?.tarmac_pickup === true || bookingData?.immigration?.tarmac_pickup === 1) ? 'true' : 'false',
     use_immigration_fast_track: (bookingData?.immigration?.use_immigration_fast_track === 'true' || bookingData?.immigration?.use_immigration_fast_track === true || bookingData?.immigration?.use_immigration_fast_track === 1) ? 'true' : 'false',
@@ -71,6 +83,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     departure_time: bookingData?.emigration?.departure_time ?? '',
     departure_flight_number: bookingData?.emigration?.departure_flight_number ?? '',
     sameAsEntry: false, // Track if "Same as entry" checkbox is checked
+    departure_driver_phone_number_and_route_info_confirmed: Boolean(bookingData?.emigration?.departure_driver_phone_number_and_route_info_confirmed),
   });
 
   const normalizeAirportValue = (airportValue) => {
@@ -109,7 +122,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
   const hasSelectedArrivalAirport = formData.arrival_airport !== '' && formData.arrival_airport !== null && formData.arrival_airport !== undefined;
   const showImmigrationFastTrackAddon = hasSelectedArrivalAirport && !isSgnAirport && selectedImmigrationPackage?.priceKey !== '300$';
 
-  const handleTimeChange = (type, value) => {
+  const handleTimeChange = (field, type, value) => {
     // Only digits, max 2 characters
     let val = value.replace(/\D/g, '').slice(0, 2);
 
@@ -124,22 +137,30 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     }
 
     // Update display state (shows 1 or 2 digits as typed)
-    const newTime = { ...time, [type]: val };
-    setTime(newTime);
+    const isArrivalField = field === 'arrival';
+    const prevState = isArrivalField ? arrivalTimeInput : departureTimeInput;
+    const setter = isArrivalField ? setArrivalTimeInput : setDepartureTimeInput;
+    const newTime = { ...prevState, [type]: val };
+    setter(newTime);
 
     // Always save the properly formatted 2-digit time to formData
-    const hrs = newTime.hrs ? parseInt(newTime.hrs).toString().padStart(2, '0') : '00';
-    const mins = newTime.mins ? parseInt(newTime.mins).toString().padStart(2, '0') : '00';
-    setFormData(prev => ({ ...prev, departure_time: `${hrs}:${mins}` }));
+    const hrsWithPadding = newTime.hrs ? parseInt(newTime.hrs).toString().padStart(2, '0') : '00';
+    const minsWithPadding = newTime.mins ? parseInt(newTime.mins).toString().padStart(2, '0') : '00';
+    const hasValue = Boolean(newTime.hrs || newTime.mins);
+    setFormData(prev => ({
+      ...prev,
+      [isArrivalField ? 'arrival_time' : 'departure_time']: hasValue ? `${hrsWithPadding}:${minsWithPadding}` : '',
+    }));
 
     // Auto-focus minutes ONLY when user has entered exactly 2 digits
     if (
       type === 'hrs' &&
       val.length === 2 &&           // ← key condition
-      minutesInputRef.current
+      (isArrivalField ? arrivalMinutesInputRef.current : departureMinutesInputRef.current)
     ) {
-      minutesInputRef.current.focus();
-      minutesInputRef.current.select();
+      const minutesRef = isArrivalField ? arrivalMinutesInputRef : departureMinutesInputRef;
+      minutesRef.current.focus();
+      minutesRef.current.select();
     }
   };
 
@@ -158,12 +179,18 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
     if (name === 'arrival_airport') {
       const normalizedAirportValue = normalizeAirportValue(value);
       const airportCode = getSelectedAirportCode(normalizedAirportValue);
+      const defaultPackageValue = airportCode === 'SGN'
+        ? sgnImmigrationPackages[0]?.value ?? 4
+        : 0;
       setFormData(prev => ({
         ...prev,
         [name]: normalizedAirportValue,
         ...(airportCode === 'SGN' ? {
-          entry_fast_track_option: 0,
+          entry_fast_track_option: defaultPackageValue,
           use_immigration_fast_track: 'false',
+        } : {}),
+        ...(airportCode !== 'SGN' ? {
+          entry_fast_track_option: 0,
         } : {}),
       }));
       return;
@@ -293,6 +320,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         arrival_flight_number: formData.arrival_flight_number,
         arrival_airport: formData.arrival_airport,
         arrival_date: formData.arrival_date,
+        arrival_time: formData.arrival_time,
         // Already stored as strings "true"/"false"
         tarmac_pickup: formData.tarmac_pickup || 'false',
         use_immigration_fast_track: formData.use_immigration_fast_track || 'false',
@@ -314,6 +342,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
         departure_request: formData.departure_request,
         departure_date: formData.departure_date,
         departure_time: formData.departure_time,
+        departure_driver_phone_number_and_route_info_confirmed: formData.departure_driver_phone_number_and_route_info_confirmed,
         emigration_package: emigrationPackages[formData.departure_fast_track_option]?.priceKey || '50$',
       } : null,
       type: formData.useImmigration && formData.useEmigration ? 'both' :
@@ -532,7 +561,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                               {t(`booking.step1.use_immigration_fast_track_option_1`)}
                             </span>
                           </label>
-                          <p className="text-md text-[#1362cb] mt-2 text-left">
+                          <p className="text-sm font-semibold text-blue-600 mt-2 text-left text-[#1362cb]">
                             {t(`booking.step1.immigration_fast_track_notice`)}
                           </p>
                         </fieldset>
@@ -567,6 +596,11 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                           ))}
                         </fieldset>
                       </FieldRequired>
+                      {isSgnAirport && (
+                        <p className="text-sm text-red-600 mt-3 whitespace-pre-line">
+                          {t(`booking.step1.entry_fast_track_option_important_notice`)}
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="mt-6">
@@ -625,7 +659,7 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                               {t(`booking.step1.use_immigration_fast_track_option_1`)}
                             </span>
                           </label>
-                          <p className="text-md text-[#1362cb] mt-2 text-left">
+                          <p className="text-md font-semibold text-blue-600 mt-2 text-left text-[#025dc8]">
                             {t(`booking.step1.immigration_fast_track_notice`)}
                           </p>
                         </fieldset>
@@ -673,6 +707,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                         }`}
                     />
                   </FieldRequired>
+                  <p className="text-base font-regular text-blue-600 mt-2 text-left text-[#165dfc]">
+                    {t(`booking.step1.arrival_flight_number_notice`)}
+                  </p>
                 </div>
 
                 <div>
@@ -694,6 +731,47 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       error={errors.arrival_date}
                     />
                   </FieldRequired>
+                  <p className="text-base font-regular mt-2 text-left text-[#165dfc]">
+                    {t(`booking.date_notice`)}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-base font-medium text-black mb-2 text-left">
+                    {t(`booking.step1.arrival_time_label`)}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {/* Hours input box */}
+                    <input
+                      type="number"
+                      ref={arrivalHoursInputRef}
+                      name="arrival_time_hours"
+                      min="0"
+                      max="23"
+                      maxLength={2}
+                      placeholder={t(`booking.step1.time_hour_placeholder`)}
+                      value={arrivalTimeInput.hrs}
+                      onChange={(e) => handleTimeChange('arrival', 'hrs', e.target.value)}
+                      className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
+                    />
+                    {/* Colon separator */}
+                    <span className="text-black text-lg font-medium">:</span>
+                    {/* Minutes input box */}
+                    <input
+                      type="number"
+                      ref={arrivalMinutesInputRef}
+                      name="arrival_time_minutes"
+                      min="0"
+                      max="59"
+                      maxLength={2}
+                      placeholder={t(`booking.step1.time_min_placeholder`)}
+                      value={arrivalTimeInput.mins}
+                      onChange={(e) => handleTimeChange('arrival', 'mins', e.target.value)}
+                      className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
+                    />
+                  </div>
+                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                    {t(`booking.step1.arrival_time_notice`)}
+                  </p>
                 </div>
               </div>
 
@@ -1070,6 +1148,9 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                       error={errors.departure_date}
                     />
                   </FieldRequired>
+                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                    {t(`booking.date_notice`)}
+                  </p>
                 </div>
 
                 <div>
@@ -1080,12 +1161,12 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     {/* Hours input box */}
                     <input
                       type="number"
-                      ref={hoursInputRef}
+                      ref={departureHoursInputRef}
                       name="departure_time_hours"
                       min="0"
                       max="23"
                       maxLength={2}
-                      placeholder={t(`booking.step1.departure_time_hour_placeholder`)}
+                      placeholder={t(`booking.step1.time_hour_placeholder`)}
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[0] || '0') : ''}
                       onChange={(e) => handleTimeChange('hrs', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
@@ -1095,17 +1176,20 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     {/* Minutes input box */}
                     <input
                       type="number"
-                      ref={minutesInputRef}
+                      ref={departureMinutesInputRef}
                       name="meeting_time_minutes"
                       min="0"
                       max="59"
                       maxLength={2}
-                      placeholder={t(`booking.step1.departure_time_min_placeholder`)}
+                      placeholder={t(`booking.step1.time_min_placeholder`)}
                       value={formData.departure_time ? parseInt(formData.departure_time.split(':')[1] || '0') : ''}
                       onChange={(e) => handleTimeChange('mins', e.target.value)}
                       className="w-16 px-3 py-2 bg-[#a3e7a3] border border-gray-300 rounded-md text-center text-black font-medium focus:outline-none text-base placeholder-gray-400"
                     />
                   </div>
+                  <p className="text-base font-regular text-blue-600 mt-2 text-left">
+                    {t(`booking.step1.departure_time_notice`)}
+                  </p>
                 </div>
               </div>
 
@@ -1190,6 +1274,26 @@ const BookingStep1 = ({ bookingData, setBookingData, onNextStep }) => {
                     className="text-center w-full px-4 py-3 bg-[#a3e7a3] border border-[#f2f2f2] rounded-lg focus:outline-none text-base"
                   />
                 </div>
+              </div>
+              <div className="mb-4">
+                <p className="text-base font-semibold text-black text-left">
+                  {t(`booking.step1.departure_driver_phone_number_and_route_info_label`)}
+                </p>
+                <label className="flex items-center mt-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="departure_driver_phone_number_and_route_info_confirmed"
+                    checked={Boolean(formData.departure_driver_phone_number_and_route_info_confirmed)}
+                    onChange={handleInputChange}
+                    className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:outline-none"
+                  />
+                  <span className="ml-3 text-base text-black font-semibold">
+                    {t(`booking.step1.departure_driver_phone_number_and_route_info_checkbox`)}
+                  </span>
+                </label>
+                <p className="text-base font-regular text-red-600 mt-3 whitespace-pre-line">
+                  {t(`booking.step1.departure_driver_phone_number_and_route_info_notice`)}
+                </p>
               </div>
             </div>
           )}

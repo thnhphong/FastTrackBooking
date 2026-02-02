@@ -17,7 +17,6 @@ export const sgnImmigrationPackages = [
   { value: 4, priceKey: '35$' },
   { value: 5, priceKey: '50$' },
   { value: 6, priceKey: '65$' },
-  { value: 7, priceKey: '300$' },
 ];
 
 export const emigrationPackages = [
@@ -52,8 +51,8 @@ export const classDocuments = [
 ];
 
 export const baggageAvailabilityOptions = [
-  { value: '0', labelKey: 'available' },
-  { value: '1', labelKey: 'not_available' },
+  { value: '1', labelKey: 'available' },
+  { value: '0', labelKey: 'not_available' },
   { value: '2', labelKey: 'undecided' },
 ];
 

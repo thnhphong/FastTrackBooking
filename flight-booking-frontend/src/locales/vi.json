@@ -23,6 +23,7 @@
       "immigration_package_title": "Chọn gói cơ bản",
       "immigration_package_description": "*Lưu ý: Giá cả khác nhau tùy theo sân bay.",
       "entry_fast_track_option_label": "Gói Fast Track nhập cảnh",
+      "entry_fast_track_option_important_notice": "【Thông báo quan trọng】\n Do thay đổi quy định vận hành của sân bay và hãng hàng không, từ ngày 1 tháng 1 năm 2026 sẽ áp dụng các thay đổi tạm thời sau. \n - Với hành khách Vietjet Air, làn ưu tiên (dịch vụ ưu tiên khởi hành) tạm thời sẽ bị ngưng tại tất cả sân bay. Chúng tôi xin lỗi vì sự bất tiện và cảm ơn sự thông cảm của bạn.",
       "sgn_fast_track_label": "Gói Fast Track nhập cảnh dành riêng cho SGN",
       "immigration_packages": {
         "0": "VIP_IN1_Tận dụng làn ưu tiên tại cửa nhập cảnh (Phí $35)",
@@ -46,6 +47,12 @@
       "flight_number_label": "Số chuyến bay",
       "airport_label": "Sân bay áp dụng",
       "arrival_date_label": "Ngày đến",
+      "arrival_time_label": "Thời gian đến",
+      "arrival_time_notice": "Vui lòng nhập thời gian theo định dạng 24 giờ.",
+      "departure_driver_phone_number_and_route_info_label": "Vui lòng xác nhận bạn có thể cung cấp số điện thoại của tài xế hoặc tuyến đường khi khởi hành.",
+      "departure_driver_phone_number_and_route_info_checkbox": "Tôi đã xác nhận.",
+      "departure_driver_phone_number_and_route_info_notice": "Tình trạng tắc nghẽn giao thông thường xuyên xảy ra xung quanh sân bay, vì vậy để đảm bảo việc đón khách diễn ra suôn sẻ, vui lòng cho chúng tôi biết số điện thoại của tài xế sẽ đưa bạn đến sân bay hoặc đường dẫn để chia sẻ lộ trình (một tính năng tiêu chuẩn trên các ứng dụng gọi xe) khi bạn khởi hành.",
+      "arrival_flight_number_notice": "Hành khách hạng Thương gia của Vietnam Airlines có thể được ưu tiên làm thủ tục nhanh miễn phí trên một số chuyến bay. Vui lòng kiểm tra với hãng hàng không trước khi đặt vé. Xin lưu ý rằng dịch vụ của chúng tôi độc lập với hãng hàng không, vì vậy sẽ có phí phát sinh nếu bạn sử dụng dịch vụ này.",
       "other_option_label": "Các tùy chọn khác",
       "tarmac_pickup_label": "Chọn điểm đón tại cửa máy bay (hoặc nơi bạn đến bằng xe buýt):",
       "pickup_vehicle_label": "Dịch vụ đón",
@@ -59,8 +66,9 @@
       "seating_preference_label": "Ưu tiên chỗ ngồi (chúng tôi sẽ cố gắng đáp ứng nhưng không đảm bảo)",
       "departure_date_label": "Ngày khởi hành",
       "departure_time_label": "Thời gian mong muốn gặp tại sân bay khởi hành (có thể chỉ định từ 3 giờ trước giờ bay)",
-      "departure_time_hour_placeholder": "giờ",
-      "departure_time_min_placeholder": "phút",
+      "departure_time_notice": "Vui lòng nhập thời gian theo định dạng 24 giờ. Bạn có thể thay đổi thời gian này sau khi đặt chỗ.\n Ví dụ: Nếu thời gian khởi hành là 9:00 PM, vui lòng nhập thời gian sau 6:00 PM.",
+      "time_hour_placeholder": "giờ",
+      "time_min_placeholder": "phút",
       "departure_phone_number_label": "Số điện thoại người nói tiếng Việt tiễn bạn (không bắt buộc)",
       "emigration_packages": {
         "0": "Sử dụng Fasttrack hỗ trợ toàn diện cho khởi hành ($50)",
@@ -204,6 +212,9 @@
       "departure_time_label": "Thời gian mong muốn gặp tại sân bay khởi hành (có thể chỉ định từ 3 giờ trước giờ bay)",
       "departure_phone_number_label": "Số điện thoại người nói tiếng Việt tiễn bạn (không bắt buộc)",
       "departure_request_label": "Vui lòng ghi thêm yêu cầu khác nếu có.",
+      "departure_driver_phone_number_and_route_info_label": "Vui lòng cung cấp số điện thoại của tài xế và thông tin tuyến đường khi khởi hành.",
+      "departure_driver_phone_number_and_route_info_checkbox": "Tôi đã xác nhận.",
+      "departure_driver_phone_number_and_route_info_notice": "Tình trạng tắc nghẽn giao thông thường xuyên xảy ra xung quanh sân bay, vì vậy để đảm bảo việc đón khách diễn ra suôn sẻ, vui lòng cho chúng tôi biết số điện thoại của tài xế sẽ đưa bạn đến sân bay hoặc đường dẫn để chia sẻ lộ trình (một tính năng tiêu chuẩn trên các ứng dụng gọi xe) khi bạn khởi hành.",
       "cost_label": "Chi phí",
       "content_label": "Nội dung",
       "presence_label": "Tình trạng",
@@ -226,6 +237,7 @@
     "error_text": "Có vấn đề với dữ liệu bạn nhập. Vui lòng kiểm tra các trường bên dưới.",
     "field_require_text": "Trường này là bắt buộc.",
     "date_placeholder": "Năm / Tháng / Ngày",
-    "request_label": "Vui lòng ghi rõ các yêu cầu khác nếu có."
+    "request_label": "Vui lòng ghi rõ các yêu cầu khác nếu có.",
+    "date_notice": "Đối với các đặt dịch vụ khẩn cấp trong vòng 24 giờ, vui lòng liên hệ ngay với chúng tôi sau khi hoàn tất đơn đăng ký bằng cách gọi đến đường dây nóng (+81) 050-6862-0772 hoặc qua Line OA https://page.line.me/vietjapan.vip. Chúng tôi sẽ phản hồi nhanh chóng."
   }
 }
